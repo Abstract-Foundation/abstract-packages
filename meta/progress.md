@@ -170,3 +170,17 @@ Do not:
 - Added unit coverage in `test/agw-client.test.ts` for direct adapter creation, persisted-session creation with keyfile signer ref, and redacted signer rejection.
 - Updated `README.md` status note to reflect session-client factory availability while write-tool execution remains scaffolded.
 - Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build` (6/6 test suites passing, lint/typecheck/build successful).
+
+## 2026-02-18T12:09:10.437Z - Task done AGW-001
+- Codex execution completed and quality gates passed.
+- Commit: 33e3188
+
+## 2026-02-18T12:09:18.959Z - Task start AGW-002
+- [P0][M1] Add network config layer (testnet default, mainnet configurable)
+
+## 2026-02-18T12:13:05Z - Task done AGW-002
+- Added network config layer in `src/config/network.ts` with Abstract testnet default (`11124`), mainnet support (`2741`), and env overrides for chain/RPC (`AGW_MCP_CHAIN_ID`, `AGW_MCP_RPC_URL`; legacy aliases `AGW_CHAIN_ID`, `AGW_RPC_URL`).
+- Wired CLI commands in `src/index.ts` to resolve network config without code edits and accept `--chain-id` / `--rpc-url` overrides with deterministic precedence over env.
+- Added config unit coverage in `test/config.test.ts` for default resolution, mainnet/env selection, precedence rules, and invalid chain handling.
+- Updated `README.md` usage examples for env-driven network selection.
+- Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build`.

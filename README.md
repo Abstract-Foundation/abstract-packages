@@ -27,13 +27,23 @@ npm install
 npm run build
 
 # Bootstrap local session file (manual placeholder flow for now)
-node dist/index.js init --chain-id 11124
+node dist/index.js init
 
 # Run local stdio MCP server
-node dist/index.js serve --chain-id 11124
+node dist/index.js serve
 ```
 
 The `init` flow currently asks for session details interactively and stores them in `~/.agw-mcp/session.json` with restrictive file permissions. Session signer references are redacted before persistence.
+
+Network defaults to Abstract testnet (`11124`). You can switch networks without code edits via CLI or env:
+
+```bash
+# Mainnet by env
+AGW_MCP_CHAIN_ID=2741 node dist/index.js serve
+
+# Explicit chain/rpc override
+node dist/index.js serve --chain-id 2741 --rpc-url https://api.mainnet.abs.xyz
+```
 
 ## Autonomous Agent Workflow
 

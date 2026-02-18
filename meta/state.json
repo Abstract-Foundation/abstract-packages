@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "last_updated": "2026-02-18T12:09:07.964Z",
+  "last_updated": "2026-02-18T12:14:13.105Z",
   "roadmap_phase": "M1_session_and_client_core",
-  "next_task": "AGW-002",
+  "next_task": "AGW-003",
   "autonomy": {
     "branch_mode": "direct_to_main",
     "stop_mode": "never_stop",
@@ -28,9 +28,9 @@
   },
   "counters": {
     "tasks_total": 28,
-    "tasks_ready": 18,
+    "tasks_ready": 17,
     "tasks_in_progress": 0,
-    "tasks_done": 3,
+    "tasks_done": 4,
     "tasks_failed": 0,
     "tasks_blocked": 0
   }
