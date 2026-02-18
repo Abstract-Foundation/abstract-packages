@@ -26,14 +26,14 @@ Initial scaffold for architecture and security boundaries is implemented. Read/s
 npm install
 npm run build
 
-# Bootstrap local session file (manual placeholder flow for now)
+# Bootstrap local session file from AGW callback/session bundle payload
 node dist/index.js init
 
 # Run local stdio MCP server
 node dist/index.js serve
 ```
 
-The `init` flow currently asks for session details interactively and stores them in `~/.agw-mcp/session.json` with restrictive file permissions. Session signer references are redacted before persistence.
+The `init` flow opens bootstrap instructions, then prompts for a callback URL or session bundle payload. It validates the payload and stores a persisted session bundle in `~/.agw-mcp/session.json` with restrictive file permissions. Raw signer secrets are materialized into a local keyfile (`~/.agw-mcp/session-signer.key`) and are not written to `session.json`.
 
 Network defaults to Abstract testnet (`11124`). You can switch networks without code edits via CLI or env:
 

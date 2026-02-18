@@ -28,11 +28,12 @@ export class SessionStorage {
   }
 
   private sanitizeForPersistence(data: AgwSessionData): AgwSessionData {
+    const signerRefValue = data.sessionSignerRef.kind === "raw" ? REDACTED_SIGNER_REF : data.sessionSignerRef.value;
     return {
       ...data,
       sessionSignerRef: {
         kind: data.sessionSignerRef.kind,
-        value: REDACTED_SIGNER_REF,
+        value: signerRefValue,
       },
     };
   }

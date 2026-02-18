@@ -90,6 +90,28 @@ describe("AGW session client factory", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
+  it("builds from JSON-persisted session config with string expiresAt", () => {
+    const session = buildSessionData({
+      sessionConfig: {
+        signer: "0x2222222222222222222222222222222222222222",
+        expiresAt: String(Math.floor(Date.now() / 1000) + 3600),
+        feeLimit: LimitUnlimited,
+        callPolicies: [],
+        transferPolicies: [],
+      },
+    });
+
+    const client = createSessionClientFromSessionData({
+      session,
+      chainConfig: {
+        chain: abstractTestnet,
+      },
+    });
+
+    expect(client.account.address.toLowerCase()).toBe(session.accountAddress.toLowerCase());
+    expect(client.chain.id).toBe(abstractTestnet.id);
+  });
+
   it("rejects redacted signer references", () => {
     const session = buildSessionData({
       sessionSignerRef: {

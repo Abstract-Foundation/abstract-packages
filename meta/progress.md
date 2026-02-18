@@ -184,3 +184,18 @@ Do not:
 - Added config unit coverage in `test/config.test.ts` for default resolution, mainnet/env selection, precedence rules, and invalid chain handling.
 - Updated `README.md` usage examples for env-driven network selection.
 - Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build`.
+
+## 2026-02-18T12:14:15.499Z - Task done AGW-002
+- Codex execution completed and quality gates passed.
+- Commit: ebccc42
+
+## 2026-02-18T12:14:18.504Z - Task start AGW-003
+- [P0][M1] Replace placeholder init with real session provisioning flow
+
+## 2026-02-18T12:19:42Z - Task done AGW-003
+- Replaced placeholder `init` prompts with callback/session-bundle provisioning flow in `src/auth/bootstrap.ts` using validated callback payload parsing from `src/auth/callback.ts`.
+- Added secure session materialization in `src/auth/provision.ts` to persist raw signer secrets as local keyfile references (`session-signer.key`) and store reusable session bundle metadata.
+- Updated persistence and client hydration paths (`src/session/storage.ts`, `src/session/client.ts`) so persisted keyfile refs remain usable and JSON `sessionConfig.expiresAt` is revived to `bigint` at runtime.
+- Added/updated tests: `test/bootstrap.test.ts`, `test/storage.test.ts`, `test/agw-client.test.ts` for callback parsing, provisioning materialization, persistence usability, and rehydration behavior.
+- Updated `README.md` init docs for callback payload import flow.
+- Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build`.

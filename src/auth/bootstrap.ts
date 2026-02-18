@@ -3,10 +3,13 @@ import { stdin as input, stdout as output } from "node:process";
 import open from "open";
 import type { Logger } from "../utils/logger.js";
 import type { AgwSessionData } from "../session/types.js";
+import { parseSessionBundleInput } from "./callback.js";
+import { materializeSessionFromBundle } from "./provision.js";
 
 export interface BootstrapOptions {
   bootstrapUrl?: string;
   chainId: number;
+  storageDir?: string;
 }
 
 export async function runBootstrapFlow(logger: Logger, options: BootstrapOptions): Promise<AgwSessionData> {
@@ -22,32 +25,13 @@ export async function runBootstrapFlow(logger: Logger, options: BootstrapOptions
   const rl = readline.createInterface({ input, output });
 
   try {
-    const accountAddress = (await rl.question("AGW account address: ")).trim();
-    const signerRef = (await rl.question("Session signer ref (keyfile path or encrypted blob id): ")).trim();
-    const expiresAtRaw = (await rl.question("Session expiry unix seconds: ")).trim();
-
-    const expiresAt = Number.parseInt(expiresAtRaw, 10);
-    if (!accountAddress || !signerRef || !Number.isFinite(expiresAt) || expiresAt <= 0) {
-      throw new Error("Invalid bootstrap input.");
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    return {
-      accountAddress,
+    logger.info("Complete AGW session approval in the browser, then copy the callback URL or session bundle payload.");
+    const callbackInput = await rl.question("Callback URL or session bundle payload: ");
+    const bundle = parseSessionBundleInput(callbackInput);
+    return materializeSessionFromBundle(bundle, {
       chainId: options.chainId,
-      createdAt: now,
-      updatedAt: now,
-      expiresAt,
-      status: "active",
-      sessionConfig: {
-        source: "manual-bootstrap",
-        notes: "Replace with AGW web bootstrap exchange payload in production.",
-      },
-      sessionSignerRef: {
-        kind: signerRef.startsWith("/") ? "keyfile" : "raw",
-        value: signerRef,
-      },
-    };
+      storageDir: options.storageDir,
+    });
   } finally {
     rl.close();
   }

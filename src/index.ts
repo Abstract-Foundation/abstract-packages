@@ -25,7 +25,7 @@ program
     });
 
     logger.info(`Using network ${networkConfig.chain.name} (${networkConfig.chainId}) with RPC ${networkConfig.rpcUrl}`);
-    const session = await runBootstrapFlow(logger, { chainId: networkConfig.chainId });
+    const session = await runBootstrapFlow(logger, { chainId: networkConfig.chainId, storageDir: options.storageDir });
     const manager = new SessionManager(logger, { chainId: networkConfig.chainId, storageDir: options.storageDir });
     manager.setSession(session);
     logger.info("Session saved. You can now run `agw-mcp serve`.");

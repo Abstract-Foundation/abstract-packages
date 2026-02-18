@@ -17,7 +17,7 @@ describe("SessionStorage", () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("saves and loads a valid session without signer material", () => {
+  it("saves and loads a valid session without persisting raw signer material", () => {
     const now = Math.floor(Date.now() / 1000);
     const signerSecret = "SESSION_SIGNER_SECRET_456";
     const session: AgwSessionData = {
@@ -42,6 +42,30 @@ describe("SessionStorage", () => {
     expect(persisted).toContain('"value": "[REDACTED]"');
   });
 
+  it("persists keyfile signer references so the stored session remains reusable", () => {
+    const now = Math.floor(Date.now() / 1000);
+    const keyfilePath = path.join(tmpDir, "session-key.txt");
+    const session: AgwSessionData = {
+      accountAddress: "0xabc",
+      chainId: 11124,
+      expiresAt: now + 3600,
+      createdAt: now,
+      updatedAt: now,
+      status: "active",
+      sessionConfig: { test: true },
+      sessionSignerRef: { kind: "keyfile", value: keyfilePath },
+    };
+
+    storage.save(session);
+
+    const loaded = storage.load();
+    const persisted = fs.readFileSync(storage.path, "utf8");
+
+    expect(loaded?.sessionSignerRef.kind).toBe("keyfile");
+    expect(loaded?.sessionSignerRef.value).toBe(keyfilePath);
+    expect(persisted).toContain(`"value": "${keyfilePath}"`);
+  });
+
   it("guards persisted artifacts against signer secret leaks via grep-style check", () => {
     const now = Math.floor(Date.now() / 1000);
     const signerSecret = "AGW_SIGNER_GREP_SENTINEL";
@@ -53,7 +77,7 @@ describe("SessionStorage", () => {
       updatedAt: now,
       status: "active",
       sessionConfig: { test: true },
-      sessionSignerRef: { kind: "keyfile", value: signerSecret },
+      sessionSignerRef: { kind: "raw", value: signerSecret },
     };
 
     storage.save(session);
