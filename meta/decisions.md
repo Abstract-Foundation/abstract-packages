@@ -18,3 +18,6 @@
 | ADR-014 | 2026-02-18 | Single assistant persona for v1 | Minimize complexity while validating core wallet workflows | accepted |
 | ADR-015 | 2026-02-18 | Enforce test criteria + quality + commit/push per task | Keep autonomous throughput high without weakening release discipline | accepted |
 | ADR-016 | 2026-02-18 | Companion app is in v1 critical path | AGW session approval UX requires explicit human policy setup and secure handoff | accepted |
+| ADR-017 | 2026-02-18 | Enforce session-key least-privilege defaults | Align with AGW session-key safety model and reduce autonomous agent blast radius | accepted |
+| ADR-018 | 2026-02-18 | Require AGW action parity for write/sign tools | Keep MCP execution paths aligned with official AGW SDK action semantics | accepted |
+| ADR-019 | 2026-02-18 | Harden loop runtime for unattended operation | Add stale-lock recovery, retries, and overnight wrapper to reduce operational interruptions | accepted |

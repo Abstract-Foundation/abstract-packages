@@ -26,6 +26,7 @@ Enable Abstract users with AGW wallets to use AI agents for common wallet operat
 ## Product Constraints
 - Session-key-based execution only.
 - Session policies must be fully customizable.
+- Safe defaults should be least-privilege (short expiry, explicit limits, explicit selectors/targets).
 - Testnet-first rollout with straightforward mainnet configurability.
 - Companion app is required in v1 for human-approved session policy setup and secure local handoff.
 
@@ -36,6 +37,7 @@ Enable Abstract users with AGW wallets to use AI agents for common wallet operat
 
 ## Product Principles
 - Preserve AGW non-custodial model.
+- Keep MCP write/sign flows aligned with official AGW action semantics.
 - Keep write behavior explicit and auditable.
 - Minimize friction for common wallet tasks.
 - Build iteratively with strong tests and clear memory artifacts.

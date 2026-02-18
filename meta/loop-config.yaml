@@ -8,8 +8,14 @@ codex:
   model: gpt-5.3-codex
   run_template: 'codex exec --model "{model}" --sandbox danger-full-access --cd "{repoRoot}" {prompt}'
 loop:
-  max_iterations_per_run: 25
+  max_iterations_per_run: 9600
   sleep_seconds_between_iterations: 3
+  idle_sleep_seconds_when_empty: 20
+  max_lock_wait_seconds: 120
+  codex_retries_per_task: 3
+  codex_retry_backoff_seconds: 10
+  quality_retries_per_task: 2
+  quality_retry_backoff_seconds: 5
   retry_failed_tasks: true
 quality_gates:
   command: npm run check-types && npm test && npm run lint && npm run build

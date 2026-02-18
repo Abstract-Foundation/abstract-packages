@@ -70,6 +70,7 @@ Key files:
 - `meta/risks.md`
 - `meta/test-strategy.md`
 - `meta/agw-protocol-reference.md`
+- `meta/agw-session-key-best-practices.md`
 - `meta/loop-config.yaml`
 
 Run loop commands:
@@ -78,6 +79,7 @@ Run loop commands:
 npm run loop:dry   # picks one task and logs without running Codex
 npm run loop:once  # executes one autonomous task iteration
 npm run loop       # runs multi-iteration loop
+npm run loop:overnight # resilient 8h wrapper with restart + logs
 npm run eval:nightly
 ```
 
@@ -85,6 +87,14 @@ The loop uses `meta/tasks.md` as the task source of truth and appends every step
 It also synchronizes `meta/state.json` counters and `next_task` from the markdown task table on each iteration.
 Tasks without meaningful `tests_required` criteria are blocked before execution, and successful tasks are committed and pushed after quality gates pass.
 By default, pushes require a private-safe remote policy (`origin` must not be HTTPS GitHub URL form).
+The runner auto-recovers stale lock files, waits for active locks, and retries transient Codex/quality-gate failures.
+
+Overnight operation (recommended):
+
+```bash
+bash scripts/run-overnight.sh 8
+tail -f logs/agent-loop-*.log
+```
 
 ## Scripts
 
@@ -94,6 +104,7 @@ By default, pushes require a private-safe remote policy (`origin` must not be HT
 - `npm run check-types`
 - `npm run lint`
 - `npm run loop`
+- `npm run loop:overnight`
 - `npm run eval:nightly`
 
 ## Security model (v1 direction)

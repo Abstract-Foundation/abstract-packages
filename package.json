@@ -14,11 +14,12 @@
     "start": "node dist/index.js",
     "test": "jest",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src companion scripts test --ext .ts",
     "prettier": "prettier --write \"src/**/*.ts\"",
     "loop": "bash scripts/agent-loop.sh",
     "loop:once": "bash scripts/agent-loop.sh --once",
     "loop:dry": "bash scripts/agent-loop.sh --dry-run --once",
+    "loop:overnight": "bash scripts/run-overnight.sh 8",
     "eval:nightly": "bash scripts/eval-nightly.sh"
   },
   "dependencies": {

@@ -31,6 +31,12 @@ interface LoopConfig {
   loop: {
     max_iterations_per_run: number;
     sleep_seconds_between_iterations: number;
+    idle_sleep_seconds_when_empty?: number;
+    max_lock_wait_seconds?: number;
+    codex_retries_per_task?: number;
+    codex_retry_backoff_seconds?: number;
+    quality_retries_per_task?: number;
+    quality_retry_backoff_seconds?: number;
     retry_failed_tasks: boolean;
   };
   quality_gates: {
@@ -358,6 +364,65 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function readLockPid(lockPath: string): number | null {
+  try {
+    const raw = fs.readFileSync(lockPath, "utf8").trim();
+    const pid = Number.parseInt(raw, 10);
+    if (!Number.isInteger(pid) || pid <= 0) {
+      return null;
+    }
+    return pid;
+  } catch {
+    return null;
+  }
+}
+
+function isPidRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "EPERM") {
+      return true;
+    }
+    return false;
+  }
+}
+
+async function acquireLoopLock(lockPath: string, maxWaitSeconds: number): Promise<number> {
+  const start = Date.now();
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      const lockFd = fs.openSync(lockPath, "wx");
+      fs.writeFileSync(lockFd, `${process.pid}\n`, "utf8");
+      return lockFd;
+    } catch {
+      const lockPid = readLockPid(lockPath);
+      const lockIsStale = lockPid === null || !isPidRunning(lockPid);
+
+      if (lockIsStale) {
+        fs.rmSync(lockPath, { force: true });
+        continue;
+      }
+
+      const waitedSeconds = Math.floor((Date.now() - start) / 1000);
+      if (waitedSeconds >= maxWaitSeconds) {
+        throw new Error(
+          `Lock file exists at ${lockPath} (pid ${lockPid}). Waited ${waitedSeconds}s for lock; exiting.`,
+        );
+      }
+
+      process.stderr.write(
+        `[loop] waiting for lock ${lockPath} held by pid=${lockPid} (${waitedSeconds + 1}/${maxWaitSeconds}s)\n`,
+      );
+      await sleep(1000);
+    }
+  }
+}
+
 function parseArgs(): { once: boolean; dryRun: boolean; maxIterations?: number } {
   const args = process.argv.slice(2);
   const once = args.includes("--once");
@@ -377,14 +442,15 @@ async function main(): Promise<void> {
   const args = parseArgs();
   const config = readConfig(repoRoot);
   const lockPath = path.join(repoRoot, config.autonomy.lock_file);
+  const maxLockWaitSeconds = Math.max(0, config.loop.max_lock_wait_seconds ?? 120);
+  const codexRetries = Math.max(1, config.loop.codex_retries_per_task ?? 2);
+  const codexRetryBackoffMs = Math.max(0, config.loop.codex_retry_backoff_seconds ?? 10) * 1000;
+  const qualityRetries = Math.max(1, config.loop.quality_retries_per_task ?? 2);
+  const qualityRetryBackoffMs = Math.max(0, config.loop.quality_retry_backoff_seconds ?? 5) * 1000;
+  const idleSleepMs =
+    Math.max(0, config.loop.idle_sleep_seconds_when_empty ?? config.loop.sleep_seconds_between_iterations ?? 3) * 1000;
 
-  let lockFd: number;
-  try {
-    lockFd = fs.openSync(lockPath, "wx");
-  } catch {
-    throw new Error(`Lock file exists at ${lockPath}. Another loop may already be running.`);
-  }
-  fs.writeFileSync(lockFd, `${process.pid}\n`, "utf8");
+  const lockFd = await acquireLoopLock(lockPath, maxLockWaitSeconds);
 
   try {
     const maxIterations = args.maxIterations ?? (args.once ? 1 : config.loop.max_iterations_per_run);
@@ -397,7 +463,11 @@ async function main(): Promise<void> {
 
       if (!task) {
         appendProgress(repoRoot, config, "Loop idle", ["No ready/in-progress task found."]);
-        break;
+        if (args.once) {
+          break;
+        }
+        await sleep(idleSleepMs);
+        continue;
       }
 
       if (!hasMeaningfulTestCriteria(task.tests_required)) {
@@ -439,23 +509,67 @@ async function main(): Promise<void> {
         .replaceAll("{prompt}", shellQuote(promptText));
 
       let codexSuccess = false;
+      let codexError: unknown = null;
       process.stderr.write(`[loop] task=${task.task_id}\n`);
       process.stderr.write(`[loop] codex=${codexCommand}\n`);
-      try {
-        runCommand(codexCommand, repoRoot);
-        codexSuccess = true;
-      } catch (error) {
+      for (let attempt = 1; attempt <= codexRetries; attempt += 1) {
+        try {
+          runCommand(codexCommand, repoRoot);
+          codexSuccess = true;
+          break;
+        } catch (error) {
+          codexError = error;
+          if (attempt < codexRetries) {
+            appendProgress(repoRoot, config, `Task codex retry ${task.task_id}`, [
+              `Attempt ${attempt}/${codexRetries} failed; retrying after backoff.`,
+              `Error: ${error instanceof Error ? error.message : String(error)}`,
+            ]);
+            await sleep(codexRetryBackoffMs);
+          }
+        }
+      }
+
+      if (!codexSuccess) {
         task.status = "failed";
         writeTasks(repoRoot, config, parsed);
         appendProgress(repoRoot, config, `Task codex failed ${task.task_id}`, [
           `Command: ${codexCommand}`,
-          `Error: ${error instanceof Error ? error.message : String(error)}`,
+          `Attempts: ${codexRetries}`,
+          `Error: ${codexError instanceof Error ? codexError.message : String(codexError)}`,
         ]);
       }
 
       if (codexSuccess) {
+        let qualityPassed = false;
+        let qualityError: unknown = null;
+
+        for (let attempt = 1; attempt <= qualityRetries; attempt += 1) {
+          try {
+            runCommand(config.quality_gates.command, repoRoot);
+            qualityPassed = true;
+            break;
+          } catch (error) {
+            qualityError = error;
+            if (attempt < qualityRetries) {
+              appendProgress(repoRoot, config, `Task quality retry ${task.task_id}`, [
+                `Quality gate attempt ${attempt}/${qualityRetries} failed; retrying after backoff.`,
+                `Error: ${error instanceof Error ? error.message : String(error)}`,
+              ]);
+              await sleep(qualityRetryBackoffMs);
+            }
+          }
+        }
+
+        if (!qualityPassed) {
+          task.status = "failed";
+          writeTasks(repoRoot, config, parsed);
+          appendProgress(repoRoot, config, `Task completion failed ${task.task_id}`, [
+            `Quality command: ${config.quality_gates.command}`,
+            `Attempts: ${qualityRetries}`,
+            `Error: ${qualityError instanceof Error ? qualityError.message : String(qualityError)}`,
+          ]);
+        } else {
         try {
-          runCommand(config.quality_gates.command, repoRoot);
           task.status = "done";
           writeTasks(repoRoot, config, parsed);
           const commitSha = commitAndPushTask(repoRoot, task, config);
@@ -463,13 +577,14 @@ async function main(): Promise<void> {
             "Codex execution completed and quality gates passed.",
             `Commit: ${commitSha}`,
           ]);
-        } catch (error) {
-          task.status = "failed";
-          writeTasks(repoRoot, config, parsed);
-          appendProgress(repoRoot, config, `Task completion failed ${task.task_id}`, [
-            `Quality command: ${config.quality_gates.command}`,
-            `Error: ${error instanceof Error ? error.message : String(error)}`,
-          ]);
+          } catch (error) {
+            task.status = "failed";
+            writeTasks(repoRoot, config, parsed);
+            appendProgress(repoRoot, config, `Task completion failed ${task.task_id}`, [
+              `Quality command: ${config.quality_gates.command}`,
+              `Error: ${error instanceof Error ? error.message : String(error)}`,
+            ]);
+          }
         }
       }
 

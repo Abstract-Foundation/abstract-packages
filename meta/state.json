@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "last_updated": "2026-02-18T12:27:21.717Z",
+  "last_updated": "2026-02-18T12:35:10.103Z",
   "roadmap_phase": "M1_session_and_client_core",
   "next_task": "AGW-026",
   "autonomy": {
@@ -27,10 +27,10 @@
     "preflight_path_p95": "yellow"
   },
   "counters": {
-    "tasks_total": 28,
-    "tasks_ready": 15,
+    "tasks_total": 42,
+    "tasks_ready": 26,
     "tasks_in_progress": 0,
-    "tasks_done": 6,
+    "tasks_done": 8,
     "tasks_failed": 0,
     "tasks_blocked": 0
   }

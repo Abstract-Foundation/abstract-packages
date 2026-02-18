@@ -20,6 +20,7 @@ Build a local stdio MCP server and local companion app for AGW users to perform 
 - `sign_transaction`: signs and returns signed payload only; never broadcasts.
 - `send_transaction`: executes signing + broadcast path and returns transaction hash.
 - `swap_tokens`: routes through 0x backend (quote + execute flow).
+- Write/sign tools must align with official AGW action semantics (`signMessage`, `signTransaction`, `sendTransaction`, `sendCalls`, `writeContract`, `deployContract`).
 
 ## Network Strategy
 - Default target: Abstract testnet.

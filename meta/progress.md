@@ -206,3 +206,35 @@ Do not:
 
 ## 2026-02-18T12:21:53.658Z - Task start AGW-025
 - [P0][M1] Create companion app scaffold for AGW session bootstrap
+
+## 2026-02-18T23:20:00Z - Task done AGW-025
+- Added local companion app scaffold (`companion/`) with server entrypoint, static shell, and `/auth/start` redirect route.
+- Added companion auth URL helper for AGW login bootstrap params (`redirect_uri`, `chain_id`, `state`, `source`).
+- Added scaffold smoke coverage in `test/companion-scaffold.test.ts`.
+- Updated `README.md` and `package.json` with companion run instructions (`npm run companion:dev`).
+- Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build`.
+
+## 2026-02-18T23:35:00Z - Task done AGW-041
+- Hardened loop runtime in `scripts/agent-loop.ts`:
+  - stale lock recovery + active lock wait
+  - codex retry/backoff
+  - quality-gate retry/backoff
+  - non-exiting idle behavior for unattended runs
+- Added lock recovery coverage in `test/agent-loop-locking.test.ts`.
+- Updated loop tuning in `meta/loop-config.yaml` for unattended operation.
+
+## 2026-02-18T23:36:00Z - Task done AGW-042
+- Expanded lint gate coverage in `package.json` to include `src`, `companion`, `scripts`, and `test`.
+- Added resilient overnight wrapper script: `scripts/run-overnight.sh` (+ `npm run loop:overnight`).
+- Updated `README.md`, `meta/decisions.md`, `meta/risks.md`, and session-key best-practices reference.
+- Expanded backlog with AGW session-key/action parity tasks (`AGW-029` to `AGW-040`) for overnight execution depth.
+
+## 2026-02-18T12:27:24.158Z - Task done AGW-025
+- Codex execution completed and quality gates passed.
+- Commit: d25c77e
+
+## 2026-02-18T12:35:10.102Z - Task start AGW-026
+- [P0][M1] Implement companion app session policy presets
+
+## 2026-02-18T12:35:10.103Z - Task dry-run AGW-026
+- Dry run mode, skipping Codex and quality gates.
