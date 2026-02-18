@@ -4,7 +4,7 @@ Status lifecycle: `backlog -> ready -> in_progress -> done` (`failed` and `block
 
 | task_id | objective | scope_in | scope_out | files | tests_required | acceptance | status | owner_agent | dependencies |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AGW-001 | [P0][M1] Wire AGW session client factory | `createSessionClient` adapter, typed wrapper | hosted auth | `src/agw/client.ts`, `src/session/*` | unit tests for client creation | session client builds from persisted session data and chain config | ready | unassigned | - |
+| AGW-001 | [P0][M1] Wire AGW session client factory | `createSessionClient` adapter, typed wrapper | hosted auth | `src/agw/client.ts`, `src/session/*` | unit tests for client creation | session client builds from persisted session data and chain config | done | codex-5.3-high | - |
 | AGW-002 | [P0][M1] Add network config layer (testnet default, mainnet configurable) | chain config resolution and env support | auto mainnet rollout | `src/config/*`, `src/index.ts` | config unit tests | chain+rpc selection works without code edits | ready | unassigned | - |
 | AGW-003 | [P0][M1] Replace placeholder init with real session provisioning flow | callback/bootstrap and persisted session bundle | hosted oauth service | `src/auth/*`, `src/index.ts`, `src/session/*` | callback and persistence tests | `agw-mcp init` provisions usable AGW session end-to-end | ready | unassigned | AGW-001,AGW-002 |
 | AGW-025 | [P0][M1] Create companion app scaffold for AGW session bootstrap | local web app shell and wallet auth entrypoint | production hosting | `companion/*`, `package.json`, `README.md` | scaffold smoke tests | local companion app runs and initiates AGW login/session bootstrap | ready | unassigned | AGW-001,AGW-002 |

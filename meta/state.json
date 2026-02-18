@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "last_updated": "2026-02-18T10:53:20Z",
+  "last_updated": "2026-02-18T12:09:07.964Z",
   "roadmap_phase": "M1_session_and_client_core",
-  "next_task": "AGW-019",
+  "next_task": "AGW-002",
   "autonomy": {
     "branch_mode": "direct_to_main",
     "stop_mode": "never_stop",
@@ -27,11 +27,11 @@
     "preflight_path_p95": "yellow"
   },
   "counters": {
-    "tasks_total": 24,
-    "tasks_ready": 15,
+    "tasks_total": 28,
+    "tasks_ready": 18,
     "tasks_in_progress": 0,
-    "tasks_done": 2,
-    "tasks_failed": 2,
+    "tasks_done": 3,
+    "tasks_failed": 0,
     "tasks_blocked": 0
   }
 }

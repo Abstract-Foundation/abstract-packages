@@ -1,4 +1,7 @@
+import type { SessionClient } from "@abstract-foundation/agw-client/sessions";
+import type { AgwChainConfig } from "../agw/client.js";
 import type { Logger } from "../utils/logger.js";
+import { createSessionClientFromSessionData } from "./client.js";
 import { SessionStorage } from "./storage.js";
 import type { AgwSessionData, SessionStatus } from "./types.js";
 
@@ -60,5 +63,16 @@ export class SessionManager {
 
   getChainId(): number {
     return this.chainId;
+  }
+
+  createSessionClient(chainConfig: AgwChainConfig): SessionClient {
+    if (!this.session) {
+      throw new Error("session is missing");
+    }
+
+    return createSessionClientFromSessionData({
+      session: this.session,
+      chainConfig,
+    });
   }
 }

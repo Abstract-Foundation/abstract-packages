@@ -4,7 +4,7 @@ Local MCP server for Abstract Global Wallet (AGW), designed around scoped sessio
 
 ## Status
 
-Initial scaffold for architecture and security boundaries is implemented. Read/status tools are wired; AGW session-client execution wiring is intentionally stubbed behind policy gates.
+Initial scaffold for architecture and security boundaries is implemented. Read/status tools are wired, and an AGW session-client factory adapter is now available; write-tool execution wiring remains stubbed behind policy gates.
 
 ## Why this exists
 

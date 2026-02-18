@@ -160,3 +160,13 @@ Do not:
 - Added `meta/agw-protocol-reference.md` with verified AGW addresses, selectors, rights constants, and ABI file inventory.
 - Included upstream source links for `agw-contracts` and `agw-sdk` constants/ABI paths.
 - Linked protocol reference from `README.md` key files section.
+
+## 2026-02-18T12:03:13.931Z - Task start AGW-001
+- [P0][M1] Wire AGW session client factory
+
+## 2026-02-18T12:08:03Z - Task done AGW-001
+- Added AGW session client adapter in `src/agw/client.ts` that wraps `createSessionClient` with signer reference resolution (`raw` and `keyfile`), session config validation, and chain/rpc config input.
+- Added typed persisted-session wrapper in `src/session/client.ts` and `SessionManager.createSessionClient()` in `src/session/manager.ts`.
+- Added unit coverage in `test/agw-client.test.ts` for direct adapter creation, persisted-session creation with keyfile signer ref, and redacted signer rejection.
+- Updated `README.md` status note to reflect session-client factory availability while write-tool execution remains scaffolded.
+- Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build` (6/6 test suites passing, lint/typecheck/build successful).
