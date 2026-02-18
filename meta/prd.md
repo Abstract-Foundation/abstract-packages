@@ -1,7 +1,7 @@
 # AGW MCP PRD (v1)
 
 ## Scope
-Build a local stdio MCP server for AGW users to perform common crypto wallet actions through session keys.
+Build a local stdio MCP server and local companion app for AGW users to perform common crypto wallet actions through session keys.
 
 ## Core Tool Surface (v1)
 - `get_wallet_address`
@@ -34,6 +34,7 @@ Build a local stdio MCP server for AGW users to perform common crypto wallet act
 
 ### M1: Session + Client Core
 - Implement AGW session client adapter
+- Ship companion app bootstrap for login/session policy approval
 - Replace placeholder init with real session provisioning path
 - Map on-chain session status to MCP tool output
 

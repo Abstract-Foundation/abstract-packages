@@ -27,6 +27,7 @@ Enable Abstract users with AGW wallets to use AI agents for common wallet operat
 - Session-key-based execution only.
 - Session policies must be fully customizable.
 - Testnet-first rollout with straightforward mainnet configurability.
+- Companion app is required in v1 for human-approved session policy setup and secure local handoff.
 
 ## Non-goals (v1)
 - Hosted multi-tenant MCP service
