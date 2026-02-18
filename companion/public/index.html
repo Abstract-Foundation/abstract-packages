@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AGW Companion</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">Local Companion</p>
+        <h1>AGW Companion</h1>
+        <p class="subhead">Bootstrap AGW wallet login and session approval for local `agw-mcp init`.</p>
+      </header>
+
+      <form id="bootstrap-form" class="panel">
+        <label for="callback-url">Callback URL</label>
+        <input
+          id="callback-url"
+          name="callbackUrl"
+          value="http://127.0.0.1:8787/callback"
+          autocomplete="off"
+          required
+        />
+
+        <label for="chain-id">Chain ID</label>
+        <input id="chain-id" name="chainId" type="number" min="1" step="1" value="11124" required />
+
+        <button id="start-login" type="submit">Start wallet login</button>
+        <p class="hint">You will be redirected to AGW wallet auth, then return with a callback payload for `agw-mcp init`.</p>
+      </form>
+
+      <section class="panel secondary">
+        <p class="eyebrow">Auth Entrypoint</p>
+        <a id="start-login-link" href="#" rel="noreferrer">/auth/start</a>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

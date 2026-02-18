@@ -1,0 +1,96 @@
+:root {
+  --bg: #f5f6ef;
+  --panel: #ffffff;
+  --line: #d0d4c4;
+  --text: #11210a;
+  --accent: #1f7a3f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 60%);
+}
+
+.shell {
+  width: min(700px, 92vw);
+  margin: 40px auto;
+  display: grid;
+  gap: 16px;
+}
+
+header h1 {
+  margin: 6px 0;
+  font-size: 2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #47613a;
+}
+
+.subhead {
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #9ca88f;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 700;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+a {
+  color: #1b5f44;
+  word-break: break-all;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #355728;
+}
+
+.secondary {
+  background: #f6f8f2;
+}
+
+@media (max-width: 640px) {
+  .shell {
+    margin: 20px auto;
+  }
+}

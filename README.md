@@ -4,7 +4,7 @@ Local MCP server for Abstract Global Wallet (AGW), designed around scoped sessio
 
 ## Status
 
-Initial scaffold for architecture and security boundaries is implemented. Read/status tools are wired, and an AGW session-client factory adapter is now available; write-tool execution wiring remains stubbed behind policy gates.
+Initial scaffold for architecture and security boundaries is implemented. Read/status tools are wired, and an AGW session-client factory adapter is now available; write-tool execution wiring remains stubbed behind policy gates. A local companion app scaffold is also available for wallet-login bootstrap.
 
 ## Why this exists
 
@@ -34,6 +34,17 @@ node dist/index.js serve
 ```
 
 The `init` flow opens bootstrap instructions, then prompts for a callback URL or session bundle payload. It validates the payload and stores a persisted session bundle in `~/.agw-mcp/session.json` with restrictive file permissions. Raw signer secrets are materialized into a local keyfile (`~/.agw-mcp/session-signer.key`) and are not written to `session.json`.
+
+## Companion App (Scaffold)
+
+Run the local companion app shell:
+
+```bash
+npm run companion:dev
+```
+
+This starts a local web app at `http://127.0.0.1:4173` with an auth entrypoint at `/auth/start`.
+The scaffold redirects to AGW wallet login (`https://portal.abs.xyz/login`) with callback/bootstrap query params so users can initiate session approval before pasting the callback payload into `agw-mcp init`.
 
 Network defaults to Abstract testnet (`11124`). You can switch networks without code edits via CLI or env:
 

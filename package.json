@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/index.ts",
+    "companion:dev": "tsx companion/start.ts",
     "start": "node dist/index.js",
     "test": "jest",
     "check-types": "tsc --noEmit",

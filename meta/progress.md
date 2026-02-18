@@ -199,3 +199,10 @@ Do not:
 - Added/updated tests: `test/bootstrap.test.ts`, `test/storage.test.ts`, `test/agw-client.test.ts` for callback parsing, provisioning materialization, persistence usability, and rehydration behavior.
 - Updated `README.md` init docs for callback payload import flow.
 - Quality gate passed: `npm run check-types && npm test && npm run lint && npm run build`.
+
+## 2026-02-18T12:21:49.654Z - Task done AGW-003
+- Codex execution completed and quality gates passed.
+- Commit: 1b3d85c
+
+## 2026-02-18T12:21:53.658Z - Task start AGW-025
+- [P0][M1] Create companion app scaffold for AGW session bootstrap
