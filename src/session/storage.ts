@@ -3,6 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import type { AgwSessionData } from "./types.js";
 
+const REDACTED_SIGNER_REF = "[REDACTED]";
+
 export class SessionStorage {
   private readonly dir: string;
   private readonly filePath: string;
@@ -25,6 +27,16 @@ export class SessionStorage {
     }
   }
 
+  private sanitizeForPersistence(data: AgwSessionData): AgwSessionData {
+    return {
+      ...data,
+      sessionSignerRef: {
+        kind: data.sessionSignerRef.kind,
+        value: REDACTED_SIGNER_REF,
+      },
+    };
+  }
+
   load(): AgwSessionData | null {
     try {
       if (!fs.existsSync(this.filePath)) {
@@ -41,12 +53,12 @@ export class SessionStorage {
         typeof parsed.status !== "string" ||
         typeof parsed.sessionConfig !== "object" ||
         !parsed.sessionConfig ||
-        typeof parsed.sessionSignerRef?.kind !== "string" ||
+        (parsed.sessionSignerRef?.kind !== "raw" && parsed.sessionSignerRef?.kind !== "keyfile") ||
         typeof parsed.sessionSignerRef?.value !== "string"
       ) {
         return null;
       }
-      return parsed as AgwSessionData;
+      return this.sanitizeForPersistence(parsed as AgwSessionData);
     } catch {
       return null;
     }
@@ -54,7 +66,7 @@ export class SessionStorage {
 
   save(data: AgwSessionData): void {
     this.ensureDir();
-    fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), { mode: 0o600 });
+    fs.writeFileSync(this.filePath, JSON.stringify(this.sanitizeForPersistence(data), null, 2), { mode: 0o600 });
   }
 
   delete(): void {

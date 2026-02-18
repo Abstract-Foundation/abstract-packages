@@ -33,7 +33,37 @@ node dist/index.js init --chain-id 11124
 node dist/index.js serve --chain-id 11124
 ```
 
-The `init` flow currently asks for session details interactively and stores them in `~/.agw-mcp/session.json` with restrictive file permissions.
+The `init` flow currently asks for session details interactively and stores them in `~/.agw-mcp/session.json` with restrictive file permissions. Session signer references are redacted before persistence.
+
+## Autonomous Agent Workflow
+
+This repo now includes a markdown-first orchestration system for long-running Codex CLI loops.
+
+Key files:
+
+- `meta/product.md`
+- `meta/prd.md`
+- `meta/decisions.md`
+- `meta/tasks.md`
+- `meta/progress.md`
+- `meta/risks.md`
+- `meta/test-strategy.md`
+- `meta/agw-protocol-reference.md`
+- `meta/loop-config.yaml`
+
+Run loop commands:
+
+```bash
+npm run loop:dry   # picks one task and logs without running Codex
+npm run loop:once  # executes one autonomous task iteration
+npm run loop       # runs multi-iteration loop
+npm run eval:nightly
+```
+
+The loop uses `meta/tasks.md` as the task source of truth and appends every step to `meta/progress.md`.
+It also synchronizes `meta/state.json` counters and `next_task` from the markdown task table on each iteration.
+Tasks without meaningful `tests_required` criteria are blocked before execution, and successful tasks are committed and pushed after quality gates pass.
+By default, pushes require a private-safe remote policy (`origin` must not be HTTPS GitHub URL form).
 
 ## Scripts
 
@@ -42,6 +72,8 @@ The `init` flow currently asks for session details interactively and stores them
 - `npm run test`
 - `npm run check-types`
 - `npm run lint`
+- `npm run loop`
+- `npm run eval:nightly`
 
 ## Security model (v1 direction)
 

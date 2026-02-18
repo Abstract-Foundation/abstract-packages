@@ -14,13 +14,18 @@
     "test": "jest",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "prettier": "prettier --write \"src/**/*.ts\""
+    "prettier": "prettier --write \"src/**/*.ts\"",
+    "loop": "bash scripts/agent-loop.sh",
+    "loop:once": "bash scripts/agent-loop.sh --once",
+    "loop:dry": "bash scripts/agent-loop.sh --dry-run --once",
+    "eval:nightly": "bash scripts/eval-nightly.sh"
   },
   "dependencies": {
     "@abstract-foundation/agw-client": "latest",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "commander": "^12.1.0",
-    "open": "^10.1.0"
+    "open": "^10.1.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

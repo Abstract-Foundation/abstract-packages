@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "last_updated": "2026-02-18T10:53:20Z",
+  "roadmap_phase": "M1_session_and_client_core",
+  "next_task": "AGW-019",
+  "autonomy": {
+    "branch_mode": "direct_to_main",
+    "stop_mode": "never_stop",
+    "state_model": "markdown_plus_json"
+  },
+  "product": {
+    "primary_user": "abstract_agw_end_user",
+    "swap_backend": "0x",
+    "transaction_semantics": {
+      "sign_transaction": "sign_only",
+      "send_transaction": "sign_and_broadcast"
+    },
+    "network_strategy": "testnet_first_mainnet_configurable"
+  },
+  "slo_status": {
+    "loop_health": "yellow",
+    "task_completion": "yellow",
+    "regression_reopen_rate": "yellow",
+    "secret_hygiene": "green",
+    "write_path_test_discipline": "yellow",
+    "read_path_p95": "yellow",
+    "preflight_path_p95": "yellow"
+  },
+  "counters": {
+    "tasks_total": 24,
+    "tasks_ready": 15,
+    "tasks_in_progress": 0,
+    "tasks_done": 2,
+    "tasks_failed": 2,
+    "tasks_blocked": 0
+  }
+}
