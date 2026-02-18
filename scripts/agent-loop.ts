@@ -492,7 +492,9 @@ async function main(): Promise<void> {
       appendProgress(repoRoot, config, `Task start ${task.task_id}`, [task.objective]);
 
       const promptText = buildTaskPrompt(repoRoot, task);
-      const promptFile = path.join("/tmp/agw-mcp-loop", `${task.task_id}-${Date.now()}.md`);
+      const promptDir = "/tmp/agw-mcp-loop";
+      fs.mkdirSync(promptDir, { recursive: true });
+      const promptFile = path.join(promptDir, `${task.task_id}-${Date.now()}.md`);
       fs.writeFileSync(promptFile, promptText, "utf8");
 
       if (args.dryRun) {
