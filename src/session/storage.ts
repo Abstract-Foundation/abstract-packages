@@ -4,14 +4,17 @@ import path from "node:path";
 import type { AgwSessionData } from "./types.js";
 
 const REDACTED_SIGNER_REF = "[REDACTED]";
+const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
 
 export class SessionStorage {
   private readonly dir: string;
   private readonly filePath: string;
+  private readonly signerKeyPath: string;
 
   constructor(dir?: string) {
     this.dir = dir ?? path.join(os.homedir(), ".agw-mcp");
     this.filePath = path.join(this.dir, "session.json");
+    this.signerKeyPath = path.join(this.dir, "session-signer.key");
   }
 
   get path(): string {
@@ -25,6 +28,52 @@ export class SessionStorage {
     } catch {
       // Ignore chmod errors on platforms that do not support unix permissions.
     }
+  }
+
+  private ensureSignerKeyfile(privateKey: string): string {
+    this.ensureDir();
+    fs.writeFileSync(this.signerKeyPath, `${privateKey.trim()}\n`, { mode: 0o600 });
+    try {
+      fs.chmodSync(this.signerKeyPath, 0o600);
+    } catch {
+      // Ignore chmod errors on platforms that do not support unix permissions.
+    }
+    return this.signerKeyPath;
+  }
+
+  private resolveSignerRefForRuntime(data: AgwSessionData): AgwSessionData | null {
+    if (data.sessionSignerRef.kind === "keyfile") {
+      if (!fs.existsSync(data.sessionSignerRef.value)) {
+        return null;
+      }
+      return data;
+    }
+
+    const rawValue = data.sessionSignerRef.value.trim();
+    if (rawValue === REDACTED_SIGNER_REF) {
+      if (!fs.existsSync(this.signerKeyPath)) {
+        return null;
+      }
+      return {
+        ...data,
+        sessionSignerRef: {
+          kind: "keyfile",
+          value: this.signerKeyPath,
+        },
+      };
+    }
+
+    if (!PRIVATE_KEY_PATTERN.test(rawValue)) {
+      return null;
+    }
+
+    return {
+      ...data,
+      sessionSignerRef: {
+        kind: "keyfile",
+        value: this.ensureSignerKeyfile(rawValue),
+      },
+    };
   }
 
   private sanitizeForPersistence(data: AgwSessionData): AgwSessionData {
@@ -59,7 +108,7 @@ export class SessionStorage {
       ) {
         return null;
       }
-      return this.sanitizeForPersistence(parsed as AgwSessionData);
+      return this.resolveSignerRefForRuntime(parsed as AgwSessionData);
     } catch {
       return null;
     }
@@ -67,7 +116,18 @@ export class SessionStorage {
 
   save(data: AgwSessionData): void {
     this.ensureDir();
-    fs.writeFileSync(this.filePath, JSON.stringify(this.sanitizeForPersistence(data), null, 2), { mode: 0o600 });
+    const normalized =
+      data.sessionSignerRef.kind === "raw"
+        ? {
+            ...data,
+            sessionSignerRef: {
+              kind: "keyfile" as const,
+              value: this.ensureSignerKeyfile(data.sessionSignerRef.value),
+            },
+          }
+        : data;
+
+    fs.writeFileSync(this.filePath, JSON.stringify(this.sanitizeForPersistence(normalized), null, 2), { mode: 0o600 });
   }
 
   delete(): void {

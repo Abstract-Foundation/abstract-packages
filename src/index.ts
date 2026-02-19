@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { runBootstrapFlow } from "./auth/bootstrap.js";
+import { buildMcpConfigSnippet } from "./config/mcp-config.js";
 import { resolveNetworkConfig } from "./config/index.js";
 import { AgwMcpServer } from "./server/mcp-server.js";
 import { SessionManager } from "./session/manager.js";
@@ -29,6 +30,17 @@ program
     const manager = new SessionManager(logger, { chainId: networkConfig.chainId, storageDir: options.storageDir });
     manager.setSession(session);
     logger.info("Session saved. You can now run `agw-mcp serve`.");
+  });
+
+program
+  .command("config")
+  .description("Print a ready-to-paste local MCP config snippet")
+  .option("--name <name>", "MCP server name override", "agw-mcp")
+  .action(options => {
+    const snippet = buildMcpConfigSnippet({
+      serverName: options.name,
+    });
+    process.stdout.write(`${JSON.stringify(snippet, null, 2)}\n`);
   });
 
 program

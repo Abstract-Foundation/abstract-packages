@@ -1,7 +1,10 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { AuditLog } from "../audit/index.js";
+import { toMcpErrorContract } from "../errors/index.js";
 import { SessionManager } from "../session/manager.js";
+import { SessionReconcileWorker } from "../session/reconcile.js";
 import { getTool, tools } from "../tools/index.js";
 import { Logger } from "../utils/logger.js";
 
@@ -14,6 +17,8 @@ export class AgwMcpServer {
   private readonly server: Server;
   private readonly logger: Logger;
   private readonly sessionManager: SessionManager;
+  private readonly auditLog: AuditLog;
+  private readonly reconcileWorker: SessionReconcileWorker;
 
   constructor(options: AgwMcpServerOptions = {}) {
     this.logger = new Logger("agw-mcp");
@@ -21,6 +26,8 @@ export class AgwMcpServer {
       storageDir: options.storageDir,
       chainId: options.chainId,
     });
+    this.auditLog = new AuditLog(options.storageDir);
+    this.reconcileWorker = new SessionReconcileWorker(this.sessionManager, this.logger.child("reconcile"));
 
     this.server = new Server(
       {
@@ -50,26 +57,50 @@ export class AgwMcpServer {
       const toolName = request.params.name;
       const tool = getTool(toolName);
       if (!tool) {
+        const error = toMcpErrorContract(new Error(`Unknown tool: ${toolName}`), "TOOL_NOT_FOUND");
         return {
-          content: [{ type: "text" as const, text: JSON.stringify({ error: `Unknown tool: ${toolName}` }) }],
+          content: [{ type: "text" as const, text: JSON.stringify(error, null, 2) }],
           isError: true,
         };
       }
 
       try {
+        this.auditLog.append({
+          timestamp: new Date().toISOString(),
+          tool: toolName,
+          phase: "request",
+          payload: {
+            arguments: (request.params.arguments ?? {}) as Record<string, unknown>,
+          },
+        });
+
         const result = await tool.handler(request.params.arguments ?? {}, {
           sessionManager: this.sessionManager,
           logger: this.logger.child(toolName),
+        });
+        this.auditLog.append({
+          timestamp: new Date().toISOString(),
+          tool: toolName,
+          phase: "response",
+          payload: {
+            result: result as Record<string, unknown>,
+          },
         });
 
         return {
           content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
         };
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        this.logger.error(`${toolName} failed: ${message}`);
+        const mapped = toMcpErrorContract(error);
+        this.auditLog.append({
+          timestamp: new Date().toISOString(),
+          tool: toolName,
+          phase: "error",
+          payload: mapped as unknown as Record<string, unknown>,
+        });
+        this.logger.error(`${toolName} failed: ${mapped.message}`);
         return {
-          content: [{ type: "text" as const, text: JSON.stringify({ error: message }, null, 2) }],
+          content: [{ type: "text" as const, text: JSON.stringify(mapped, null, 2) }],
           isError: true,
         };
       }
@@ -78,6 +109,11 @@ export class AgwMcpServer {
 
   async start(): Promise<void> {
     this.sessionManager.initialize();
+    this.reconcileWorker.start();
+    process.once("beforeExit", () => {
+      this.reconcileWorker.stop();
+      void this.auditLog.flush().catch(() => undefined);
+    });
     await this.server.connect(new StdioServerTransport());
     this.logger.info("AGW MCP server started");
   }
