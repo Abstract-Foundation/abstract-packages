@@ -2,8 +2,6 @@ import { isAddress, type Address, type Hex } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
 import { resolveNetworkConfig } from "../config/network.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
-import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
-import { buildExplorerUrl } from "../utils/explorer.js";
 import type { ToolHandler } from "./types.js";
 
 const HEX_DATA_PATTERN = /^0x[0-9a-fA-F]*$/;
@@ -14,18 +12,6 @@ function parseValue(value: unknown): string {
     throw new Error("value must be a non-negative integer string");
   }
   return parsed;
-}
-
-function parseExecute(execute: unknown): boolean {
-  if (execute === undefined) {
-    return false;
-  }
-
-  if (typeof execute !== "boolean") {
-    throw new Error("execute must be a boolean");
-  }
-
-  return execute;
 }
 
 function assertHexData(data: unknown): Hex {
@@ -48,17 +34,15 @@ function assertAddress(value: unknown, field: string): Address {
   return value;
 }
 
-export const sendTransactionTool: ToolHandler = {
-  name: "send_transaction",
-  description:
-    "Sends an EVM transaction through AGW session keys. Defaults to preview mode; set execute=true to broadcast.",
+export const signTransactionTool: ToolHandler = {
+  name: "sign_transaction",
+  description: "Signs an EVM transaction through AGW session keys and returns signed payload only (no broadcast).",
   inputSchema: {
     type: "object",
     properties: {
       to: { type: "string", description: "Target contract or EOA" },
       data: { type: "string", description: "Hex calldata" },
       value: { type: "string", description: "Wei value as decimal string", default: "0" },
-      execute: { type: "boolean", description: "Broadcast when true; preview only when omitted/false", default: false },
     },
     required: ["to", "data"],
   },
@@ -67,7 +51,6 @@ export const sendTransactionTool: ToolHandler = {
     const data = assertHexData(params.data);
     const valueRaw = parseValue(params.value);
     const value = BigInt(valueRaw);
-    const execute = parseExecute(params.execute);
 
     const status = context.sessionManager.getSessionStatus();
     if (status !== "active") {
@@ -80,45 +63,21 @@ export const sendTransactionTool: ToolHandler = {
     }
 
     if (!canCallTargetWithData(session.sessionConfig, to, data)) {
-      throw new Error("transaction rejected: call policy does not allow this target/selector");
+      throw new Error("transaction signing rejected: call policy does not allow this target/selector");
     }
 
     if (!canTransferNativeValue(session.sessionConfig, value)) {
-      throw new Error("transaction rejected: transfer policy does not allow this value");
-    }
-
-    if (!execute) {
-      return {
-        broadcast: false,
-        preview: true,
-        executionRisk: "state_change",
-        requiresExplicitExecute: true,
-        accountAddress: session.accountAddress,
-        chainId: session.chainId,
-        transaction: {
-          to,
-          data,
-          value: valueRaw,
-        },
-      };
+      throw new Error("transaction signing rejected: transfer policy does not allow this value");
     }
 
     const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
-    await assertMainnetPolicyRegistryPreflight({
-      chainId: session.chainId,
-      to,
-      data,
-      value,
-      rpcUrl: networkConfig.rpcUrl,
-    });
-
     const sessionClient = context.sessionManager.createSessionClient({
       chain: networkConfig.chain,
       rpcUrl: networkConfig.rpcUrl,
     });
     const agwActions = createAgwActionAdapter(sessionClient);
 
-    const txHash = await agwActions.sendTransaction({
+    const signedPayload = await agwActions.signTransaction({
       account: session.accountAddress as Address,
       chain: undefined,
       to,
@@ -126,17 +85,11 @@ export const sendTransactionTool: ToolHandler = {
       value,
     });
 
-    const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
-
     return {
-      broadcast: true,
-      txHash,
+      signedPayload,
+      broadcast: false,
       accountAddress: session.accountAddress,
       chainId: session.chainId,
-      explorer: {
-        chain: explorerBase,
-        transaction: buildExplorerUrl(explorerBase, `/tx/${txHash}`),
-      },
       transaction: {
         to,
         data,

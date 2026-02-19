@@ -106,3 +106,15 @@ export function canTransferNativeValue(sessionConfig: Record<string, unknown>, v
   const transferPolicies = parseTransferPolicies(sessionConfig);
   return transferPolicies.some(policy => policy.tokenAddress === ZERO_ADDRESS && policy.maxAmountBaseUnit >= valueBaseUnit);
 }
+
+export function canTransferTokenValue(sessionConfig: Record<string, unknown>, tokenAddress: string, valueBaseUnit: bigint): boolean {
+  if (valueBaseUnit <= 0n) {
+    return true;
+  }
+
+  const normalizedTokenAddress = tokenAddress.toLowerCase();
+  const transferPolicies = parseTransferPolicies(sessionConfig);
+  return transferPolicies.some(
+    policy => policy.tokenAddress === normalizedTokenAddress && policy.maxAmountBaseUnit >= valueBaseUnit,
+  );
+}
