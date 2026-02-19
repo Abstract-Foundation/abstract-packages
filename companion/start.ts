@@ -6,6 +6,7 @@ const parsedPort = portValue && /^\d+$/.test(portValue) ? Number.parseInt(portVa
 startCompanionServer({
   host: process.env.COMPANION_HOST ?? "127.0.0.1",
   port: parsedPort,
+  storageDir: process.env.COMPANION_STORAGE_DIR,
 })
   .then(started => {
     process.stdout.write(`[agw-companion] running at ${started.url}\n`);

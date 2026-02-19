@@ -53,11 +53,15 @@ header h1 {
 }
 
 input,
+select,
+textarea,
 button {
   font: inherit;
 }
 
-input {
+input,
+select,
+textarea {
   width: 100%;
   padding: 10px;
   border-radius: 8px;
@@ -74,6 +78,41 @@ button {
   cursor: pointer;
 }
 
+.custom-field {
+  display: grid;
+  gap: 10px;
+}
+
+.advanced {
+  border: 1px solid #c8cfba;
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 180px;
+}
+
+pre {
+  margin: 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #c8cfba;
+  background: #fbfcf8;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 a {
   color: #1b5f44;
   word-break: break-all;
@@ -87,6 +126,24 @@ a {
 
 .secondary {
   background: #f6f8f2;
+}
+
+.error {
+  color: #7a311f;
+}
+
+.risk-reasons {
+  margin: 0;
+  padding-left: 20px;
+  color: #7a311f;
+}
+
+.confirm-risk {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+  color: #7a311f;
 }
 
 @media (max-width: 640px) {
