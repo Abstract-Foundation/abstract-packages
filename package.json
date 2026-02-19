@@ -13,6 +13,7 @@
     "companion:dev": "tsx companion/start.ts",
     "start": "node dist/index.js",
     "test": "jest",
+    "test:e2e": "AGW_E2E_ENABLED=1 jest --runInBand test/e2e",
     "check-types": "tsc --noEmit",
     "lint": "eslint src companion scripts test --ext .ts",
     "prettier": "prettier --write \"src/**/*.ts\"",
@@ -23,7 +24,7 @@
     "eval:nightly": "bash scripts/eval-nightly.sh"
   },
   "dependencies": {
-    "@abstract-foundation/agw-client": "latest",
+    "@abstract-foundation/agw-client": "1.10.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "commander": "^12.1.0",
     "open": "^10.1.0",
