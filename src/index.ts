@@ -36,9 +36,13 @@ program
   .command("config")
   .description("Print a ready-to-paste local MCP config snippet")
   .option("--name <name>", "MCP server name override", "agw-mcp")
+  .option("--npx", "Output npx-based config for published package")
+  .option("--chain-id <chainId>", "Chain id to include in config args")
   .action(options => {
     const snippet = buildMcpConfigSnippet({
       serverName: options.name,
+      npx: options.npx,
+      chainId: options.chainId,
     });
     process.stdout.write(`${JSON.stringify(snippet, null, 2)}\n`);
   });
