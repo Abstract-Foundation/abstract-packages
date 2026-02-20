@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section {
+  border: 1px solid #e3e5ea;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.label {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.code {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.risks {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.lowRisk {
+  margin: 0;
+}
