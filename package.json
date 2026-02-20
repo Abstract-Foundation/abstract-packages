@@ -1,27 +1,54 @@
 {
-  "name": "agw-mcp",
+  "name": "@abstract-foundation/agw-mcp",
   "version": "0.1.0",
-  "private": true,
-  "description": "Local MCP server for Abstract Global Wallet (AGW) session-key workflows",
-  "type": "module",
-  "bin": {
-    "agw-mcp": "./dist/index.js"
+  "description": "MCP server for Abstract Global Wallet session-key workflows",
+  "license": "MIT",
+  "author": "Abstract Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abstract-Foundation/agw-mcp.git"
   },
+  "homepage": "https://github.com/Abstract-Foundation/agw-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/agw-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "agw",
+    "abstract-global-wallet",
+    "session-key",
+    "wallet",
+    "ethereum",
+    "cli"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "bin": {
+    "agw-mcp": "./dist/index.mjs"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "dev": "tsx src/index.ts",
     "companion:dev": "tsx companion/start.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/index.mjs",
+    "prepublishOnly": "pnpm check-types && pnpm lint && pnpm test && pnpm build",
     "test": "jest",
     "test:e2e": "AGW_E2E_ENABLED=1 jest --runInBand test/e2e",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src companion scripts test --ext .ts",
-    "prettier": "prettier --write \"src/**/*.ts\"",
-    "loop": "bash scripts/agent-loop.sh",
-    "loop:once": "bash scripts/agent-loop.sh --once",
-    "loop:dry": "bash scripts/agent-loop.sh --dry-run --once",
-    "loop:overnight": "bash scripts/run-overnight.sh 8",
-    "eval:nightly": "bash scripts/eval-nightly.sh"
+    "lint": "eslint src companion test --ext .ts",
+    "prettier": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "@abstract-foundation/agw-client": "1.10.0",
@@ -41,7 +68,7 @@
     "prettier": "^3.5.2",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.2.5",
-    "tsup": "^8.4.0",
+    "tsdown": "^0.20.3",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   }
