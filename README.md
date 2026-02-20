@@ -26,13 +26,15 @@ claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
 npx -y @abstract-foundation/agw-mcp init --chain-id 11124
 ```
 
-This opens the companion app where you:
+This opens the hosted onboarding app (`https://mcp.abs.xyz`) where you:
 
 1. Choose a policy preset (or provide custom policy JSON)
 2. Connect your Abstract Global Wallet
 3. Approve the session key
 
 Session data is saved to `~/.agw-mcp/session.json` with `0o600` file permissions. The session signer key is stored separately in `~/.agw-mcp/session-signer.key`.
+If a previous active session exists locally, the CLI attempts to revoke it on-chain after creating the new one.
+Bootstrap is single-process per storage directory (lockfile: `~/.agw-mcp/.bootstrap-init.lock`) to prevent concurrent `init` races.
 
 ### 2. Start the MCP server
 
@@ -130,6 +132,15 @@ Environment variables are also supported:
 ```bash
 AGW_MCP_CHAIN_ID=2741 npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_RPC_URL=https://api.mainnet.abs.xyz npx -y @abstract-foundation/agw-mcp serve
+AGW_MCP_APP_URL=http://localhost:3001 npx -y @abstract-foundation/agw-mcp init --chain-id 11124
+```
+
+`init` requires `https://` app URLs except for loopback local development URLs (`http://localhost`, `http://127.0.0.1`, `http://[::1]`).
+
+For local hosted-app development:
+
+```bash
+npx -y @abstract-foundation/agw-mcp init --chain-id 11124 --app-url http://localhost:3001
 ```
 
 ## Security Model
