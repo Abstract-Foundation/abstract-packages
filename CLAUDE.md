@@ -6,55 +6,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Local MCP server for Abstract Global Wallet (AGW) session-key workflows. Enables agent-accessible wallet actions via scoped session keys without custodial signing. Uses `@modelcontextprotocol/sdk` for the MCP protocol and `@abstract-foundation/agw-client` for the AGW SDK.
 
-**Current state**: Read/status tools are wired. Write tools (sign, send, write-contract) are scaffolded with policy gates but not yet connected to AGW SDK execution.
+**Current state**: All tools (read, sign, send, write, swap, deploy, revoke) are implemented with policy-enforced execution via AGW session client.
+
+**Package**: Published as `@abstract-foundation/agw-mcp` on npm. Uses pnpm and tsdown (rolldown-based bundler).
 
 ## Commands
 
 ```bash
-npm run build          # tsup -> dist/
-npm run dev            # tsx src/index.ts (dev mode)
-npm test               # jest (all tests in test/)
-npm run check-types    # tsc --noEmit
-npm run lint           # eslint src --ext .ts
-npm run prettier       # prettier --write "src/**/*.ts"
-
-npm run loop:dry       # dry-run one autonomous loop iteration
-npm run loop:once      # execute one autonomous loop iteration
-npm run loop           # run multi-iteration autonomous loop
-npm run eval:nightly   # run nightly quality/eval harness
+pnpm build             # tsdown -> dist/
+pnpm dev               # tsx src/index.ts (dev mode)
+pnpm test              # jest (all tests in test/)
+pnpm check-types       # tsc --noEmit
+pnpm lint              # eslint src companion test --ext .ts
+pnpm prettier          # prettier --write "src/**/*.ts"
 ```
 
 Run a single test:
 
 ```bash
-npx jest test/policy-validate.test.ts
+pnpm jest test/policy-validate.test.ts
 ```
 
 Bootstrap + serve:
 
 ```bash
-node dist/index.js init --chain-id 11124
-node dist/index.js serve --chain-id 11124
+node dist/index.mjs init --chain-id 11124
+node dist/index.mjs serve --chain-id 11124
 ```
 
-## Workflow Control Plane
+## Reference Docs
 
-Use markdown memory as source-of-truth:
+Design and planning docs in `meta/`:
 
-- `meta/product.md`
-- `meta/prd.md`
-- `meta/decisions.md`
-- `meta/tasks.md`
-- `meta/progress.md`
-- `meta/risks.md`
-- `meta/test-strategy.md`
-- `meta/loop-config.yaml`
-
-Prompt templates for loop agents:
-
-- `meta/prompts/planner.md`
-- `meta/prompts/builder.md`
-- `meta/prompts/reviewer.md`
+- `meta/product.md` — product overview
+- `meta/prd.md` — product requirements
+- `meta/decisions.md` — architectural decision log
+- `meta/test-strategy.md` — testing approach
+- `meta/agw-protocol-reference.md` — AGW protocol reference
+- `meta/agw-session-key-best-practices.md` — session key best practices
+- `meta/user-flows.md` — user flow diagrams
 
 ## Architecture
 
