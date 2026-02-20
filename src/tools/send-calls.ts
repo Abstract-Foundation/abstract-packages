@@ -2,7 +2,7 @@ import { isAddress, type Address, type Hex } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
 import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
-import { resolveNetworkConfig } from "../config/network.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 interface ParsedCall {
@@ -112,7 +112,7 @@ export const sendCallsTool: ToolHandler = {
       };
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     for (const call of calls) {
       await assertMainnetPolicyRegistryPreflight({
         chainId: session.chainId,

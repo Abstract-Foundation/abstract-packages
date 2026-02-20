@@ -1,6 +1,6 @@
 import { isAddress } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 function resolvePolicySignerAddress(sessionConfig: Record<string, unknown>): string {
@@ -41,7 +41,7 @@ export const signMessageTool: ToolHandler = {
     }
 
     const signerAddress = resolvePolicySignerAddress(session.sessionConfig);
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     const sessionClient = context.sessionManager.createSessionClient({
       chain: networkConfig.chain,
       rpcUrl: networkConfig.rpcUrl,

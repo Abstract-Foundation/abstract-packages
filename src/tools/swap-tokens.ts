@@ -4,8 +4,8 @@ import type { ZeroExQuoteAdapter } from "../integrations/zeroex/index.js";
 import { zeroExQuoteAdapter } from "../integrations/zeroex/index.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
 import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
-import { resolveNetworkConfig } from "../config/network.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 export interface SwapTokensToolDependencies {
@@ -118,7 +118,7 @@ export function createSwapTokensTool(
         };
       }
 
-      const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+      const networkConfig = resolveToolNetworkConfig(context, session.chainId);
       await assertMainnetPolicyRegistryPreflight({
         chainId: session.chainId,
         to: txTarget as Address,

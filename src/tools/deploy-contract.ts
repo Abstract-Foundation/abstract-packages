@@ -1,8 +1,8 @@
 import { type Abi, type Address } from "viem";
 import { abstract } from "viem/chains";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 function parseExecute(value: unknown): boolean {
@@ -70,7 +70,7 @@ export const deployContractTool: ToolHandler = {
       };
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     if (session.chainId === abstract.id) {
       throw new Error("deploy rejected: mainnet deploy preflight is not supported; use testnet or explicit manual flow");
     }

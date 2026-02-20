@@ -18,6 +18,7 @@ program
   .description("Bootstrap local AGW MCP session storage")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
+  .option("--app-url <url>", "Hosted session onboarding URL (env: AGW_MCP_APP_URL)")
   .option("--storage-dir <dir>", "Session storage directory")
   .action(async options => {
     const networkConfig = resolveNetworkConfig({
@@ -26,8 +27,17 @@ program
     });
 
     logger.info(`Using network ${networkConfig.chain.name} (${networkConfig.chainId}) with RPC ${networkConfig.rpcUrl}`);
-    const session = await runBootstrapFlow(logger, { chainId: networkConfig.chainId, storageDir: options.storageDir });
-    const manager = new SessionManager(logger, { chainId: networkConfig.chainId, storageDir: options.storageDir });
+    const session = await runBootstrapFlow(logger, {
+      chainId: networkConfig.chainId,
+      rpcUrl: networkConfig.rpcUrl,
+      appUrl: options.appUrl,
+      storageDir: options.storageDir,
+    });
+    const manager = new SessionManager(logger, {
+      chainId: networkConfig.chainId,
+      rpcUrl: networkConfig.rpcUrl,
+      storageDir: options.storageDir,
+    });
     manager.setSession(session);
     logger.info("Session saved. You can now run `agw-mcp serve`.");
   });
@@ -60,7 +70,11 @@ program
     });
 
     logger.info(`Using network ${networkConfig.chain.name} (${networkConfig.chainId}) with RPC ${networkConfig.rpcUrl}`);
-    const server = new AgwMcpServer({ chainId: networkConfig.chainId, storageDir: options.storageDir });
+    const server = new AgwMcpServer({
+      chainId: networkConfig.chainId,
+      rpcUrl: networkConfig.rpcUrl,
+      storageDir: options.storageDir,
+    });
     await server.start();
   });
 

@@ -41,14 +41,12 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsx src/index.ts",
-    "companion:server": "tsx companion/start.ts",
-    "companion:dev": "cd companion && npx vite",
     "start": "node dist/index.mjs",
     "prepublishOnly": "pnpm check-types && pnpm lint && pnpm test && pnpm build",
     "test": "jest",
     "test:e2e": "AGW_E2E_ENABLED=1 jest --runInBand test/e2e",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src companion test --ext .ts",
+    "lint": "eslint src test --ext .ts",
     "prettier": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {

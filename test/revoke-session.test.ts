@@ -1,17 +1,23 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { sessionKeyValidatorAddress } from "@abstract-foundation/agw-client/constants";
-import { SessionKeyValidatorAbi, getSessionHash, type SessionConfig } from "@abstract-foundation/agw-client/sessions";
+import { getSessionHash, type SessionConfig } from "@abstract-foundation/agw-client/sessions";
 import { abstractTestnet } from "viem/chains";
 import { resolveNetworkConfig } from "../src/config/network.js";
 import { SessionManager } from "../src/session/manager.js";
 import type { AgwSessionData } from "../src/session/types.js";
+import { revokeSessionOnchain } from "../src/session/revoke.js";
 import { getTool } from "../src/tools/index.js";
 import { revokeSessionTool } from "../src/tools/revoke-session.js";
 import { sendTransactionTool } from "../src/tools/send-transaction.js";
 import type { ToolContext } from "../src/tools/types.js";
 import { Logger } from "../src/utils/logger.js";
+
+jest.mock("../src/session/revoke.js", () => ({
+  revokeSessionOnchain: jest.fn(),
+}));
+
+const revokeSessionOnchainMock = revokeSessionOnchain as unknown as jest.Mock;
 
 function buildSessionData(overrides: Partial<AgwSessionData> = {}): AgwSessionData {
   const now = Math.floor(Date.now() / 1000);
@@ -58,31 +64,28 @@ describe("revoke_session tool", () => {
       sessionManager.setSession(session);
 
       const transactionHash = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as const;
-      const writeContract = jest.fn<Promise<`0x${string}`>, [Record<string, unknown>]>(async () => transactionHash);
-      const createSessionClientSpy = jest
-        .spyOn(sessionManager, "createSessionClient")
-        .mockReturnValue({ writeContract } as unknown as ReturnType<SessionManager["createSessionClient"]>);
-
       const context = {
         sessionManager,
         logger,
       } as ToolContext;
 
       const expectedSessionHash = getSessionHash(session.sessionConfig as unknown as SessionConfig);
+      revokeSessionOnchainMock.mockResolvedValueOnce({
+        transactionHash,
+        sessionHash: expectedSessionHash,
+      });
       const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
       const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
 
       const result = (await revokeSessionTool.handler({}, context)) as Record<string, unknown>;
 
-      expect(writeContract).toHaveBeenCalledTimes(1);
-      expect(writeContract).toHaveBeenCalledWith({
-        account: session.accountAddress,
-        chain: undefined,
-        address: sessionKeyValidatorAddress,
-        abi: SessionKeyValidatorAbi,
-        functionName: "revokeKeys",
-        args: [[expectedSessionHash]],
-      });
+      expect(revokeSessionOnchainMock).toHaveBeenCalledTimes(1);
+      expect(revokeSessionOnchainMock).toHaveBeenCalledWith(
+        session,
+        expect.objectContaining({
+          rpcUrl: networkConfig.rpcUrl,
+        }),
+      );
 
       expect(result).toEqual({
         revoked: true,
@@ -113,8 +116,6 @@ describe("revoke_session tool", () => {
           context,
         ),
       ).rejects.toThrow("session must be active (current status: revoked)");
-
-      expect(createSessionClientSpy).toHaveBeenCalledTimes(1);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

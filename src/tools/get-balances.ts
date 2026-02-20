@@ -1,6 +1,7 @@
 import { createPublicClient, erc20Abi, formatUnits, http, isAddress, type Address } from "viem";
 import { resolveNetworkConfig } from "../config/network.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 export interface CreateBalanceReaderInput {
@@ -123,7 +124,7 @@ export function createGetBalancesTool(
     handler: async (params, context) => {
       const session = context.sessionManager.getSession();
       const chainId = session?.chainId ?? context.sessionManager.getChainId();
-      const networkConfig = resolveNetworkConfig({ chainId });
+      const networkConfig = resolveToolNetworkConfig(context, chainId);
       const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
 
       if (!session) {

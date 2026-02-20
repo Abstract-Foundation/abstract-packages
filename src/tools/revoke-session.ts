@@ -1,19 +1,7 @@
-import { sessionKeyValidatorAddress } from "@abstract-foundation/agw-client/constants";
-import { SessionKeyValidatorAbi, getSessionHash, type SessionConfig } from "@abstract-foundation/agw-client/sessions";
-import { encodeFunctionData, type Address, type Hash } from "viem";
-import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
-import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
+import { revokeSessionOnchain } from "../session/revoke.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
-
-function deriveSessionHash(sessionConfig: Record<string, unknown>): Hash {
-  try {
-    return getSessionHash(sessionConfig as unknown as SessionConfig);
-  } catch {
-    throw new Error("revoke rejected: session config is not compatible with AGW session hashing");
-  }
-}
 
 export const revokeSessionTool: ToolHandler = {
   name: "revoke_session",
@@ -33,35 +21,10 @@ export const revokeSessionTool: ToolHandler = {
       throw new Error("session is missing");
     }
 
-    const sessionHash = deriveSessionHash(session.sessionConfig);
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
-    const data = encodeFunctionData({
-      abi: SessionKeyValidatorAbi,
-      functionName: "revokeKeys",
-      args: [[sessionHash]],
-    });
-    await assertMainnetPolicyRegistryPreflight({
-      chainId: session.chainId,
-      to: sessionKeyValidatorAddress,
-      data,
-      value: 0n,
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
+    const { sessionHash, transactionHash } = await revokeSessionOnchain(session, {
       rpcUrl: networkConfig.rpcUrl,
     });
-
-    const sessionClient = context.sessionManager.createSessionClient({
-      chain: networkConfig.chain,
-      rpcUrl: networkConfig.rpcUrl,
-    });
-    const agwActions = createAgwActionAdapter(sessionClient);
-
-    const transactionHash = await agwActions.writeContract({
-      account: session.accountAddress as Address,
-      chain: undefined,
-      address: sessionKeyValidatorAddress,
-      abi: SessionKeyValidatorAbi,
-      functionName: "revokeKeys",
-      args: [[sessionHash]],
-    } as never);
 
     context.sessionManager.markSessionRevoked();
 

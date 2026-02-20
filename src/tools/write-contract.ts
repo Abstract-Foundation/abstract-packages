@@ -1,9 +1,9 @@
 import { encodeFunctionData, isAddress, type Abi, type Address } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
 import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 function assertAddress(value: unknown, field: string): Address {
@@ -99,7 +99,7 @@ export const writeContractTool: ToolHandler = {
       throw new Error("contract write rejected: transfer policy does not allow this value");
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     await assertMainnetPolicyRegistryPreflight({
       chainId: session.chainId,
       to: address,

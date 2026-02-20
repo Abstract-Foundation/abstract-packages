@@ -1,9 +1,9 @@
 import { isAddress, type Address, type Hex } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
 import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 const HEX_DATA_PATTERN = /^0x[0-9a-fA-F]*$/;
@@ -103,7 +103,7 @@ export const sendTransactionTool: ToolHandler = {
       };
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     await assertMainnetPolicyRegistryPreflight({
       chainId: session.chainId,
       to,

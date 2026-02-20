@@ -10,6 +10,7 @@ import { Logger } from "../utils/logger.js";
 
 export interface AgwMcpServerOptions {
   chainId?: number;
+  rpcUrl?: string;
   storageDir?: string;
 }
 
@@ -25,6 +26,7 @@ export class AgwMcpServer {
     this.sessionManager = new SessionManager(this.logger, {
       storageDir: options.storageDir,
       chainId: options.chainId,
+      rpcUrl: options.rpcUrl,
     });
     this.auditLog = new AuditLog(options.storageDir);
     this.reconcileWorker = new SessionReconcileWorker(this.sessionManager, this.logger.child("reconcile"));

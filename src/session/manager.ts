@@ -1,6 +1,6 @@
 import type { SessionClient } from "@abstract-foundation/agw-client/sessions";
 import type { AgwChainConfig } from "../agw/client.js";
-import { resolveNetworkConfig } from "../config/network.js";
+import { resolveNetworkConfig, type ResolvedNetworkConfig } from "../config/network.js";
 import { assertSafeSessionPolicy } from "../policy/lint.js";
 import type { Logger } from "../utils/logger.js";
 import { createSessionClientFromSessionData } from "./client.js";
@@ -10,6 +10,7 @@ import type { AgwSessionData, OnchainSessionStatus, OnchainSessionStatusCode, On
 export interface SessionManagerOptions {
   storageDir?: string;
   chainId?: number;
+  rpcUrl?: string;
 }
 
 const ONCHAIN_STATUS_CODE_TO_STATUS: Record<OnchainSessionStatusCode, OnchainSessionStatus> = {
@@ -31,12 +32,14 @@ export class SessionManager {
   private readonly storage: SessionStorage;
   private readonly logger: Logger;
   private readonly chainId: number;
+  private readonly rpcUrl?: string;
   private session: AgwSessionData | null = null;
 
   constructor(logger: Logger, options: SessionManagerOptions = {}) {
     this.logger = logger.child("session");
     this.storage = new SessionStorage(options.storageDir);
     this.chainId = options.chainId ?? 11124;
+    this.rpcUrl = options.rpcUrl;
   }
 
   initialize(): void {
@@ -85,7 +88,7 @@ export class SessionManager {
       };
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: this.session.chainId });
+    const networkConfig = this.getNetworkConfig(this.session.chainId);
     const sessionClient = createSessionClientFromSessionData({
       session: this.session,
       chainConfig: {
@@ -133,6 +136,13 @@ export class SessionManager {
 
   getChainId(): number {
     return this.chainId;
+  }
+
+  getNetworkConfig(chainId?: number): ResolvedNetworkConfig {
+    return resolveNetworkConfig({
+      chainId: chainId ?? this.chainId,
+      rpcUrl: this.rpcUrl,
+    });
   }
 
   createSessionClient(chainConfig: AgwChainConfig): SessionClient {

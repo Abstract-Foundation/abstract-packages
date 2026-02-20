@@ -1,7 +1,7 @@
 import { isAddress, type Address, type Hex } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import { resolveNetworkConfig } from "../config/network.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
+import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 const HEX_DATA_PATTERN = /^0x[0-9a-fA-F]*$/;
@@ -70,7 +70,7 @@ export const signTransactionTool: ToolHandler = {
       throw new Error("transaction signing rejected: transfer policy does not allow this value");
     }
 
-    const networkConfig = resolveNetworkConfig({ chainId: session.chainId });
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     const sessionClient = context.sessionManager.createSessionClient({
       chain: networkConfig.chain,
       rpcUrl: networkConfig.rpcUrl,

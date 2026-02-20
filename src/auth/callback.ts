@@ -1,15 +1,14 @@
-const CALLBACK_PAYLOAD_QUERY_KEYS = ["session", "bundle", "payload"] as const;
-const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
+import { isAddress } from "viem";
+
+const CALLBACK_PAYLOAD_QUERY_KEY = "session";
 
 export interface SessionBundlePayload {
   accountAddress: string;
-  chainId?: number;
+  chainId: number;
   expiresAt: number;
-  sessionConfig: Record<string, unknown>;
-  sessionSignerRef: {
-    kind: "raw" | "keyfile";
-    value: string;
-  };
+  sessionConfig: {
+    signer: `0x${string}`;
+  } & Record<string, unknown>;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -43,20 +42,16 @@ function resolvePayloadCandidate(input: string): string {
 
   const callbackUrl = new URL(trimmed);
 
-  for (const key of CALLBACK_PAYLOAD_QUERY_KEYS) {
-    const queryValue = callbackUrl.searchParams.get(key);
-    if (queryValue) {
-      return queryValue;
-    }
+  const queryValue = callbackUrl.searchParams.get(CALLBACK_PAYLOAD_QUERY_KEY);
+  if (queryValue) {
+    return queryValue;
   }
 
   if (callbackUrl.hash.startsWith("#")) {
     const hashParams = new URLSearchParams(callbackUrl.hash.slice(1));
-    for (const key of CALLBACK_PAYLOAD_QUERY_KEYS) {
-      const hashValue = hashParams.get(key);
-      if (hashValue) {
-        return hashValue;
-      }
+    const hashValue = hashParams.get(CALLBACK_PAYLOAD_QUERY_KEY);
+    if (hashValue) {
+      return hashValue;
     }
   }
 
@@ -89,43 +84,10 @@ function parsePayloadObject(rawPayload: string): Record<string, unknown> {
   throw new Error("Invalid session bundle payload. Expected JSON or base64url-encoded JSON.");
 }
 
-function parseSessionSignerRef(payload: Record<string, unknown>): SessionBundlePayload["sessionSignerRef"] {
-  const sessionSignerRefValue = payload.sessionSignerRef;
-  if (isRecord(sessionSignerRefValue)) {
-    const kind = sessionSignerRefValue.kind;
-    const value = sessionSignerRefValue.value;
-
-    if ((kind === "raw" || kind === "keyfile") && typeof value === "string" && value.trim()) {
-      if (kind === "raw" && !PRIVATE_KEY_PATTERN.test(value.trim())) {
-        throw new Error("Invalid session signer private key. Expected a 32-byte 0x-prefixed hex value.");
-      }
-      return { kind, value: value.trim() };
-    }
-  }
-
-  const privateKeyCandidate =
-    typeof payload.sessionSignerPrivateKey === "string"
-      ? payload.sessionSignerPrivateKey
-      : typeof payload.sessionPrivateKey === "string"
-        ? payload.sessionPrivateKey
-        : undefined;
-
-  if (!privateKeyCandidate || !PRIVATE_KEY_PATTERN.test(privateKeyCandidate.trim())) {
-    throw new Error(
-      "Session bundle must include session signer material (`sessionSignerPrivateKey` or `sessionSignerRef`).",
-    );
-  }
-
-  return {
-    kind: "raw",
-    value: privateKeyCandidate.trim(),
-  };
-}
-
 export function parseSessionBundleInput(input: string): SessionBundlePayload {
   const payload = parsePayloadObject(resolvePayloadCandidate(input));
 
-  if (typeof payload.accountAddress !== "string" || !payload.accountAddress.trim()) {
+  if (typeof payload.accountAddress !== "string" || !isAddress(payload.accountAddress)) {
     throw new Error("Invalid session bundle accountAddress.");
   }
 
@@ -133,14 +95,19 @@ export function parseSessionBundleInput(input: string): SessionBundlePayload {
   if (!isRecord(sessionConfig)) {
     throw new Error("Invalid session bundle sessionConfig.");
   }
+  if (typeof sessionConfig.signer !== "string" || !isAddress(sessionConfig.signer)) {
+    throw new Error("Invalid session bundle sessionConfig.signer.");
+  }
 
-  const chainId = payload.chainId === undefined ? undefined : parsePositiveInt(payload.chainId, "chainId");
+  const chainId = parsePositiveInt(payload.chainId, "chainId");
 
   return {
-    accountAddress: payload.accountAddress.trim(),
+    accountAddress: payload.accountAddress,
     chainId,
     expiresAt: parsePositiveInt(payload.expiresAt, "expiresAt"),
-    sessionConfig,
-    sessionSignerRef: parseSessionSignerRef(payload),
+    sessionConfig: {
+      ...sessionConfig,
+      signer: sessionConfig.signer,
+    },
   };
 }
