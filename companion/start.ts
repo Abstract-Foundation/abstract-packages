@@ -1,7 +1,7 @@
 import { startCompanionServer } from "./src/server.js";
 
 const portValue = process.env.COMPANION_PORT;
-const parsedPort = portValue && /^\d+$/.test(portValue) ? Number.parseInt(portValue, 10) : 4173;
+const parsedPort = portValue && /^\d+$/.test(portValue) ? Number.parseInt(portValue, 10) : 4174;
 
 startCompanionServer({
   host: process.env.COMPANION_HOST ?? "127.0.0.1",

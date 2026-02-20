@@ -40,6 +40,30 @@ function parseCallPolicies(sessionConfig: Record<string, unknown>): ParsedCallPo
   return policies;
 }
 
+function resolveTransferMaxValue(record: Record<string, unknown>): bigint | null {
+  if (typeof record.maxValuePerUse === "string") {
+    try {
+      return BigInt(record.maxValuePerUse);
+    } catch {
+      return null;
+    }
+  }
+  if (typeof record.maxAmountBaseUnit === "string") {
+    try {
+      return BigInt(record.maxAmountBaseUnit);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function resolveTransferTarget(record: Record<string, unknown>): string | null {
+  if (typeof record.target === "string") return record.target.toLowerCase();
+  if (typeof record.tokenAddress === "string") return record.tokenAddress.toLowerCase();
+  return null;
+}
+
 function parseTransferPolicies(sessionConfig: Record<string, unknown>): ParsedTransferPolicy[] {
   const raw = sessionConfig.transferPolicies;
   if (!Array.isArray(raw)) {
@@ -52,18 +76,13 @@ function parseTransferPolicies(sessionConfig: Record<string, unknown>): ParsedTr
       continue;
     }
     const record = item as Record<string, unknown>;
-    if (typeof record.tokenAddress !== "string" || typeof record.maxAmountBaseUnit !== "string") {
+    const tokenAddress = resolveTransferTarget(record);
+    const maxAmountBaseUnit = resolveTransferMaxValue(record);
+    if (!tokenAddress || maxAmountBaseUnit === null) {
       continue;
     }
 
-    try {
-      policies.push({
-        tokenAddress: record.tokenAddress.toLowerCase(),
-        maxAmountBaseUnit: BigInt(record.maxAmountBaseUnit),
-      });
-    } catch {
-      // Ignore invalid bigint policy entries.
-    }
+    policies.push({ tokenAddress, maxAmountBaseUnit });
   }
 
   return policies;

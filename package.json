@@ -41,7 +41,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsx src/index.ts",
-    "companion:dev": "tsx companion/start.ts",
+    "companion:server": "tsx companion/start.ts",
+    "companion:dev": "cd companion && npx vite",
     "start": "node dist/index.mjs",
     "prepublishOnly": "pnpm check-types && pnpm lint && pnpm test && pnpm build",
     "test": "jest",

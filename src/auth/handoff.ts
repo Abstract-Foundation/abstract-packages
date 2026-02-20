@@ -91,6 +91,20 @@ export async function startCompanionHandoffServer(
       return;
     }
 
+    if (req.method === "OPTIONS") {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
+
+    if (req.method === "POST") {
+      void handlePostCallback(req, res);
+      return;
+    }
+
     const token = url.searchParams.get("handoff");
     if (!token) {
       textResponse(res, 400, "Missing `handoff` query parameter.");
@@ -113,6 +127,42 @@ export async function startCompanionHandoffServer(
       }
     }
   });
+
+  async function handlePostCallback(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const MAX_BODY_BYTES = 64 * 1024;
+    try {
+      const body = await new Promise<string>((resolve, reject) => {
+        let size = 0;
+        const chunks: Buffer[] = [];
+        req.on("data", (chunk: Buffer) => {
+          size += chunk.length;
+          if (size > MAX_BODY_BYTES) {
+            reject(new Error("Request body too large."));
+            req.destroy();
+            return;
+          }
+          chunks.push(chunk);
+        });
+        req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+        req.on("error", reject);
+      });
+
+      if (!body.trim()) {
+        textResponse(res, 400, "Empty request body.");
+        return;
+      }
+
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      textResponse(res, 200, "Session bundle received. You can return to the CLI.");
+      if (!settled) {
+        settled = true;
+        resolvePayload?.(body);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      textResponse(res, 400, message);
+    }
+  }
 
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);

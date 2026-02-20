@@ -146,6 +146,19 @@ a {
   color: #7a311f;
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+code {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: #eef0e8;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
 @media (max-width: 640px) {
   .shell {
     margin: 20px auto;

@@ -3,7 +3,7 @@ import type { SessionCallPolicy, SessionPolicyConfig, SessionPolicyPresetTemplat
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const SELECTOR_PATTERN = /^0x[0-9a-fA-F]{8}$/;
 const UINT_PATTERN = /^\d+$/;
-const PRESET_ID_PATTERN = /^(read_only|transfer|swap|contract_write|read_and_sign|limited_spend|custom)$/;
+const PRESET_ID_PATTERN = /^(transfer|custom)$/;
 
 const MIN_EXPIRY_SECONDS = 300;
 const MAX_EXPIRY_SECONDS = 24 * 60 * 60;
@@ -49,17 +49,17 @@ function validateTransferPolicy(policy: unknown, index: number): void {
   if (!isRecord(policy)) {
     throw new Error(`transferPolicies[${index}] must be an object.`);
   }
-  validateAllowedKeys(policy, ["tokenAddress", "maxAmountBaseUnit"], `transferPolicies[${index}]`);
+  validateAllowedKeys(policy, ["target", "maxValuePerUse"], `transferPolicies[${index}]`);
 
-  if (typeof policy.tokenAddress !== "string") {
-    throw new Error(`transferPolicies[${index}].tokenAddress must be a 20-byte 0x-prefixed hex address.`);
+  if (typeof policy.target !== "string") {
+    throw new Error(`transferPolicies[${index}].target must be a 20-byte 0x-prefixed hex address.`);
   }
 
-  if (!ADDRESS_PATTERN.test(policy.tokenAddress)) {
-    throw new Error(`transferPolicies[${index}].tokenAddress must be a 20-byte 0x-prefixed hex address.`);
+  if (!ADDRESS_PATTERN.test(policy.target)) {
+    throw new Error(`transferPolicies[${index}].target must be a 20-byte 0x-prefixed hex address.`);
   }
 
-  validateUint(policy.maxAmountBaseUnit, `transferPolicies[${index}].maxAmountBaseUnit`);
+  validateUint(policy.maxValuePerUse, `transferPolicies[${index}].maxValuePerUse`);
 }
 
 export function validateSessionPolicyConfig(sessionConfig: SessionPolicyConfig): void {
@@ -105,7 +105,7 @@ export function validateSessionPolicyPresetTemplate(template: SessionPolicyPrese
 
   if (typeof template.id !== "string" || !PRESET_ID_PATTERN.test(template.id)) {
     throw new Error(
-      "template.id must be one of: read_only, transfer, swap, contract_write, read_and_sign, limited_spend, custom.",
+      "template.id must be one of: transfer, custom.",
     );
   }
   if (typeof template.label !== "string" || template.label.trim() === "") {
@@ -178,14 +178,14 @@ function parseSessionPolicyConfig(value: unknown): SessionPolicyConfig {
   });
 
   const transferPolicies: SessionTransferPolicy[] = transferPoliciesRaw.map((entry, index) => {
-    if (!isRecord(entry) || typeof entry.tokenAddress !== "string" || typeof entry.maxAmountBaseUnit !== "string") {
+    if (!isRecord(entry) || typeof entry.target !== "string" || typeof entry.maxValuePerUse !== "string") {
       throw new Error(`Invalid custom policy transferPolicies[${index}].`);
     }
-    validateAllowedKeys(entry, ["tokenAddress", "maxAmountBaseUnit"], `Invalid custom policy transferPolicies[${index}]`);
+    validateAllowedKeys(entry, ["target", "maxValuePerUse"], `Invalid custom policy transferPolicies[${index}]`);
 
     return {
-      tokenAddress: entry.tokenAddress.trim(),
-      maxAmountBaseUnit: entry.maxAmountBaseUnit.trim(),
+      target: entry.target.trim(),
+      maxValuePerUse: entry.maxValuePerUse.trim(),
     };
   });
 

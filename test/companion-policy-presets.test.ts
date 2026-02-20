@@ -8,68 +8,38 @@ import {
 import { BUILT_IN_POLICY_PRESETS, CUSTOM_PRESET, DEFAULT_CUSTOM_TEMPLATE } from "../companion/src/policies/templates.js";
 
 describe("companion policy presets", () => {
-  it("lists safe presets plus custom mode", () => {
+  it("lists built-in presets plus custom mode", () => {
     expect(listPolicyPresets()).toEqual([
-      {
-        id: "read_only",
-        label: "Read Only",
-        description: "Short-lived session for read/sign flows with zero transfer allowance.",
-        customMode: false,
-      },
       {
         id: "transfer",
         label: "Transfer",
-        description: "Session preset for bounded native transfers.",
-        customMode: false,
-      },
-      {
-        id: "swap",
-        label: "Swap",
-        description: "Session preset for swap workflows with explicit call + value limits.",
-        customMode: false,
-      },
-      {
-        id: "contract_write",
-        label: "Contract Write",
-        description: "Session preset for contract writes with strict expiry and explicit policy customization.",
-        customMode: false,
-      },
-      {
-        id: "read_and_sign",
-        label: "Read + Sign",
-        description: "Short-lived session that allows signing but no value transfer.",
-        customMode: false,
-      },
-      {
-        id: "limited_spend",
-        label: "Limited Spend",
-        description: "Short-lived session with a strict native token spend cap.",
+        description: "Native ETH transfers with a per-transaction cap. Specify allowed recipients.",
         customMode: false,
       },
       {
         id: "custom",
         label: "Custom",
-        description: "Define a custom policy template with explicit limits.",
+        description: "Define exact call targets, transfer recipients, and limits.",
         customMode: true,
       },
     ]);
   });
 
-  it("builds preview payload for read_and_sign preset", () => {
+  it("builds preview payload for transfer preset", () => {
     const preview = buildPolicyPreview({
-      presetId: "read_and_sign",
+      presetId: "transfer",
       nowUnixSeconds: 1_700_000_000,
     });
 
     expect(preview).toEqual({
-      presetId: "read_and_sign",
-      label: "Read + Sign",
-      description: "Short-lived session that allows signing but no value transfer.",
+      presetId: "transfer",
+      label: "Transfer",
+      description: "Native ETH transfers with a per-transaction cap. Specify allowed recipients.",
       policyPayload: {
-        expiresAt: 1_700_001_800,
+        expiresAt: 1_700_003_600,
         sessionConfig: {
-          feeLimit: "1000000000000000",
-          maxValuePerUse: "0",
+          feeLimit: "2000000000000000",
+          maxValuePerUse: "10000000000000000",
           callPolicies: [],
           transferPolicies: [],
         },
@@ -77,89 +47,56 @@ describe("companion policy presets", () => {
     });
   });
 
-  it("builds preview payload for limited_spend preset", () => {
-    const preview = buildPolicyPreview({
-      presetId: "limited_spend",
-      nowUnixSeconds: 1_700_000_000,
-    });
-
-    expect(preview.policyPayload).toEqual({
-      expiresAt: 1_700_003_600,
-      sessionConfig: {
-        feeLimit: "2000000000000000",
-        maxValuePerUse: "10000000000000000",
-        callPolicies: [],
-        transferPolicies: [
-          {
-            tokenAddress: "0x0000000000000000000000000000000000000000",
-            maxAmountBaseUnit: "10000000000000000",
-          },
-        ],
-      },
-    });
-  });
-
   it("validates built-in presets before generating preview payloads", () => {
-    const originalFeeLimit = BUILT_IN_POLICY_PRESETS.limited_spend.sessionConfig.feeLimit;
-
-    BUILT_IN_POLICY_PRESETS.limited_spend.sessionConfig.feeLimit = "not-a-base10-integer";
+    const originalFeeLimit = BUILT_IN_POLICY_PRESETS.transfer.sessionConfig.feeLimit;
+    BUILT_IN_POLICY_PRESETS.transfer.sessionConfig.feeLimit = "not-a-base10-integer";
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "limited_spend",
-        }),
-      ).toThrow('Invalid policy preset template "limited_spend"');
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset template "transfer"');
     } finally {
-      BUILT_IN_POLICY_PRESETS.limited_spend.sessionConfig.feeLimit = originalFeeLimit;
+      BUILT_IN_POLICY_PRESETS.transfer.sessionConfig.feeLimit = originalFeeLimit;
     }
   });
 
   it("fails closed when built-in preset metadata is corrupted", () => {
-    const originalCustomMode = BUILT_IN_POLICY_PRESETS.read_and_sign.customMode;
-
-    BUILT_IN_POLICY_PRESETS.read_and_sign.customMode = true;
+    const originalCustomMode = BUILT_IN_POLICY_PRESETS.transfer.customMode;
+    BUILT_IN_POLICY_PRESETS.transfer.customMode = true;
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "read_and_sign",
-        }),
-      ).toThrow('Invalid policy preset template "read_and_sign"');
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset template "transfer"');
     } finally {
-      BUILT_IN_POLICY_PRESETS.read_and_sign.customMode = originalCustomMode;
+      BUILT_IN_POLICY_PRESETS.transfer.customMode = originalCustomMode;
     }
   });
 
   it("fails closed when built-in preset description is corrupted during preview", () => {
-    const originalDescription = BUILT_IN_POLICY_PRESETS.read_and_sign.description;
-
-    BUILT_IN_POLICY_PRESETS.read_and_sign.description = "";
+    const originalDescription = BUILT_IN_POLICY_PRESETS.transfer.description;
+    BUILT_IN_POLICY_PRESETS.transfer.description = "";
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "read_and_sign",
-        }),
-      ).toThrow('Invalid policy preset template "read_and_sign"');
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset template "transfer"');
     } finally {
-      BUILT_IN_POLICY_PRESETS.read_and_sign.description = originalDescription;
+      BUILT_IN_POLICY_PRESETS.transfer.description = originalDescription;
     }
   });
 
   it("fails closed when built-in preset template contains unknown top-level keys", () => {
-    const mutablePreset = BUILT_IN_POLICY_PRESETS.read_and_sign as unknown as Record<string, unknown>;
+    const mutablePreset = BUILT_IN_POLICY_PRESETS.transfer as unknown as Record<string, unknown>;
     const hadUnexpected = Object.prototype.hasOwnProperty.call(mutablePreset, "unexpected");
     const originalUnexpected = mutablePreset.unexpected;
     mutablePreset.unexpected = true;
 
     try {
-      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "read_and_sign": template. Unexpected key: unexpected.');
+      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "transfer": template. Unexpected key: unexpected.');
       expect(() =>
-        buildPolicyPreview({
-          presetId: "read_and_sign",
-        }),
-      ).toThrow('Invalid policy preset template "read_and_sign": template. Unexpected key: unexpected.');
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset template "transfer": template. Unexpected key: unexpected.');
     } finally {
       if (hadUnexpected) {
         mutablePreset.unexpected = originalUnexpected;
@@ -170,32 +107,29 @@ describe("companion policy presets", () => {
   });
 
   it("fails closed when built-in preset customMode is corrupted during listing", () => {
-    const originalCustomMode = BUILT_IN_POLICY_PRESETS.read_and_sign.customMode;
-
-    BUILT_IN_POLICY_PRESETS.read_and_sign.customMode = true;
+    const originalCustomMode = BUILT_IN_POLICY_PRESETS.transfer.customMode;
+    BUILT_IN_POLICY_PRESETS.transfer.customMode = true;
 
     try {
-      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "read_and_sign"');
+      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "transfer"');
     } finally {
-      BUILT_IN_POLICY_PRESETS.read_and_sign.customMode = originalCustomMode;
+      BUILT_IN_POLICY_PRESETS.transfer.customMode = originalCustomMode;
     }
   });
 
   it("fails closed when listing presets if built-in preset metadata is corrupted", () => {
-    const originalLabel = BUILT_IN_POLICY_PRESETS.limited_spend.label;
-
-    BUILT_IN_POLICY_PRESETS.limited_spend.label = "";
+    const originalLabel = BUILT_IN_POLICY_PRESETS.transfer.label;
+    BUILT_IN_POLICY_PRESETS.transfer.label = "";
 
     try {
-      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "limited_spend"');
+      expect(() => listPolicyPresets()).toThrow('Invalid policy preset template "transfer"');
     } finally {
-      BUILT_IN_POLICY_PRESETS.limited_spend.label = originalLabel;
+      BUILT_IN_POLICY_PRESETS.transfer.label = originalLabel;
     }
   });
 
   it("fails closed when custom preset metadata is corrupted during listing", () => {
     const originalLabel = CUSTOM_PRESET.label;
-
     CUSTOM_PRESET.label = "";
 
     try {
@@ -208,13 +142,11 @@ describe("companion policy presets", () => {
   it("fails closed when custom preset id metadata is corrupted during preview", () => {
     const mutableCustomPreset = CUSTOM_PRESET as unknown as { id: string };
     const originalId = mutableCustomPreset.id;
-    mutableCustomPreset.id = "read_and_sign";
+    mutableCustomPreset.id = "transfer";
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "custom",
-        }),
+        buildPolicyPreview({ presetId: "custom" }),
       ).toThrow('Invalid custom preset metadata: id must be "custom".');
     } finally {
       mutableCustomPreset.id = originalId;
@@ -228,9 +160,7 @@ describe("companion policy presets", () => {
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "custom",
-        }),
+        buildPolicyPreview({ presetId: "custom" }),
       ).toThrow("Invalid custom preset metadata: customMode must be true.");
     } finally {
       mutableCustomPreset.customMode = originalCustomMode;
@@ -260,9 +190,7 @@ describe("companion policy presets", () => {
     try {
       expect(() => listPolicyPresets()).toThrow("Invalid custom preset metadata: unexpected key \"unexpected\".");
       expect(() =>
-        buildPolicyPreview({
-          presetId: "custom",
-        }),
+        buildPolicyPreview({ presetId: "custom" }),
       ).toThrow("Invalid custom preset metadata: unexpected key \"unexpected\".");
     } finally {
       if (hadUnexpected) {
@@ -273,78 +201,49 @@ describe("companion policy presets", () => {
     }
   });
 
-  it("fails closed when a built-in preset id mismatches its registry key during preview", () => {
-    const originalId = BUILT_IN_POLICY_PRESETS.read_and_sign.id;
-
-    BUILT_IN_POLICY_PRESETS.read_and_sign.id = "limited_spend";
-
-    try {
-      expect(() =>
-        buildPolicyPreview({
-          presetId: "read_and_sign",
-        }),
-      ).toThrow('Invalid policy preset registry: key "read_and_sign" does not match preset id "limited_spend".');
-    } finally {
-      BUILT_IN_POLICY_PRESETS.read_and_sign.id = originalId;
-    }
-  });
-
-  it("fails closed when a built-in preset id mismatches its registry key during listing", () => {
-    const originalId = BUILT_IN_POLICY_PRESETS.read_and_sign.id;
-
-    BUILT_IN_POLICY_PRESETS.read_and_sign.id = "limited_spend";
-
-    try {
-      expect(() => listPolicyPresets()).toThrow(
-        'Invalid policy preset registry: key "read_and_sign" does not match preset id "limited_spend".',
-      );
-    } finally {
-      BUILT_IN_POLICY_PRESETS.read_and_sign.id = originalId;
-    }
-  });
-
-  it("fails closed when a built-in preset registry entry is missing during preview", () => {
-    const originalPreset = BUILT_IN_POLICY_PRESETS.read_and_sign;
-    (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).read_and_sign = undefined;
+  it("fails closed when a built-in preset id mismatches its registry key", () => {
+    const originalId = BUILT_IN_POLICY_PRESETS.transfer.id;
+    BUILT_IN_POLICY_PRESETS.transfer.id = "custom";
 
     try {
       expect(() =>
-        buildPolicyPreview({
-          presetId: "read_and_sign",
-        }),
-      ).toThrow('Invalid policy preset registry: missing preset template for key "read_and_sign".');
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset registry: key "transfer" does not match preset id "custom".');
     } finally {
-      (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).read_and_sign = originalPreset;
+      BUILT_IN_POLICY_PRESETS.transfer.id = originalId;
     }
   });
 
-  it("fails closed when a built-in preset registry entry is missing during listing", () => {
-    const originalPreset = BUILT_IN_POLICY_PRESETS.read_and_sign;
-    (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).read_and_sign = undefined;
+  it("fails closed when a built-in preset registry entry is missing", () => {
+    const originalPreset = BUILT_IN_POLICY_PRESETS.transfer;
+    (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).transfer = undefined;
 
     try {
+      expect(() =>
+        buildPolicyPreview({ presetId: "transfer" }),
+      ).toThrow('Invalid policy preset registry: missing preset template for key "transfer".');
       expect(() => listPolicyPresets()).toThrow(
-        'Invalid policy preset registry: missing preset template for key "read_and_sign".',
+        'Invalid policy preset registry: missing preset template for key "transfer".',
       );
     } finally {
-      (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).read_and_sign = originalPreset;
+      (BUILT_IN_POLICY_PRESETS as Record<string, SessionPolicyPresetTemplate | undefined>).transfer = originalPreset;
     }
   });
 
   it("returns isolated preview payloads for repeated preset requests", () => {
     const first = buildPolicyPreview({
-      presetId: "limited_spend",
+      presetId: "transfer",
       nowUnixSeconds: 1_700_000_000,
     });
 
-    first.policyPayload.sessionConfig.transferPolicies[0].maxAmountBaseUnit = "1";
+    first.policyPayload.sessionConfig.feeLimit = "1";
 
     const second = buildPolicyPreview({
-      presetId: "limited_spend",
+      presetId: "transfer",
       nowUnixSeconds: 1_700_000_000,
     });
 
-    expect(second.policyPayload.sessionConfig.transferPolicies[0].maxAmountBaseUnit).toBe("10000000000000000");
+    expect(second.policyPayload.sessionConfig.feeLimit).toBe("2000000000000000");
   });
 
   it("supports validated custom mode previews", () => {
@@ -358,7 +257,7 @@ describe("companion policy presets", () => {
         feeLimit: "1000000000000000",
         maxValuePerUse: "42",
         callPolicies: [{ target: "0xabc0000000000000000000000000000000000000", selector: "0xa9059cbb" }],
-        transferPolicies: [{ tokenAddress: "0x0000000000000000000000000000000000000000", maxAmountBaseUnit: "42" }],
+        transferPolicies: [{ target: "0xdef0000000000000000000000000000000000000", maxValuePerUse: "42" }],
       },
     };
 
@@ -372,9 +271,9 @@ describe("companion policy presets", () => {
     expect(preview.policyPayload.sessionConfig.maxValuePerUse).toBe("42");
   });
 
-  it("ignores custom template input when a built-in safe preset is selected", () => {
+  it("ignores custom template input when a built-in preset is selected", () => {
     const preview = buildPolicyPreview({
-      presetId: "read_and_sign",
+      presetId: "transfer",
       customTemplate: {
         id: "custom",
         label: "Custom",
@@ -385,26 +284,14 @@ describe("companion policy presets", () => {
           feeLimit: "1000000000000000",
           maxValuePerUse: "42",
           callPolicies: [{ target: "0xabc0000000000000000000000000000000000000", selector: "0xa9059cbb" }],
-          transferPolicies: [{ tokenAddress: "0x0000000000000000000000000000000000000000", maxAmountBaseUnit: "42" }],
+          transferPolicies: [{ target: "0xdef0000000000000000000000000000000000000", maxValuePerUse: "42" }],
         },
       },
       nowUnixSeconds: 1_700_000_000,
     });
 
-    expect(preview).toEqual({
-      presetId: "read_and_sign",
-      label: "Read + Sign",
-      description: "Short-lived session that allows signing but no value transfer.",
-      policyPayload: {
-        expiresAt: 1_700_001_800,
-        sessionConfig: {
-          feeLimit: "1000000000000000",
-          maxValuePerUse: "0",
-          callPolicies: [],
-          transferPolicies: [],
-        },
-      },
-    });
+    expect(preview.presetId).toBe("transfer");
+    expect(preview.policyPayload.sessionConfig.maxValuePerUse).toBe("10000000000000000");
   });
 
   it("rejects invalid custom templates", () => {
@@ -423,10 +310,7 @@ describe("companion policy presets", () => {
     };
 
     expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: invalidTemplate,
-      }),
+      buildPolicyPreview({ presetId: "custom", customTemplate: invalidTemplate }),
     ).toThrow("Invalid custom policy");
   });
 
@@ -451,191 +335,15 @@ describe("companion policy presets", () => {
     ).toThrow("Invalid custom policy: callPolicies must be an array.");
   });
 
-  it("rejects non-object custom templates with deterministic validation errors", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: [] as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. Expected an object.");
-
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: 42 as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. Expected an object.");
-  });
-
-  it("rejects malformed custom policy entries with deterministic validation errors", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "custom",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [null],
-            transferPolicies: [],
-          },
-        } as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: callPolicies[0] must be an object.");
-  });
-
-  it("rejects custom templates with non-object sessionConfig using deterministic validation errors", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "custom",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: null,
-        } as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: sessionConfig must be an object.");
-  });
-
-  it("rejects custom templates with array sessionConfig using deterministic validation errors", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "custom",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: [],
-        } as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: sessionConfig must be an object.");
-  });
-
-  it("rejects custom templates with unknown top-level keys", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "custom",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [],
-            transferPolicies: [],
-          },
-          unexpected: true,
-        } as unknown as SessionPolicyPresetTemplate,
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. Unexpected key: unexpected.");
-  });
-
-  it("rejects custom templates with mismatched metadata fields", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "read_and_sign",
-          label: "Custom",
-          description: "Define a custom policy template with explicit limits.",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [],
-            transferPolicies: [],
-          },
-        },
-      }),
-    ).toThrow('Invalid custom policy: Invalid custom policy template input. id must be "custom".');
-
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "Define a custom policy template with explicit limits.",
-          customMode: false,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [],
-            transferPolicies: [],
-          },
-        },
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. customMode must be true.");
-  });
-
-  it("rejects custom templates with empty label or description metadata", () => {
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "",
-          description: "Define a custom policy template with explicit limits.",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [],
-            transferPolicies: [],
-          },
-        },
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. label must be a non-empty string.");
-
-    expect(() =>
-      buildPolicyPreview({
-        presetId: "custom",
-        customTemplate: {
-          id: "custom",
-          label: "Custom",
-          description: "",
-          customMode: true,
-          expiresInSeconds: 900,
-          sessionConfig: {
-            feeLimit: "100",
-            maxValuePerUse: "1",
-            callPolicies: [],
-            transferPolicies: [],
-          },
-        },
-      }),
-    ).toThrow("Invalid custom policy: Invalid custom policy template input. description must be a non-empty string.");
-  });
-
   it("rejects unknown preset ids", () => {
     expect(() =>
-      buildPolicyPreview({
-        presetId: "unsafe_unbounded",
-      }),
+      buildPolicyPreview({ presetId: "unsafe_unbounded" }),
     ).toThrow("Unknown policy preset");
   });
 
   it("rejects preview generation when nowUnixSeconds is invalid", () => {
     expect(() =>
-      buildPolicyPreview({
-        presetId: "read_and_sign",
-        nowUnixSeconds: Number.NaN,
-      }),
+      buildPolicyPreview({ presetId: "transfer", nowUnixSeconds: Number.NaN }),
     ).toThrow("Invalid policy preview time.");
   });
 
@@ -646,10 +354,10 @@ describe("companion policy presets", () => {
     });
 
     expect(preview.policyPayload).toEqual({
-      expiresAt: 1_700_000_900,
+      expiresAt: 1_700_003_600,
       sessionConfig: {
-        feeLimit: "1000000000000000",
-        maxValuePerUse: "1000000000000000",
+        feeLimit: "2000000000000000",
+        maxValuePerUse: "10000000000000000",
         callPolicies: [],
         transferPolicies: [],
       },
@@ -686,7 +394,7 @@ describe("companion policy presets", () => {
           feeLimit: " 1000 ",
           maxValuePerUse: " 42 ",
           callPolicies: [{ target: " 0xabc0000000000000000000000000000000000000 ", selector: " 0xa9059cbb " }],
-          transferPolicies: [{ tokenAddress: " 0x0000000000000000000000000000000000000000 ", maxAmountBaseUnit: " 7 " }],
+          transferPolicies: [{ target: " 0xdef0000000000000000000000000000000000000 ", maxValuePerUse: " 7 " }],
         },
       }),
     );
@@ -694,14 +402,14 @@ describe("companion policy presets", () => {
     expect(parsed).toEqual({
       id: "custom",
       label: "Custom",
-      description: "Define a custom policy template with explicit limits.",
+      description: "Define exact call targets, transfer recipients, and limits.",
       customMode: true,
       expiresInSeconds: 900,
       sessionConfig: {
         feeLimit: "1000",
         maxValuePerUse: "42",
         callPolicies: [{ target: "0xabc0000000000000000000000000000000000000", selector: "0xa9059cbb" }],
-        transferPolicies: [{ tokenAddress: "0x0000000000000000000000000000000000000000", maxAmountBaseUnit: "7" }],
+        transferPolicies: [{ target: "0xdef0000000000000000000000000000000000000", maxValuePerUse: "7" }],
       },
     });
   });
@@ -760,7 +468,7 @@ describe("companion policy presets", () => {
     ).toThrow("Invalid custom policy sessionConfig. Unexpected key: unexpected.");
   });
 
-  it("rejects custom call policies with unknown keys to prevent silent broad permissions", () => {
+  it("rejects custom call policies with unknown keys", () => {
     expect(() =>
       parseCustomPolicyTemplate(
         JSON.stringify({
@@ -792,8 +500,8 @@ describe("companion policy presets", () => {
             callPolicies: [],
             transferPolicies: [
               {
-                tokenAddress: "0x0000000000000000000000000000000000000000",
-                maxAmountBaseUnit: "7",
+                target: "0xdef0000000000000000000000000000000000000",
+                maxValuePerUse: "7",
                 note: "extra",
               },
             ],

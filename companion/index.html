@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AGW Companion</title>
+    <link rel="stylesheet" href="/public/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">Local Companion</p>
+        <h1>AGW Companion</h1>
+        <p class="subhead">Connect your wallet and create a session key for <code>agw-mcp</code>.</p>
+      </header>
+
+      <!-- Step 1: Wallet Connection -->
+      <section id="wallet-section" class="panel">
+        <p class="eyebrow">Step 1 — Wallet</p>
+        <p id="wallet-status" class="hint">Not connected</p>
+        <button id="connect-wallet" type="button">Connect Wallet</button>
+      </section>
+
+      <!-- Step 2: Policy Selection -->
+      <section id="policy-section" class="panel" hidden>
+        <p class="eyebrow">Step 2 — Session Policy</p>
+
+        <label for="policy-preset">Policy Preset</label>
+        <select id="policy-preset" name="preset" required>
+          <option value="transfer">Transfer (native ETH)</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <div id="custom-policy-field" class="custom-field" hidden>
+          <label for="custom-policy">Custom Policy (JSON)</label>
+          <textarea
+            id="custom-policy"
+            name="customPolicy"
+            rows="10"
+            spellcheck="false"
+            placeholder='{"expiresInSeconds":900,"sessionConfig":{"feeLimit":"1000000000000000","maxValuePerUse":"1000000000000000","callPolicies":[],"transferPolicies":[]}}'
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Policy Preview -->
+      <section id="preview-section" class="panel secondary" hidden>
+        <p class="eyebrow">Policy Preview</p>
+        <pre id="policy-preview"></pre>
+        <p id="policy-risk-level" class="hint"></p>
+        <ul id="policy-risk-reasons" class="risk-reasons"></ul>
+        <label id="confirm-high-risk-wrapper" class="confirm-risk" hidden>
+          <input id="confirm-high-risk" type="checkbox" />
+          I confirm this high-risk policy and want to continue.
+        </label>
+        <p id="policy-preview-error" class="hint error" hidden></p>
+      </section>
+
+      <!-- Step 3: Create Session -->
+      <section id="session-section" class="panel" hidden>
+        <p class="eyebrow">Step 3 — Create Session</p>
+        <button id="create-session" type="button">Create Session Key</button>
+        <p id="session-status" class="hint"></p>
+      </section>
+
+      <!-- Result -->
+      <section id="result-section" class="panel" hidden>
+        <p class="eyebrow">Done</p>
+        <p id="result-message" class="hint"></p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/frontend/main.ts"></script>
+  </body>
+</html>

@@ -64,7 +64,7 @@ describe("companion security controls", () => {
     });
     log.append({
       timestamp: "2026-02-18T00:01:00Z",
-      presetId: "read_only",
+      presetId: "transfer",
       chainId: 11124,
       riskLevel: "low",
       reasons: [],
@@ -72,7 +72,7 @@ describe("companion security controls", () => {
     });
     log.append({
       timestamp: "2026-02-18T00:02:00Z",
-      presetId: "swap",
+      presetId: "custom",
       chainId: 11124,
       riskLevel: "high",
       reasons: ["risk-b"],
@@ -82,7 +82,7 @@ describe("companion security controls", () => {
     expect(log.list()).toEqual([
       {
         timestamp: "2026-02-18T00:01:00Z",
-        presetId: "read_only",
+        presetId: "transfer",
         chainId: 11124,
         riskLevel: "low",
         reasons: [],
@@ -90,7 +90,7 @@ describe("companion security controls", () => {
       },
       {
         timestamp: "2026-02-18T00:02:00Z",
-        presetId: "swap",
+        presetId: "custom",
         chainId: 11124,
         riskLevel: "high",
         reasons: ["risk-b"],

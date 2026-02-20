@@ -35,12 +35,7 @@ export interface BuildPolicyPreviewOptions {
 }
 
 const SAFE_PRESET_IDS: readonly BuiltInSessionPolicyPresetId[] = [
-  "read_only",
   "transfer",
-  "swap",
-  "contract_write",
-  "read_and_sign",
-  "limited_spend",
 ];
 const CUSTOM_PRESET_METADATA_KEYS = ["id", "label", "description", "customMode"] as const;
 const CUSTOM_TEMPLATE_ALLOWED_KEYS = [
@@ -116,8 +111,8 @@ function cloneSessionConfig(sessionConfig: SessionPolicyConfig): SessionPolicyCo
       selector: policy.selector,
     })),
     transferPolicies: sessionConfig.transferPolicies.map(policy => ({
-      tokenAddress: policy.tokenAddress,
-      maxAmountBaseUnit: policy.maxAmountBaseUnit,
+      target: policy.target,
+      maxValuePerUse: policy.maxValuePerUse,
     })),
   };
 }
