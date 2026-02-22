@@ -1,7 +1,5 @@
-import SessionWizard from '@/components/SessionWizard';
-import AbstractProvider from '@/providers/AbstractProvider';
+import SessionFlowClient from '@/components/SessionFlowClient';
 import { parseOnboardingParams } from '@/lib/onboarding-params';
-import { resolveChain } from '@/lib/chains';
 import styles from '@/components/SessionWizard/styles.module.scss';
 
 function toSearchParams(
@@ -38,15 +36,11 @@ export default function NewSessionPage({
     );
   }
 
-  const chain = resolveChain(result.params.chainId);
-
   return (
-    <AbstractProvider chain={chain}>
-      <SessionWizard
-        callbackUrl={result.params.callbackUrl}
-        chain={chain}
-        signerAddress={result.params.signerAddress}
-      />
-    </AbstractProvider>
+    <SessionFlowClient
+      callbackUrl={result.params.callbackUrl}
+      chainId={result.params.chainId}
+      signerAddress={result.params.signerAddress}
+    />
   );
 }
