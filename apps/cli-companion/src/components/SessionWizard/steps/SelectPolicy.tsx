@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Button from '@/@abstract-ui/components/Button';
 import {
   Card,
@@ -20,28 +21,44 @@ export default function SelectPolicy() {
     customPolicyJson,
     selectPreset,
     updateCustomPolicyJson,
-    proceedToReview,
+    proceedToCreating,
     setValidationError,
   } = useSessionWizardState();
   const policyState = usePolicyPreview(selectedPreset, customPolicyJson);
+  const displayAddress = agwAddress
+    ? `${agwAddress.slice(0, 6)}...${agwAddress.slice(-4)}`
+    : 'Wallet';
 
-  const handleReview = () => {
+  const handleCreate = () => {
     if (!policyState.preview || !policyState.risk) {
       setValidationError(policyState.error ?? 'Unable to build policy preview.');
       return;
     }
 
-    proceedToReview(policyState.preview, policyState.risk);
+    proceedToCreating(policyState.preview, policyState.risk);
   };
 
   return (
     <div className={styles.wrapper}>
-      <Card>
-        <CardHeader>
-          <h2 className={styles.title}>Configure Session Policy</h2>
-          <p className={styles.description}>Connected account: {agwAddress}</p>
+      <Card className={styles.mainCard}>
+        <CardHeader className={styles.mainHeader}>
+          <div className={styles.identity}>
+            <div className={styles.logoWrap}>
+              <Image
+                src="/assets/images/Abstract_AppIcon_LightMode.svg"
+                alt="Abstract AGW icon"
+                width={68}
+                height={68}
+                priority
+              />
+            </div>
+            <h2 className={styles.walletAddress}>{displayAddress}</h2>
+            <p className={styles.walletLabel}>AGW Wallet</p>
+          </div>
         </CardHeader>
-        <CardContent className={styles.content}>
+        <CardContent className={styles.mainBody}>
+          <p className={styles.sectionTitle}>Configure session policy</p>
+
           <div className={styles.row}>
             <label htmlFor="preset">Preset</label>
             <select
@@ -71,13 +88,13 @@ export default function SelectPolicy() {
           ) : null}
 
           {policyState.error ? <p className={styles.error}>{policyState.error}</p> : null}
-          <CardDescription>
+          <CardDescription className={styles.policyDescription}>
             {POLICY_PRESET_OPTIONS.find(option => option.id === selectedPreset)?.description}
           </CardDescription>
         </CardContent>
-        <CardFooter className={styles.footer}>
-          <Button className={styles.footerButton} height="40" variant="primary" onClick={handleReview}>
-            Review Policy
+        <CardFooter className={styles.mainFooter}>
+          <Button className={styles.footerButton} height="40" variant="primary" onClick={handleCreate}>
+            Create Session
           </Button>
         </CardFooter>
       </Card>

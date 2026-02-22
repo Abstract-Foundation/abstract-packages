@@ -11,7 +11,6 @@ import {
 export type SessionWizardStep =
   | 'not_logged_in'
   | 'select_policy'
-  | 'review_policy'
   | 'creating'
   | 'success'
   | 'error';
@@ -30,9 +29,8 @@ interface SessionWizardState {
   selectPreset: (preset: SessionPolicyPresetId) => void;
   updateCustomPolicyJson: (value: string) => void;
   setValidationError: (error: string | null) => void;
-  proceedToReview: (preview: PolicyPreview, risk: SecurityAssessment) => void;
+  proceedToCreating: (preview: PolicyPreview, risk: SecurityAssessment) => void;
   backToPolicySelection: () => void;
-  startCreating: () => void;
   markCreationSuccess: (input: { transactionHash: string | null; redirectUrl: string }) => void;
   markCreationError: (error: string) => void;
 }
@@ -51,7 +49,7 @@ const DEFAULT_CUSTOM_POLICY = JSON.stringify(
   2,
 );
 
-const useSessionWizardStore = create<SessionWizardState>((set, get) => ({
+const useSessionWizardStore = create<SessionWizardState>(set => ({
   currentStep: 'not_logged_in',
   agwAddress: null,
   selectedPreset: 'transfer',
@@ -90,12 +88,14 @@ const useSessionWizardStore = create<SessionWizardState>((set, get) => ({
       error: null,
     }),
   setValidationError: error => set({ error }),
-  proceedToReview: (policyPreview, riskAssessment) =>
+  proceedToCreating: (policyPreview, riskAssessment) =>
     set({
-      currentStep: 'review_policy',
+      currentStep: 'creating',
       policyPreview,
       riskAssessment,
       error: null,
+      transactionHash: null,
+      redirectUrl: null,
     }),
   backToPolicySelection: () =>
     set({
@@ -106,19 +106,6 @@ const useSessionWizardStore = create<SessionWizardState>((set, get) => ({
       transactionHash: null,
       redirectUrl: null,
     }),
-  startCreating: () => {
-    const state = get();
-    if (!state.policyPreview || !state.riskAssessment) {
-      throw new Error('Policy preview is missing. Re-run policy review before creating a session.');
-    }
-
-    set({
-      currentStep: 'creating',
-      error: null,
-      transactionHash: null,
-      redirectUrl: null,
-    });
-  },
   markCreationSuccess: ({ transactionHash, redirectUrl }) =>
     set({
       currentStep: 'success',

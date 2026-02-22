@@ -1,5 +1,6 @@
 import SessionFlowClient from '@/components/SessionFlowClient';
 import { parseOnboardingParams } from '@/lib/onboarding-params';
+import pageStyles from '@/app/styles.module.scss';
 import styles from '@/components/SessionWizard/styles.module.scss';
 
 function toSearchParams(
@@ -29,18 +30,22 @@ export default function NewSessionPage({
 
   if (!result.ok || !result.params) {
     return (
-      <div className={styles.wrapper}>
-        <p className={styles.error}>{result.error ?? 'Invalid onboarding parameters.'}</p>
-        <p className={styles.helper}>Use the agw-mcp CLI to start this flow.</p>
+      <div className={pageStyles.container}>
+        <div className={styles.wrapper}>
+          <p className={styles.error}>{result.error ?? 'Invalid onboarding parameters.'}</p>
+          <p className={styles.helper}>Use the agw-mcp CLI to start this flow.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <SessionFlowClient
-      callbackUrl={result.params.callbackUrl}
-      chainId={result.params.chainId}
-      signerAddress={result.params.signerAddress}
-    />
+    <div className={pageStyles.container}>
+      <SessionFlowClient
+        callbackUrl={result.params.callbackUrl}
+        chainId={result.params.chainId}
+        signerAddress={result.params.signerAddress}
+      />
+    </div>
   );
 }

@@ -23,9 +23,8 @@ export function useSessionWizardState() {
   const selectPreset = useSessionWizardStore(state => state.selectPreset);
   const updateCustomPolicyJson = useSessionWizardStore(state => state.updateCustomPolicyJson);
   const setValidationError = useSessionWizardStore(state => state.setValidationError);
-  const proceedToReview = useSessionWizardStore(state => state.proceedToReview);
+  const proceedToCreating = useSessionWizardStore(state => state.proceedToCreating);
   const backToPolicySelection = useSessionWizardStore(state => state.backToPolicySelection);
-  const startCreating = useSessionWizardStore(state => state.startCreating);
   const markCreationSuccess = useSessionWizardStore(state => state.markCreationSuccess);
   const markCreationError = useSessionWizardStore(state => state.markCreationError);
 
@@ -49,9 +48,8 @@ export function useSessionWizardState() {
     selectPreset,
     updateCustomPolicyJson,
     setValidationError,
-    proceedToReview,
+    proceedToCreating,
     backToPolicySelection,
-    startCreating,
     markCreationSuccess,
     markCreationError,
     isConnected,
