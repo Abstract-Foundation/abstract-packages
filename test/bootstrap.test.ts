@@ -184,7 +184,7 @@ describe("bootstrap callback/session bundle flow", () => {
 
     openMock.mockImplementation(async (url: string) => {
       const launchUrl = new URL(url);
-      expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://mcp.abs.xyz/session/new");
+      expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://app-jarrodwatts.vercel.app/session/new");
       const callbackUrlParam = launchUrl.searchParams.get("callback_url");
       expect(callbackUrlParam).toBeTruthy();
       const callbackUrl = new URL(callbackUrlParam!);

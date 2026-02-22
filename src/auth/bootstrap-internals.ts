@@ -236,7 +236,7 @@ function isLoopbackHostname(hostname: string): boolean {
 }
 
 export function resolveAppUrl(options: { appUrl?: string }): string {
-  return options.appUrl ?? process.env.AGW_MCP_APP_URL ?? "https://mcp.abs.xyz";
+  return options.appUrl ?? process.env.AGW_MCP_APP_URL ?? "https://app-jarrodwatts.vercel.app";
 }
 
 export function validateAppUrl(appUrl: string): void {

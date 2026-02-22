@@ -26,7 +26,7 @@ claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
 npx -y @abstract-foundation/agw-mcp init --chain-id 11124
 ```
 
-This opens the hosted onboarding app (`https://mcp.abs.xyz`) where you:
+This opens the hosted onboarding app (`https://app-jarrodwatts.vercel.app`) where you:
 
 1. Choose a policy preset (or provide custom policy JSON)
 2. Connect your Abstract Global Wallet
