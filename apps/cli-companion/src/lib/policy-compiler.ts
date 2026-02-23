@@ -1,4 +1,3 @@
-import { zeroAddress } from 'viem';
 import { APP_REGISTRY, getRegistryAppById, type AppRegistryEntry } from './app-registry';
 import {
   BUILT_IN_POLICY_PRESETS,
@@ -111,13 +110,6 @@ function buildCallPolicies(
 
 function buildTransferPolicies(draft: GuidedSessionPolicyDraft): SessionTransferPolicy[] {
   const transfers: SessionTransferPolicy[] = [];
-
-  if (draft.maxValuePerUse !== '0') {
-    transfers.push({
-      target: zeroAddress,
-      maxValuePerUse: draft.maxValuePerUse,
-    });
-  }
 
   if (draft.presetId === 'payments') {
     for (const transferTarget of draft.transferTargets) {
