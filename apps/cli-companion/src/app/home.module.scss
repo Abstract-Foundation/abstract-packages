@@ -64,12 +64,10 @@
   line-height: 1.55;
   color: #5a6577;
   margin: 0;
-  max-width: 440px;
-  margin-left: auto;
-  margin-right: auto;
 
   @include bp-768 {
     font-size: 16px;
+    white-space: nowrap;
   }
 }
 

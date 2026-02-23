@@ -90,10 +90,9 @@ export default function HomePage() {
           <span className={styles.tagDot} />
           MCP Server
         </div>
-        <h1 className={styles.title}>Abstract Global Wallet for AI Agents</h1>
+        <h1 className={styles.title}>Abstract Global Wallet<br />for AI Agents</h1>
         <p className={styles.subtitle}>
-          Give your AI tools secure, scoped access to your Abstract wallet.
-          Set up in a few minutes — no coding required.
+          Give AI agents secure, scoped access to your Abstract Global Wallet.
         </p>
       </div>
 
@@ -290,26 +289,13 @@ export default function HomePage() {
                 <span className={styles.codeComment}># Send a token</span>{'\n'}
                 <span className={styles.codeString}>&quot;Send 0.01 ETH to 0x1234...&quot;</span>{'\n'}
                 {'\n'}
-                <span className={styles.codeComment}># Check session status</span>{'\n'}
-                <span className={styles.codeString}>&quot;Is my wallet session still active?&quot;</span>
+                <span className={styles.codeComment}># Use an app</span>{'\n'}
+                <span className={styles.codeString}>&quot;Bet $5 USDC on Man United on Myriad&quot;</span>
               </code>
             </div>
           </div>
         </section>
 
-        <div className={styles.footer}>
-          <p className={styles.footerText}>
-            Full documentation and source code on{' '}
-            <a
-              href="https://github.com/Abstract-Foundation/agw-mcp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.footerLink}
-            >
-              GitHub
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );
