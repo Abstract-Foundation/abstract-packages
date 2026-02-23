@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { isSessionPolicyMeta } from "../policy/meta.js";
 import type { AgwSessionData } from "./types.js";
 
 const REDACTED_SIGNER_REF = "[REDACTED]";
@@ -103,6 +104,7 @@ export class SessionStorage {
         typeof parsed.status !== "string" ||
         typeof parsed.sessionConfig !== "object" ||
         !parsed.sessionConfig ||
+        (parsed.policyMeta !== undefined && !isSessionPolicyMeta(parsed.policyMeta)) ||
         (parsed.sessionSignerRef?.kind !== "raw" && parsed.sessionSignerRef?.kind !== "keyfile") ||
         typeof parsed.sessionSignerRef?.value !== "string"
       ) {

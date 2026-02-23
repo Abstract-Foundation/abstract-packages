@@ -2,6 +2,7 @@ import { type Abi, type Address } from "viem";
 import { abstract } from "viem/chains";
 import { createAgwActionAdapter } from "../agw/actions.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
+import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
@@ -42,6 +43,8 @@ export const deployContractTool: ToolHandler = {
     required: ["abi", "bytecode"],
   },
   handler: async (params, context) => {
+    assertToolCapability(context, "deploy_contract");
+
     const abi = assertAbi(params.abi);
     const bytecode = assertBytecode(params.bytecode);
     const execute = parseExecute(params.execute);

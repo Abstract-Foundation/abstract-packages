@@ -1,4 +1,6 @@
 import { isAddress } from "viem";
+import { parseSessionPolicyMeta } from "../policy/meta.js";
+import type { SessionPolicyMeta } from "../session/types.js";
 
 const CALLBACK_PAYLOAD_QUERY_KEY = "session";
 
@@ -9,6 +11,7 @@ export interface SessionBundlePayload {
   sessionConfig: {
     signer: `0x${string}`;
   } & Record<string, unknown>;
+  policyMeta?: SessionPolicyMeta;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -109,5 +112,6 @@ export function parseSessionBundleInput(input: string): SessionBundlePayload {
       ...sessionConfig,
       signer: sessionConfig.signer,
     },
+    policyMeta: parseSessionPolicyMeta(payload.policyMeta),
   };
 }

@@ -53,7 +53,7 @@
 .mainBody {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   padding: 20px 24px 16px;
 }
 
@@ -71,8 +71,10 @@
 .sectionTitle {
   margin: 0;
   text-align: center;
-  font-size: 14px;
-  color: #9da3ac;
+  font-size: 17px;
+  color: #2f3744;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .content {
@@ -150,8 +152,9 @@
 }
 
 .helper {
-  color: #68707d;
+  color: #7b8493;
   margin: 0;
+  font-size: 13px;
 }
 
 .checkbox {
@@ -173,4 +176,351 @@
 .policyDescription {
   margin-top: 2px;
   color: #919aa8;
+}
+
+.stepDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.stepDot,
+.stepDotActive {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.stepDot {
+  background: #cbd3df;
+}
+
+.stepDotActive {
+  background: #19e783;
+  box-shadow: 0 0 0 4px rgba(25, 231, 131, 0.12);
+}
+
+.presetPickerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.intentList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.intentCard,
+.intentCardSelected {
+  border-radius: 12px;
+  border: 1px solid #d6deea;
+  background: #f8fbff;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.intentCardSelected {
+  border-color: #19e783;
+  box-shadow: inset 0 0 0 1px rgba(25, 231, 131, 0.35);
+  background: linear-gradient(180deg, #eefdf5 0%, #e8faef 100%);
+}
+
+.intentCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.intentName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c3646;
+}
+
+.intentDescription {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #55657b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presetPill,
+.presetPillActive {
+  border-radius: 999px;
+  border: 1px solid #d6deea;
+  min-height: 36px;
+  padding: 0 12px;
+  color: #384253;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f8fbff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.presetPillActive {
+  border-color: #19e783;
+  color: #114e34;
+  background: linear-gradient(180deg, #ebfff5 0%, #e7fbf1 100%);
+  box-shadow: inset 0 0 0 1px rgba(25, 231, 131, 0.3);
+}
+
+.presetDetailCard {
+  border-radius: 14px;
+  border: 1px solid #d6deea;
+  background: linear-gradient(180deg, #f9fcff 0%, #f4f8fe 100%);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.presetDetailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.presetDetailTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #263042;
+}
+
+.presetDetailTag {
+  border-radius: 999px;
+  background: rgba(36, 51, 69, 0.08);
+  color: #3e4b5f;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.presetDescription {
+  margin: 0;
+  font-size: 13px;
+  color: #3f4958;
+  line-height: 1.45;
+}
+
+.presetPersona {
+  margin: 0;
+  font-size: 12px;
+  color: #637086;
+}
+
+.capabilityChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.capabilityChip {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #2f5f78;
+  background: rgba(13, 181, 255, 0.1);
+}
+
+.appScopeHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #607087;
+  text-align: center;
+}
+
+.appScopeSubhint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #6f7e94;
+  text-align: center;
+}
+
+.appList {
+  max-height: 420px;
+  overflow: auto;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f3f6fb 0%, #edf2f9 100%);
+  border: 1px solid #d4deeb;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.appCard,
+.appCardSelected {
+  position: relative;
+  border: 0;
+  border-radius: 13px;
+  padding: 0;
+  background: #121722;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.appCard {
+  box-shadow:
+    inset 0 0 0 1px rgba(190, 203, 220, 0.45),
+    0 8px 20px -18px rgba(19, 27, 39, 0.45);
+}
+
+.appCardSelected {
+  box-shadow:
+    inset 0 0 0 1px rgba(25, 231, 131, 0.75),
+    0 0 0 3px rgba(25, 231, 131, 0.2),
+    0 10px 22px -16px rgba(19, 27, 39, 0.58);
+}
+
+.appCard:hover,
+.appCardSelected:hover {
+  transform: translateY(-1px);
+}
+
+.appCardBanner {
+  position: relative;
+  height: 126px;
+}
+
+.appCardBanner :global(img) {
+  object-fit: cover;
+}
+
+.appCardOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 23, 34, 0.3) 0%,
+    rgba(16, 23, 34, 0.16) 40%,
+    rgba(16, 23, 34, 0.82) 100%
+  );
+}
+
+.appCardTopRow {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.appCheck,
+.appCheckActive {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.appCheck {
+  color: transparent;
+  background: rgba(247, 250, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(66, 81, 104, 0.22);
+}
+
+.appCheckActive {
+  color: #ffffff;
+  background: linear-gradient(180deg, #1bdd80 0%, #16bc69 100%);
+  box-shadow: 0 6px 14px -10px rgba(25, 231, 131, 0.9);
+}
+
+.appCardMeta {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.appAvatarWrap {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(10, 14, 20, 0.7);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.appAvatarFallback {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.appText {
+  min-width: 0;
+}
+
+.appName {
+  margin: 0;
+  color: #f8fbff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appCategory {
+  margin: 2px 0 0;
+  color: rgba(236, 243, 255, 0.82);
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 756px) {
+  .appList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .appCardBanner {
+    height: 118px;
+  }
+}
+
+@media screen and (max-width: 440px) {
+  .appCardBanner {
+    height: 106px;
+  }
 }

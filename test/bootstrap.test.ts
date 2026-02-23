@@ -61,6 +61,18 @@ describe("bootstrap callback/session bundle flow", () => {
         callPolicies: [],
         transferPolicies: [],
       },
+      policyMeta: {
+        version: 1,
+        mode: "guided",
+        presetId: "payments",
+        presetLabel: "Payments",
+        enabledTools: ["get_session_status", "revoke_session"],
+        selectedAppIds: [],
+        selectedContractAddresses: [],
+        unverifiedAppIds: [],
+        warnings: [],
+        generatedAt: 1_800_000_000,
+      },
     };
 
     const encoded = encodePayload(payload);
@@ -70,6 +82,7 @@ describe("bootstrap callback/session bundle flow", () => {
     expect(parsed.chainId).toBe(11124);
     expect(parsed.expiresAt).toBe(1_900_000_000);
     expect(parsed.sessionConfig).toEqual(payload.sessionConfig);
+    expect(parsed.policyMeta).toEqual(payload.policyMeta);
   });
 
   it("materializes session bundle by pairing with existing local signer keyfile", () => {
@@ -94,6 +107,18 @@ describe("bootstrap callback/session bundle flow", () => {
             callPolicies: [],
             transferPolicies: [],
           },
+          policyMeta: {
+            version: 1,
+            mode: "guided",
+            presetId: "payments",
+            presetLabel: "Payments",
+            enabledTools: ["get_session_status", "revoke_session"],
+            selectedAppIds: [],
+            selectedContractAddresses: [],
+            unverifiedAppIds: [],
+            warnings: [],
+            generatedAt: now,
+          },
         },
         {
           chainId: 11124,
@@ -104,6 +129,7 @@ describe("bootstrap callback/session bundle flow", () => {
 
       expect(session.sessionSignerRef.kind).toBe("keyfile");
       expect(session.sessionSignerRef.value).toBe(keyfilePath);
+      expect(session.policyMeta?.presetId).toBe("payments");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

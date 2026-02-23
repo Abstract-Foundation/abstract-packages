@@ -18,7 +18,14 @@ export function useSessionWizardState() {
 
   const currentStep = useSessionWizardStore(state => state.currentStep);
   const agwAddress = useSessionWizardStore(state => state.agwAddress);
+  const policyMode = useSessionWizardStore(state => state.policyMode);
   const selectedPreset = useSessionWizardStore(state => state.selectedPreset);
+  const selectedAppIds = useSessionWizardStore(state => state.selectedAppIds);
+  const transferTargets = useSessionWizardStore(state => state.transferTargets);
+  const expiresInSeconds = useSessionWizardStore(state => state.expiresInSeconds);
+  const feeLimit = useSessionWizardStore(state => state.feeLimit);
+  const maxValuePerUse = useSessionWizardStore(state => state.maxValuePerUse);
+  const dangerAcknowledged = useSessionWizardStore(state => state.dangerAcknowledged);
   const customPolicyJson = useSessionWizardStore(state => state.customPolicyJson);
   const policyPreview = useSessionWizardStore(state => state.policyPreview);
   const riskAssessment = useSessionWizardStore(state => state.riskAssessment);
@@ -27,7 +34,14 @@ export function useSessionWizardState() {
   const redirectUrl = useSessionWizardStore(state => state.redirectUrl);
 
   const syncConnection = useSessionWizardStore(state => state.syncConnection);
+  const setPolicyMode = useSessionWizardStore(state => state.setPolicyMode);
   const selectPreset = useSessionWizardStore(state => state.selectPreset);
+  const toggleAppSelection = useSessionWizardStore(state => state.toggleAppSelection);
+  const setTransferTargets = useSessionWizardStore(state => state.setTransferTargets);
+  const setExpiresInSeconds = useSessionWizardStore(state => state.setExpiresInSeconds);
+  const setFeeLimit = useSessionWizardStore(state => state.setFeeLimit);
+  const setMaxValuePerUse = useSessionWizardStore(state => state.setMaxValuePerUse);
+  const setDangerAcknowledged = useSessionWizardStore(state => state.setDangerAcknowledged);
   const updateCustomPolicyJson = useSessionWizardStore(state => state.updateCustomPolicyJson);
   const setValidationError = useSessionWizardStore(state => state.setValidationError);
   const proceedToCreating = useSessionWizardStore(state => state.proceedToCreating);
@@ -45,14 +59,28 @@ export function useSessionWizardState() {
   return {
     currentStep,
     agwAddress,
+    policyMode,
     selectedPreset,
+    selectedAppIds,
+    transferTargets,
+    expiresInSeconds,
+    feeLimit,
+    maxValuePerUse,
+    dangerAcknowledged,
     customPolicyJson,
     policyPreview,
     riskAssessment,
     error,
     transactionHash,
     redirectUrl,
+    setPolicyMode,
     selectPreset,
+    toggleAppSelection,
+    setTransferTargets,
+    setExpiresInSeconds,
+    setFeeLimit,
+    setMaxValuePerUse,
+    setDangerAcknowledged,
     updateCustomPolicyJson,
     setValidationError,
     proceedToCreating,

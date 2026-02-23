@@ -8,6 +8,14 @@ const __dirname = dirname(__filename);
 const context = __dirname;
 
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'abstract-portal-metadata-prod.s3.amazonaws.com',
+      },
+    ],
+  },
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>

@@ -114,4 +114,35 @@ describe("deploy_contract tool", () => {
 
     expect(deployContract).not.toHaveBeenCalled();
   });
+
+  it("rejects deploy when policy metadata does not enable deploy_contract", async () => {
+    const deployContract = jest.fn<Promise<`0x${string}`>, [Record<string, unknown>]>(async () => "0xabc");
+    const now = Math.floor(Date.now() / 1000);
+
+    await expect(
+      deployContractTool.handler(
+        {
+          abi: TEST_ABI,
+          bytecode: "0x60006000",
+          execute: true,
+        },
+        buildContext(deployContract, {
+          policyMeta: {
+            version: 1,
+            mode: "guided",
+            presetId: "trading",
+            presetLabel: "Trading",
+            enabledTools: ["get_session_status", "revoke_session"],
+            selectedAppIds: [],
+            selectedContractAddresses: [],
+            unverifiedAppIds: [],
+            warnings: [],
+            generatedAt: now,
+          },
+        }),
+      ),
+    ).rejects.toThrow('tool "deploy_contract" is not enabled');
+
+    expect(deployContract).not.toHaveBeenCalled();
+  });
 });

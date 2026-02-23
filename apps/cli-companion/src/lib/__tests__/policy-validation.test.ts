@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { getPolicyPreview } from '../policy-validation';
 
 describe('policy validation', () => {
-  it('builds transfer preset preview', () => {
-    const preview = getPolicyPreview({ presetId: 'transfer', nowUnixSeconds: 1_700_000_000 });
+  it('builds payments preset preview', () => {
+    const preview = getPolicyPreview({ presetId: 'payments', nowUnixSeconds: 1_700_000_000 });
 
-    expect(preview.presetId).toBe('transfer');
-    expect(preview.policyPayload.expiresAt).toBe(1_700_003_600);
-    expect(preview.policyPayload.sessionConfig.maxValuePerUse).toBe('10000000000000000');
+    expect(preview.presetId).toBe('payments');
+    expect(preview.policyPayload.expiresAt).toBe(1_700_001_800);
+    expect(preview.policyPayload.sessionConfig.maxValuePerUse).toBe('5000000000000000');
   });
 
   it('parses custom policy json', () => {
@@ -23,6 +23,7 @@ describe('policy validation', () => {
 
     const preview = getPolicyPreview({
       presetId: 'custom',
+      policyMode: 'advanced',
       customPolicyJson,
       nowUnixSeconds: 1_700_000_000,
     });
@@ -33,9 +34,9 @@ describe('policy validation', () => {
   });
 
   it('throws for malformed custom policy', () => {
-    expect(() => getPolicyPreview({ presetId: 'custom', customPolicyJson: '{invalid-json' })).toThrow(
-      'Invalid custom policy',
-    );
+    expect(() =>
+      getPolicyPreview({ presetId: 'custom', policyMode: 'advanced', customPolicyJson: '{invalid-json' }),
+    ).toThrow('Invalid custom policy');
   });
 
   it('rejects custom policy with invalid call policy target', () => {
@@ -49,7 +50,7 @@ describe('policy validation', () => {
       },
     });
 
-    expect(() => getPolicyPreview({ presetId: 'custom', customPolicyJson })).toThrow('Invalid custom policy');
+    expect(() => getPolicyPreview({ presetId: 'custom', policyMode: 'advanced', customPolicyJson })).toThrow('Invalid custom policy');
   });
 
   it('rejects custom policy with invalid selector format', () => {
@@ -63,6 +64,24 @@ describe('policy validation', () => {
       },
     });
 
-    expect(() => getPolicyPreview({ presetId: 'custom', customPolicyJson })).toThrow('Invalid custom policy');
+    expect(() => getPolicyPreview({ presetId: 'custom', policyMode: 'advanced', customPolicyJson })).toThrow('Invalid custom policy');
+  });
+
+  it('builds guided trading preset with app selection', () => {
+    const preview = getPolicyPreview({
+      presetId: 'trading',
+      nowUnixSeconds: 1_700_000_000,
+      guidedDraft: {
+        selectedAppIds: ['12'],
+        transferTargets: [],
+        expiresInSeconds: 3600,
+        feeLimit: '1000',
+        maxValuePerUse: '7',
+      },
+    });
+
+    expect(preview.presetId).toBe('trading');
+    expect(preview.policyPayload.sessionConfig.callPolicies.length).toBeGreaterThan(0);
+    expect(preview.policyPayload.policyMeta?.selectedAppIds).toEqual(['12']);
   });
 });

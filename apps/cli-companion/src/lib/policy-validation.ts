@@ -1,23 +1,34 @@
 import {
   BUILT_IN_POLICY_PRESETS,
   CUSTOM_PRESET,
-  DEFAULT_CUSTOM_TEMPLATE,
+  ALL_SESSION_TOOLS,
 } from './policy-presets';
+import {
+  compileGuidedPolicy,
+  toPolicyPreview,
+  buildDefaultCustomTemplateJson,
+} from './policy-compiler';
 import { POLICY_MAX_EXPIRY_SECONDS, POLICY_MIN_EXPIRY_SECONDS } from './config';
 import type {
-  BuiltInSessionPolicyPresetId,
+  GuidedSessionPolicyDraft,
+  PolicyMode,
   PolicyPreview,
   SessionCallPolicy,
   SessionPolicyConfig,
+  SessionPolicyMeta,
   SessionPolicyPresetId,
   SessionPolicyPresetTemplate,
+  SessionToolName,
   SessionTransferPolicy,
 } from './policy-types';
 
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const SELECTOR_PATTERN = /^0x[0-9a-fA-F]{8}$/;
 const UINT_PATTERN = /^\d+$/;
-const PRESET_ID_PATTERN = /^(transfer|custom)$/;
+const PRESET_IDS = new Set<SessionPolicyPresetId>([
+  ...Object.keys(BUILT_IN_POLICY_PRESETS),
+  CUSTOM_PRESET.id,
+] as SessionPolicyPresetId[]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -65,6 +76,18 @@ function validateTransferPolicy(policy: unknown, index: number): void {
   validateUint(policy.maxValuePerUse, `transferPolicies[${index}].maxValuePerUse`);
 }
 
+function validateToolList(value: unknown, fieldName: string): void {
+  if (!Array.isArray(value)) {
+    throw new Error(`${fieldName} must be an array.`);
+  }
+
+  for (const [index, tool] of value.entries()) {
+    if (typeof tool !== 'string' || !(ALL_SESSION_TOOLS as string[]).includes(tool)) {
+      throw new Error(`${fieldName}[${index}] is not a supported MCP tool.`);
+    }
+  }
+}
+
 export function validateSessionPolicyConfig(sessionConfig: SessionPolicyConfig): void {
   if (!isRecord(sessionConfig)) {
     throw new Error('sessionConfig must be an object.');
@@ -92,39 +115,111 @@ export function validateSessionPolicyConfig(sessionConfig: SessionPolicyConfig):
   }
 }
 
+export function validateSessionPolicyMeta(policyMeta: SessionPolicyMeta): void {
+  if (!isRecord(policyMeta)) {
+    throw new Error('policyMeta must be an object.');
+  }
+
+  validateAllowedKeys(
+    policyMeta,
+    [
+      'version',
+      'mode',
+      'presetId',
+      'presetLabel',
+      'enabledTools',
+      'selectedAppIds',
+      'selectedContractAddresses',
+      'unverifiedAppIds',
+      'warnings',
+      'generatedAt',
+    ],
+    'policyMeta',
+  );
+
+  if (policyMeta.version !== 1) {
+    throw new Error('policyMeta.version must equal 1.');
+  }
+
+  if (policyMeta.mode !== 'guided' && policyMeta.mode !== 'advanced') {
+    throw new Error('policyMeta.mode must be either "guided" or "advanced".');
+  }
+
+  if (typeof policyMeta.presetId !== 'string' || !PRESET_IDS.has(policyMeta.presetId as SessionPolicyPresetId)) {
+    throw new Error('policyMeta.presetId is invalid.');
+  }
+
+  if (typeof policyMeta.presetLabel !== 'string' || policyMeta.presetLabel.trim() === '') {
+    throw new Error('policyMeta.presetLabel must be a non-empty string.');
+  }
+
+  validateToolList(policyMeta.enabledTools, 'policyMeta.enabledTools');
+
+  if (!Array.isArray(policyMeta.selectedAppIds) || !policyMeta.selectedAppIds.every(entry => typeof entry === 'string')) {
+    throw new Error('policyMeta.selectedAppIds must be a string array.');
+  }
+  if (
+    !Array.isArray(policyMeta.selectedContractAddresses) ||
+    !policyMeta.selectedContractAddresses.every(entry => typeof entry === 'string' && ADDRESS_PATTERN.test(entry))
+  ) {
+    throw new Error('policyMeta.selectedContractAddresses must be an address array.');
+  }
+  if (
+    !Array.isArray(policyMeta.unverifiedAppIds) ||
+    !policyMeta.unverifiedAppIds.every(entry => typeof entry === 'string')
+  ) {
+    throw new Error('policyMeta.unverifiedAppIds must be a string array.');
+  }
+  if (!Array.isArray(policyMeta.warnings) || !policyMeta.warnings.every(entry => typeof entry === 'string')) {
+    throw new Error('policyMeta.warnings must be a string array.');
+  }
+  if (!Number.isInteger(policyMeta.generatedAt) || policyMeta.generatedAt <= 0) {
+    throw new Error('policyMeta.generatedAt must be a positive unix timestamp in seconds.');
+  }
+}
+
 export function validateSessionPolicyPresetTemplate(template: SessionPolicyPresetTemplate): void {
   if (!isRecord(template)) {
     throw new Error('template must be an object.');
   }
 
-  validateAllowedKeys(template, ['id', 'label', 'description', 'customMode', 'expiresInSeconds', 'sessionConfig'], 'template');
+  validateAllowedKeys(
+    template,
+    ['id', 'label', 'description', 'customMode', 'riskHint', 'requiresDangerAcknowledgement', 'defaultLimits', 'enabledTools'],
+    'template',
+  );
 
-  if (typeof template.id !== 'string' || !PRESET_ID_PATTERN.test(template.id)) {
-    throw new Error('template.id must be one of: transfer, custom.');
+  if (typeof template.id !== 'string' || !PRESET_IDS.has(template.id as SessionPolicyPresetId)) {
+    throw new Error('template.id is invalid.');
   }
-
+  if (template.customMode !== false) {
+    throw new Error('template.customMode must be false for built-in templates.');
+  }
   if (typeof template.label !== 'string' || template.label.trim() === '') {
     throw new Error('template.label must be a non-empty string.');
   }
-
   if (typeof template.description !== 'string' || template.description.trim() === '') {
     throw new Error('template.description must be a non-empty string.');
   }
-
-  const expectedCustomMode = template.id === 'custom';
-  if (template.customMode !== expectedCustomMode) {
-    throw new Error(`template.customMode must be ${expectedCustomMode} when template.id is "${template.id}".`);
+  if (!['low', 'medium', 'high', 'critical'].includes(template.riskHint)) {
+    throw new Error('template.riskHint is invalid.');
   }
-
-  if (!Number.isInteger(template.expiresInSeconds)) {
-    throw new Error('expiresInSeconds must be an integer.');
+  if (typeof template.requiresDangerAcknowledgement !== 'boolean') {
+    throw new Error('template.requiresDangerAcknowledgement must be a boolean.');
   }
-
-  if (template.expiresInSeconds < POLICY_MIN_EXPIRY_SECONDS || template.expiresInSeconds > POLICY_MAX_EXPIRY_SECONDS) {
-    throw new Error(`expiresInSeconds must be between ${POLICY_MIN_EXPIRY_SECONDS} and ${POLICY_MAX_EXPIRY_SECONDS}.`);
+  if (!isRecord(template.defaultLimits)) {
+    throw new Error('template.defaultLimits must be an object.');
   }
-
-  validateSessionPolicyConfig(template.sessionConfig);
+  validateUint(template.defaultLimits.feeLimit, 'template.defaultLimits.feeLimit');
+  validateUint(template.defaultLimits.maxValuePerUse, 'template.defaultLimits.maxValuePerUse');
+  if (
+    !Number.isInteger(template.defaultLimits.expiresInSeconds) ||
+    template.defaultLimits.expiresInSeconds < POLICY_MIN_EXPIRY_SECONDS ||
+    template.defaultLimits.expiresInSeconds > POLICY_MAX_EXPIRY_SECONDS
+  ) {
+    throw new Error(`template.defaultLimits.expiresInSeconds must be between ${POLICY_MIN_EXPIRY_SECONDS} and ${POLICY_MAX_EXPIRY_SECONDS}.`);
+  }
+  validateToolList(template.enabledTools, 'template.enabledTools');
 }
 
 function parsePositiveInteger(value: unknown, fieldName: string): number {
@@ -205,58 +300,71 @@ function parseSessionPolicyConfig(value: unknown): SessionPolicyConfig {
   return parsedConfig;
 }
 
-export function parseCustomTemplateInput(value: unknown): Pick<SessionPolicyPresetTemplate, 'expiresInSeconds' | 'sessionConfig'> {
+function parseSessionPolicyMeta(value: unknown): SessionPolicyMeta {
+  if (!isRecord(value)) {
+    throw new Error('Invalid custom policy policyMeta.');
+  }
+
+  const parsed: SessionPolicyMeta = {
+    version: value.version as 1,
+    mode: value.mode as PolicyMode,
+    presetId: value.presetId as SessionPolicyPresetId,
+    presetLabel: value.presetLabel as string,
+    enabledTools: value.enabledTools as SessionToolName[],
+    selectedAppIds: value.selectedAppIds as string[],
+    selectedContractAddresses: value.selectedContractAddresses as string[],
+    unverifiedAppIds: value.unverifiedAppIds as string[],
+    warnings: value.warnings as string[],
+    generatedAt: value.generatedAt as number,
+  };
+  validateSessionPolicyMeta(parsed);
+  return parsed;
+}
+
+export function parseCustomTemplateInput(value: unknown): {
+  expiresInSeconds: number;
+  sessionConfig: SessionPolicyConfig;
+  policyMeta?: SessionPolicyMeta;
+} {
   if (!isRecord(value)) {
     throw new Error('Invalid custom policy. Expected JSON object.');
   }
-  validateAllowedKeys(value, ['expiresInSeconds', 'sessionConfig'], 'Invalid custom policy');
+  validateAllowedKeys(value, ['expiresInSeconds', 'sessionConfig', 'policyMeta'], 'Invalid custom policy');
 
   return {
     expiresInSeconds: parsePositiveInteger(value.expiresInSeconds, 'expiresInSeconds'),
     sessionConfig: parseSessionPolicyConfig(value.sessionConfig),
+    policyMeta: value.policyMeta === undefined ? undefined : parseSessionPolicyMeta(value.policyMeta),
   };
 }
 
-function cloneSessionConfig(sessionConfig: SessionPolicyConfig): SessionPolicyConfig {
+function normalizeCustomMeta(policyMeta: SessionPolicyMeta | undefined): SessionPolicyMeta {
+  if (policyMeta) {
+    return policyMeta;
+  }
+
   return {
-    feeLimit: sessionConfig.feeLimit,
-    maxValuePerUse: sessionConfig.maxValuePerUse,
-    callPolicies: sessionConfig.callPolicies.map(policy => ({
-      target: policy.target,
-      selector: policy.selector,
-    })),
-    transferPolicies: sessionConfig.transferPolicies.map(policy => ({
-      target: policy.target,
-      maxValuePerUse: policy.maxValuePerUse,
-    })),
+    version: 1,
+    mode: 'advanced',
+    presetId: 'custom',
+    presetLabel: CUSTOM_PRESET.label,
+    enabledTools: [...ALL_SESSION_TOOLS],
+    selectedAppIds: [],
+    selectedContractAddresses: [],
+    unverifiedAppIds: [],
+    warnings: [],
+    generatedAt: Math.floor(Date.now() / 1000),
   };
 }
 
-function validatePresetTemplate(
-  template: SessionPolicyPresetTemplate,
-  presetId: SessionPolicyPresetId,
-): SessionPolicyPresetTemplate {
-  try {
-    validateSessionPolicyPresetTemplate(template);
-  } catch (error) {
-    throw new Error(`Invalid policy preset template "${presetId}": ${error instanceof Error ? error.message : String(error)}`);
-  }
-  return template;
-}
-
-function getValidatedBuiltInPresetTemplate(presetId: BuiltInSessionPolicyPresetId): SessionPolicyPresetTemplate {
-  const template = BUILT_IN_POLICY_PRESETS[presetId];
-  if (!template) {
-    throw new Error(`Invalid policy preset registry: missing preset template for key "${presetId}".`);
-  }
-  if (template.id !== presetId) {
-    throw new Error(`Invalid policy preset registry: key "${presetId}" does not match preset id "${template.id}".`);
-  }
-
-  return validatePresetTemplate(template, presetId);
-}
-
-export function parseCustomPolicyTemplate(rawInput: string): SessionPolicyPresetTemplate {
+export function parseCustomPolicyTemplate(rawInput: string): {
+  presetId: SessionPolicyPresetId;
+  label: string;
+  description: string;
+  expiresInSeconds: number;
+  sessionConfig: SessionPolicyConfig;
+  policyMeta: SessionPolicyMeta;
+} {
   let parsed: unknown;
 
   try {
@@ -265,49 +373,112 @@ export function parseCustomPolicyTemplate(rawInput: string): SessionPolicyPreset
     throw new Error('Invalid custom policy. Expected JSON input.');
   }
 
-  let customTemplateInput: Pick<SessionPolicyPresetTemplate, 'expiresInSeconds' | 'sessionConfig'>;
+  let customTemplateInput: {
+    expiresInSeconds: number;
+    sessionConfig: SessionPolicyConfig;
+    policyMeta?: SessionPolicyMeta;
+  };
   try {
     customTemplateInput = parseCustomTemplateInput(parsed);
   } catch (error) {
     throw new Error(`Invalid custom policy: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const customTemplate = {
-    ...CUSTOM_PRESET,
+  return {
+    presetId: CUSTOM_PRESET.id,
+    label: CUSTOM_PRESET.label,
+    description: CUSTOM_PRESET.description,
     expiresInSeconds: customTemplateInput.expiresInSeconds,
     sessionConfig: customTemplateInput.sessionConfig,
+    policyMeta: normalizeCustomMeta(customTemplateInput.policyMeta),
   };
+}
 
-  try {
-    validateSessionPolicyPresetTemplate(customTemplate);
-  } catch (error) {
-    throw new Error(`Invalid custom policy: ${error instanceof Error ? error.message : String(error)}`);
+function parseTransferTargets(raw: string[]): string[] {
+  const deduped = new Set<string>();
+  const parsed: string[] = [];
+  for (const entry of raw) {
+    const normalized = entry.trim();
+    if (!normalized) {
+      continue;
+    }
+    if (!ADDRESS_PATTERN.test(normalized)) {
+      throw new Error(`transferTargets contains invalid address: ${entry}`);
+    }
+    const key = normalized.toLowerCase();
+    if (deduped.has(key)) {
+      continue;
+    }
+    deduped.add(key);
+    parsed.push(normalized);
+  }
+  return parsed;
+}
+
+function normalizeGuidedDraft(
+  presetId: SessionPolicyPresetId,
+  guidedDraft?: Partial<GuidedSessionPolicyDraft>,
+): GuidedSessionPolicyDraft {
+  if (presetId === 'custom') {
+    throw new Error('Guided draft normalization does not support custom preset.');
   }
 
-  return customTemplate;
+  const defaults = BUILT_IN_POLICY_PRESETS[presetId].defaultLimits;
+  const selectedAppIds = guidedDraft?.selectedAppIds ?? [];
+  const transferTargets = parseTransferTargets(guidedDraft?.transferTargets ?? []);
+  const expiresInSeconds = guidedDraft?.expiresInSeconds ?? defaults.expiresInSeconds;
+  const feeLimit = guidedDraft?.feeLimit ?? defaults.feeLimit;
+  const maxValuePerUse = guidedDraft?.maxValuePerUse ?? defaults.maxValuePerUse;
+
+  if (!Number.isInteger(expiresInSeconds)) {
+    throw new Error('expiresInSeconds must be an integer.');
+  }
+  if (expiresInSeconds < POLICY_MIN_EXPIRY_SECONDS || expiresInSeconds > POLICY_MAX_EXPIRY_SECONDS) {
+    throw new Error(`expiresInSeconds must be between ${POLICY_MIN_EXPIRY_SECONDS} and ${POLICY_MAX_EXPIRY_SECONDS}.`);
+  }
+  validateUint(feeLimit, 'feeLimit');
+  validateUint(maxValuePerUse, 'maxValuePerUse');
+
+  return {
+    presetId,
+    selectedAppIds,
+    transferTargets,
+    expiresInSeconds,
+    feeLimit,
+    maxValuePerUse,
+  };
 }
 
 export function getPolicyPreview(options: {
   presetId: SessionPolicyPresetId;
   customPolicyJson?: string;
+  policyMode?: PolicyMode;
+  guidedDraft?: Partial<GuidedSessionPolicyDraft>;
   nowUnixSeconds?: number;
 }): PolicyPreview {
   const nowUnixSeconds = options.nowUnixSeconds ?? Math.floor(Date.now() / 1000);
+  const mode = options.policyMode ?? (options.presetId === 'custom' ? 'advanced' : 'guided');
 
-  const template =
-    options.presetId === 'custom'
-      ? options.customPolicyJson?.trim()
-        ? parseCustomPolicyTemplate(options.customPolicyJson)
-        : DEFAULT_CUSTOM_TEMPLATE
-      : getValidatedBuiltInPresetTemplate(options.presetId);
+  if (options.presetId === 'custom' || mode === 'advanced') {
+    const customInput = options.customPolicyJson?.trim() || buildDefaultCustomTemplateJson();
+    const template = parseCustomPolicyTemplate(customInput);
+    return {
+      presetId: template.presetId,
+      label: template.label,
+      description: template.description,
+      policyPayload: {
+        expiresAt: nowUnixSeconds + template.expiresInSeconds,
+        sessionConfig: template.sessionConfig,
+        policyMeta: {
+          ...template.policyMeta,
+          mode: 'advanced',
+          generatedAt: nowUnixSeconds,
+        },
+      },
+    };
+  }
 
-  return {
-    presetId: template.id,
-    label: template.label,
-    description: template.description,
-    policyPayload: {
-      expiresAt: nowUnixSeconds + template.expiresInSeconds,
-      sessionConfig: cloneSessionConfig(template.sessionConfig),
-    },
-  };
+  const draft = normalizeGuidedDraft(options.presetId, options.guidedDraft);
+  const compiled = compileGuidedPolicy(draft);
+  return toPolicyPreview(compiled, nowUnixSeconds);
 }

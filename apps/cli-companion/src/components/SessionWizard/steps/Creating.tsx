@@ -66,6 +66,7 @@ export default function Creating({
           chainId: chain.id,
           expiresAt: Number(result.sessionConfig.expiresAt),
           sessionConfig: serializeSessionConfig(result.sessionConfig),
+          policyMeta: policyPreview.policyPayload.policyMeta,
         };
 
         const redirectUrl = buildRedirectUrl(callbackUrl, bundle);
@@ -73,7 +74,6 @@ export default function Creating({
           transactionHash: result.transactionHash ?? null,
           redirectUrl,
         });
-        window.location.assign(redirectUrl);
       } catch (error) {
         markCreationError(error instanceof Error ? error.message : String(error));
       }

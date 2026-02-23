@@ -1,5 +1,6 @@
 import { isAddress } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
+import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
@@ -26,6 +27,8 @@ export const signMessageTool: ToolHandler = {
     required: ["message"],
   },
   handler: async (params, context) => {
+    assertToolCapability(context, "sign_message");
+
     if (typeof params.message !== "string") {
       throw new Error("message must be a string");
     }

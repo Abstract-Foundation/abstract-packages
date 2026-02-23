@@ -1,12 +1,13 @@
 import { LimitType, LimitZero, type SessionConfig } from '@abstract-foundation/agw-client/sessions';
 import type { Address, Hex } from 'viem';
-import type { PolicyPreview } from './policy-types';
+import type { PolicyPreview, SessionPolicyMeta } from './policy-types';
 
 export interface SessionBundle {
   accountAddress: string;
   chainId: number;
   expiresAt: number;
   sessionConfig: Record<string, unknown>;
+  policyMeta?: SessionPolicyMeta;
 }
 
 export function toSdkSessionConfig(

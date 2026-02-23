@@ -1,58 +1,206 @@
 import type {
   BuiltInSessionPolicyPresetId,
+  CustomPolicyPresetDescriptor,
   SessionPolicyPresetId,
+  SessionToolName,
   SessionPolicyPresetTemplate,
 } from './policy-types';
-import {
-  DEFAULT_POLICY_EXPIRY_SECONDS,
-  DEFAULT_POLICY_FEE_LIMIT,
-  DEFAULT_POLICY_MAX_VALUE_PER_USE,
-} from './config';
 
-export const TRANSFER_PRESET: SessionPolicyPresetTemplate = {
-  id: 'transfer',
-  label: 'Transfer',
-  description: 'Native ETH transfers with a per-transaction cap. Specify allowed recipients.',
-  customMode: false,
-  expiresInSeconds: DEFAULT_POLICY_EXPIRY_SECONDS,
-  sessionConfig: {
-    feeLimit: DEFAULT_POLICY_FEE_LIMIT,
-    maxValuePerUse: DEFAULT_POLICY_MAX_VALUE_PER_USE,
-    callPolicies: [],
-    transferPolicies: [],
-  },
-};
+export const ALL_SESSION_TOOLS: SessionToolName[] = [
+  'get_wallet_address',
+  'get_balances',
+  'get_token_list',
+  'get_session_status',
+  'sign_message',
+  'sign_transaction',
+  'transfer_token',
+  'swap_tokens',
+  'preview_transaction',
+  'revoke_session',
+  'send_transaction',
+  'send_calls',
+  'write_contract',
+  'deploy_contract',
+];
 
-export const CUSTOM_PRESET: Omit<SessionPolicyPresetTemplate, 'sessionConfig' | 'expiresInSeconds'> = {
+export const CUSTOM_PRESET: CustomPolicyPresetDescriptor = {
   id: 'custom',
   label: 'Custom',
-  description: 'Define exact call targets, transfer recipients, and limits.',
+  description:
+    'Raw JSON policy editor for exact session payload control. Use only if guided presets do not fit.',
   customMode: true,
-};
-
-export const DEFAULT_CUSTOM_TEMPLATE: SessionPolicyPresetTemplate = {
-  ...CUSTOM_PRESET,
-  expiresInSeconds: DEFAULT_POLICY_EXPIRY_SECONDS,
-  sessionConfig: {
-    feeLimit: DEFAULT_POLICY_FEE_LIMIT,
-    maxValuePerUse: DEFAULT_POLICY_MAX_VALUE_PER_USE,
-    callPolicies: [],
-    transferPolicies: [],
-  },
 };
 
 export const BUILT_IN_POLICY_PRESETS: Readonly<
   Record<BuiltInSessionPolicyPresetId, SessionPolicyPresetTemplate>
 > = {
-  transfer: TRANSFER_PRESET,
+  payments: {
+    id: 'payments',
+    label: 'Payments',
+    description: 'Transfer-focused automation with explicit recipient allowlist and short expiry.',
+    customMode: false,
+    riskHint: 'low',
+    requiresDangerAcknowledgement: false,
+    defaultLimits: {
+      expiresInSeconds: 1800,
+      feeLimit: '2000000000000000',
+      maxValuePerUse: '5000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'transfer_token',
+      'send_transaction',
+      'revoke_session',
+    ],
+  },
+  trading: {
+    id: 'trading',
+    label: 'Trading',
+    description: 'Selector-scoped trading calls for selected apps with moderate limits.',
+    customMode: false,
+    riskHint: 'medium',
+    requiresDangerAcknowledgement: false,
+    defaultLimits: {
+      expiresInSeconds: 4 * 60 * 60,
+      feeLimit: '4000000000000000',
+      maxValuePerUse: '30000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'swap_tokens',
+      'send_transaction',
+      'send_calls',
+      'write_contract',
+      'revoke_session',
+    ],
+  },
+  gaming: {
+    id: 'gaming',
+    label: 'Gaming',
+    description: 'Gameplay-centric app calls with moderate limits and medium-lived sessions.',
+    customMode: false,
+    riskHint: 'medium',
+    requiresDangerAcknowledgement: false,
+    defaultLimits: {
+      expiresInSeconds: 4 * 60 * 60,
+      feeLimit: '3000000000000000',
+      maxValuePerUse: '10000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'send_transaction',
+      'send_calls',
+      'write_contract',
+      'revoke_session',
+    ],
+  },
+  contract_write: {
+    id: 'contract_write',
+    label: 'Contract Write',
+    description: 'Write access to selected contracts/functions without deployment permissions.',
+    customMode: false,
+    riskHint: 'high',
+    requiresDangerAcknowledgement: false,
+    defaultLimits: {
+      expiresInSeconds: 2 * 60 * 60,
+      feeLimit: '5000000000000000',
+      maxValuePerUse: '20000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'send_transaction',
+      'send_calls',
+      'write_contract',
+      'revoke_session',
+    ],
+  },
+  deploy: {
+    id: 'deploy',
+    label: 'Deploy',
+    description: 'Contract deployment workflows with explicit high-risk confirmation.',
+    customMode: false,
+    riskHint: 'critical',
+    requiresDangerAcknowledgement: true,
+    defaultLimits: {
+      expiresInSeconds: 1800,
+      feeLimit: '8000000000000000',
+      maxValuePerUse: '100000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'deploy_contract',
+      'send_transaction',
+      'send_calls',
+      'write_contract',
+      'revoke_session',
+    ],
+  },
+  signing: {
+    id: 'signing',
+    label: 'Signing',
+    description: 'Message and transaction signing-focused access with strict warnings.',
+    customMode: false,
+    riskHint: 'high',
+    requiresDangerAcknowledgement: true,
+    defaultLimits: {
+      expiresInSeconds: 2 * 60 * 60,
+      feeLimit: '2000000000000000',
+      maxValuePerUse: '10000000000000000',
+    },
+    enabledTools: [
+      'get_wallet_address',
+      'get_balances',
+      'get_token_list',
+      'get_session_status',
+      'preview_transaction',
+      'sign_message',
+      'sign_transaction',
+      'send_transaction',
+      'revoke_session',
+    ],
+  },
+  full_app_control: {
+    id: 'full_app_control',
+    label: 'Full App Control',
+    description: 'Unrestricted selectors for selected app contracts only.',
+    customMode: false,
+    riskHint: 'critical',
+    requiresDangerAcknowledgement: true,
+    defaultLimits: {
+      expiresInSeconds: 8 * 60 * 60,
+      feeLimit: '10000000000000000',
+      maxValuePerUse: '1000000000000000000',
+    },
+    enabledTools: ALL_SESSION_TOOLS,
+  },
 };
 
 export const POLICY_PRESET_OPTIONS: Array<{ id: SessionPolicyPresetId; label: string; description: string }> = [
-  {
-    id: 'transfer',
-    label: TRANSFER_PRESET.label,
-    description: TRANSFER_PRESET.description,
-  },
+  ...Object.values(BUILT_IN_POLICY_PRESETS).map(preset => ({
+    id: preset.id,
+    label: preset.label,
+    description: preset.description,
+  })),
   {
     id: 'custom',
     label: CUSTOM_PRESET.label,

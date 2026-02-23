@@ -70,6 +70,7 @@ export function materializeSessionFromBundle(
     expiresAt: bundle.expiresAt,
     status: "active",
     sessionConfig: bundle.sessionConfig,
+    policyMeta: bundle.policyMeta,
     sessionSignerRef: {
       kind: "keyfile",
       value: keyfilePath,

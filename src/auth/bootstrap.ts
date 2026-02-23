@@ -101,7 +101,7 @@ export async function runBootstrapFlow(logger: Logger, options: BootstrapOptions
       logger.warn(`Could not auto-open browser: ${error instanceof Error ? error.message : String(error)}`);
     }
 
-    logger.info("Waiting for hosted session approval in the browser...");
+    logger.info("Waiting for hosted session approval in the browser (callback window: 15 minutes)...");
 
     const sessionPayload = await callbackServer.waitForPayload();
     const bundle = parseSessionBundleInput(sessionPayload);

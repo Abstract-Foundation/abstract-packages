@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { AuditLog } from "../audit/index.js";
 import { toMcpErrorContract } from "../errors/index.js";
+import { assertToolAllowedByPolicyMeta } from "../policy/meta.js";
 import { SessionManager } from "../session/manager.js";
 import { SessionReconcileWorker } from "../session/reconcile.js";
 import { getTool, tools } from "../tools/index.js";
@@ -75,6 +76,8 @@ export class AgwMcpServer {
             arguments: (request.params.arguments ?? {}) as Record<string, unknown>,
           },
         });
+
+        assertToolAllowedByPolicyMeta(this.sessionManager.getSession(), toolName);
 
         const result = await tool.handler(request.params.arguments ?? {}, {
           sessionManager: this.sessionManager,

@@ -106,4 +106,31 @@ describe("sign_message tool", () => {
       ),
     ).rejects.toThrow("message signing rejected: session policy signer is invalid");
   });
+
+  it("rejects signing when tool capability is not enabled in policy metadata", async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const session = buildSessionData({
+      policyMeta: {
+        version: 1,
+        mode: "guided",
+        presetId: "payments",
+        presetLabel: "Payments",
+        enabledTools: ["get_session_status", "revoke_session"],
+        selectedAppIds: [],
+        selectedContractAddresses: [],
+        unverifiedAppIds: [],
+        warnings: [],
+        generatedAt: now,
+      },
+    });
+
+    await expect(
+      signMessageTool.handler(
+        { message: "blocked" },
+        buildContext(session, () => "active", {
+          signMessage: jest.fn<Promise<`0x${string}`>, [{ message: string }]>(async () => "0x1234"),
+        }),
+      ),
+    ).rejects.toThrow('tool "sign_message" is not enabled');
+  });
 });

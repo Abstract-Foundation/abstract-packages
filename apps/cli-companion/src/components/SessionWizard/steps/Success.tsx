@@ -20,15 +20,23 @@ export default function Success() {
       <Card>
         <CardHeader>
           <CardTitle>Session Created</CardTitle>
-          <CardDescription>Redirecting back to the CLI callback...</CardDescription>
+          <CardDescription>Return to your CLI callback to finish setup.</CardDescription>
         </CardHeader>
         <CardContent className={styles.content}>
           {transactionHash ? <p className={styles.success}>Transaction: {transactionHash}</p> : null}
           {redirectUrl ? (
             <p className={styles.helper}>
-              If redirect does not happen automatically, use the link below.
+              Open the link below to hand off your new session to the CLI.
             </p>
           ) : null}
+          {redirectUrl ? (
+            <p className={styles.helper}>
+              If you see <code>ERR_CONNECTION_REFUSED</code>, re-run <code>agw-mcp init</code> and keep that terminal open.
+            </p>
+          ) : null}
+          <p className={styles.helper}>
+            After returning to CLI, run <code>get_session_status</code> to confirm and <code>revoke_session</code> when done.
+          </p>
         </CardContent>
         <CardFooter className={styles.footer}>
           {redirectUrl ? (

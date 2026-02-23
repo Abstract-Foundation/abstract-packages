@@ -21,13 +21,15 @@ export interface CallbackServer {
   close: () => Promise<void>;
 }
 
+const DEFAULT_CALLBACK_TIMEOUT_MS = 15 * 60 * 1000;
+
 export async function startCallbackServer(options: StartCallbackServerOptions = {}): Promise<CallbackServer> {
   const host = options.host ?? "127.0.0.1";
   const port = options.port ?? 0;
   const callbackPathRaw = options.path ?? `/callback/${randomBytes(8).toString("hex")}`;
   const callbackPath = callbackPathRaw.startsWith("/") ? callbackPathRaw : `/${callbackPathRaw}`;
   const expectedState = options.expectedState?.trim() ? options.expectedState.trim() : undefined;
-  const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_CALLBACK_TIMEOUT_MS;
 
   let resolvePayload: ((value: string) => void) | undefined;
   let rejectPayload: ((error: Error) => void) | undefined;
