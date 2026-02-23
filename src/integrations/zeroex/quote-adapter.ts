@@ -1,3 +1,5 @@
+import { resolveZeroExConfig } from "../../config/zeroex.js";
+
 const DEFAULT_ZEROEX_API_BASE_URL = "https://api.0x.org";
 const DEFAULT_ZEROEX_TIMEOUT_MS = 15_000;
 const INTEGER_AMOUNT_PATTERN = /^[1-9]\d*$/;
@@ -532,4 +534,5 @@ export function createZeroExQuoteAdapter(config: ZeroExQuoteAdapterConfig = {}):
   };
 }
 
-export const zeroExQuoteAdapter = createZeroExQuoteAdapter();
+const defaultZeroExConfig = resolveZeroExConfig();
+export const zeroExQuoteAdapter = createZeroExQuoteAdapter({ apiKey: defaultZeroExConfig.apiKey });

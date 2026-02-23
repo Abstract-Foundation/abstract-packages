@@ -1,7 +1,7 @@
 import { isAddress, type Address } from "viem";
 import { createAgwActionAdapter } from "../agw/actions.js";
-import type { ZeroExQuoteAdapter } from "../integrations/zeroex/index.js";
-import { zeroExQuoteAdapter } from "../integrations/zeroex/index.js";
+import { resolveZeroExConfig } from "../config/zeroex.js";
+import { createZeroExQuoteAdapter, type ZeroExQuoteAdapter } from "../integrations/zeroex/index.js";
 import { canCallTargetWithData, canTransferNativeValue } from "../policies/validate.js";
 import { assertMainnetPolicyRegistryPreflight } from "../session/mainnet-preflight.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
@@ -9,7 +9,8 @@ import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
 export interface SwapTokensToolDependencies {
-  quoteAdapter: ZeroExQuoteAdapter;
+  quoteAdapter?: ZeroExQuoteAdapter;
+  createQuoteAdapter?: () => ZeroExQuoteAdapter;
 }
 
 function parseExecute(value: unknown): boolean {
@@ -43,10 +44,15 @@ function parseOptionalString(value: unknown, field: string): string | undefined 
 }
 
 export function createSwapTokensTool(
-  dependencies: SwapTokensToolDependencies = {
-    quoteAdapter: zeroExQuoteAdapter,
-  },
+  dependencies: SwapTokensToolDependencies = {},
 ): ToolHandler {
+  const createQuoteAdapter =
+    dependencies.createQuoteAdapter ??
+    (() => {
+      const zeroExConfig = resolveZeroExConfig();
+      return createZeroExQuoteAdapter({ apiKey: zeroExConfig.apiKey });
+    });
+
   return {
     name: "swap_tokens",
     description: "Fetches 0x swap quotes and executes swap transactions through AGW session keys when explicitly requested.",
@@ -81,7 +87,8 @@ export function createSwapTokensTool(
       }
 
       const execute = parseExecute(params.execute);
-      const quote = await dependencies.quoteAdapter.getQuote({
+      const quoteAdapter = dependencies.quoteAdapter ?? createQuoteAdapter();
+      const quote = await quoteAdapter.getQuote({
         chainId: session.chainId,
         taker: session.accountAddress,
         sellToken: params.sellToken.trim(),

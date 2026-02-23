@@ -126,6 +126,9 @@ npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 
 # Custom RPC
 npx -y @abstract-foundation/agw-mcp serve --chain-id 2741 --rpc-url https://api.mainnet.abs.xyz
+
+# 0x API key override (for swap_tokens quote requests)
+npx -y @abstract-foundation/agw-mcp serve --chain-id 2741 --zeroex-api-key YOUR_0X_API_KEY
 ```
 
 Environment variables are also supported:
@@ -133,6 +136,7 @@ Environment variables are also supported:
 ```bash
 AGW_MCP_CHAIN_ID=2741 npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_RPC_URL=https://api.mainnet.abs.xyz npx -y @abstract-foundation/agw-mcp serve
+AGW_MCP_ZEROEX_API_KEY=YOUR_0X_API_KEY npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_APP_URL=https://mcp.abs.xyz npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
