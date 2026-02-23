@@ -30,9 +30,7 @@ const INTENT_ORDER: BuiltInSessionPolicyPresetId[] = [
   'payments',
   'trading',
   'contract_write',
-  'deploy',
   'signing',
-  'full_app_control',
 ];
 
 const INTENT_DESCRIPTIONS: Record<BuiltInSessionPolicyPresetId, string> = {
@@ -40,8 +38,8 @@ const INTENT_DESCRIPTIONS: Record<BuiltInSessionPolicyPresetId, string> = {
   trading: 'Buy, sell, and claim in selected apps.',
   gaming: 'Repeat gameplay actions in supported apps.',
   contract_write: 'Run advanced app actions in selected apps.',
-  deploy: 'Create and launch contracts.',
   signing: 'Sign messages and transactions when needed.',
+  deploy: 'Create and launch contracts.',
   full_app_control: 'Give broad control in selected apps.',
 };
 
@@ -106,6 +104,9 @@ function buildCombinedPolicyPreview(
   }
 
   const selectedIntents = INTENT_ORDER.filter(intent => intentIds.includes(intent));
+  if (selectedIntents.length === 0) {
+    throw new Error('Select at least one supported intent.');
+  }
   const defaultLimits = selectedIntents.map(intent => BUILT_IN_POLICY_PRESETS[intent].defaultLimits);
 
   const expiresInSeconds = Math.max(...defaultLimits.map(limits => limits.expiresInSeconds));
@@ -176,8 +177,10 @@ export default function SelectPolicy() {
   } = useSessionWizardState();
 
   const [stage, setStage] = useState<PolicyStage>('intent');
+  const isSelectableIntent = (intent: BuiltInSessionPolicyPresetId): boolean => INTENT_ORDER.includes(intent);
+
   const [selectedIntentIds, setSelectedIntentIds] = useState<BuiltInSessionPolicyPresetId[]>(() => {
-    if (selectedPreset !== 'custom' && selectedPreset !== 'gaming') {
+    if (selectedPreset !== 'custom' && selectedPreset !== 'gaming' && isSelectableIntent(selectedPreset)) {
       return [selectedPreset];
     }
     return ['payments'];
@@ -185,7 +188,7 @@ export default function SelectPolicy() {
 
   useEffect(() => {
     setPolicyMode('guided');
-    if (selectedPreset === 'custom' || selectedPreset === 'gaming') {
+    if (selectedPreset === 'custom' || selectedPreset === 'gaming' || !isSelectableIntent(selectedPreset)) {
       selectPreset('payments');
     }
   }, [selectedPreset, selectPreset, setPolicyMode]);
@@ -213,7 +216,6 @@ export default function SelectPolicy() {
 
   const selectedIntentPresets = selectedIntentIds.map(intentId => BUILT_IN_POLICY_PRESETS[intentId]);
   const policyWarnings = composite.preview?.policyPayload.policyMeta?.warnings ?? [];
-  const riskReasons = composite.risk?.reasons ?? [];
   const requiresDangerAcknowledgement =
     selectedIntentPresets.some(preset => preset.requiresDangerAcknowledgement) ||
     (composite.risk?.requiresConfirmation ?? false) ||
@@ -376,30 +378,6 @@ export default function SelectPolicy() {
                 })}
               </div>
               <p className={styles.appScopeSubhint}>More options coming soon.</p>
-              {composite.risk ? (
-                <div className={styles.riskSummary}>
-                  <p className={styles.riskHeading}>Risk: {composite.risk.level.toUpperCase()}</p>
-                  {riskReasons.length === 0 ? (
-                    <p className={styles.riskMuted}>No elevated-risk signals were detected for this selection.</p>
-                  ) : (
-                    <ul className={styles.riskList}>
-                      {riskReasons.map(reason => (
-                        <li key={reason}>{reason}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {policyWarnings.length > 0 ? (
-                    <>
-                      <p className={styles.warningHeading}>Policy warnings</p>
-                      <ul className={styles.warningList}>
-                        {policyWarnings.map(warning => (
-                          <li key={warning}>{warning}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
-                </div>
-              ) : null}
               {requiresDangerAcknowledgement ? (
                 <label className={styles.dangerAck}>
                   <input
@@ -407,7 +385,7 @@ export default function SelectPolicy() {
                     checked={dangerAcknowledged}
                     onChange={event => setDangerAcknowledged(event.target.checked)}
                   />
-                  <span>I understand these permissions are high-risk and can move real funds.</span>
+                  <span>I understand these permissions can move real funds.</span>
                 </label>
               ) : null}
             </div>

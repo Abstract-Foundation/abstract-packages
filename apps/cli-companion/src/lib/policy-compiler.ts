@@ -80,7 +80,6 @@ function buildCallPolicies(
   }
 
   const calls: SessionCallPolicy[] = [];
-  const allowUnscopedByPreset = presetId === 'full_app_control' || presetId === 'deploy';
 
   for (const app of selectedApps) {
     if (!app.verified) {
@@ -90,16 +89,10 @@ function buildCallPolicies(
     }
 
     for (const contract of app.contracts) {
-      if (allowUnscopedByPreset) {
-        calls.push({ target: contract.address });
-        continue;
-      }
-
       const defaultSelectors = contract.selectors.filter(selector => selector.enabledByDefault);
       if (defaultSelectors.length === 0) {
-        calls.push({ target: contract.address });
         warnings.push(
-          `${app.name} / ${contract.label} has no curated selectors. Added contract-level call scope.`,
+          `${app.name} / ${contract.label} has no mainnet-approved selectors. Skipped from call policies.`,
         );
         continue;
       }
