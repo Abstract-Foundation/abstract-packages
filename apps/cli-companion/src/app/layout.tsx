@@ -3,6 +3,7 @@ import '@/app/fonts.scss';
 
 import type { Viewport } from 'next';
 import Navigation from '@/components/Navigation';
+import AbstractProvider from '@/providers/AbstractProvider';
 
 import styles from './styles.module.scss';
 
@@ -22,8 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html className={styles.html} lang="en">
       <body className={styles.body}>
-        <Navigation />
-        <main className={styles.main}>{children}</main>
+        <AbstractProvider>
+          <Navigation />
+          <main className={styles.main}>{children}</main>
+        </AbstractProvider>
       </body>
     </html>
   );
