@@ -63,13 +63,15 @@ describe("0x quote adapter", () => {
       price: "2",
       grossPrice: "2.01",
       estimatedPriceImpact: "0.0123",
-      gas: "210000",
-      gasPrice: "1000000000",
       totalNetworkFee: "210000000000000",
       allowanceTarget: "0xcccc000000000000000000000000000000000003",
-      to: "0xdddd000000000000000000000000000000000004",
-      data: "0xabcdef",
-      value: "0",
+      transaction: {
+        to: "0xdddd000000000000000000000000000000000004",
+        data: "0xabcdef",
+        gas: "210000",
+        gasPrice: "1000000000",
+        value: "0",
+      },
       fees: {
         integratorFee: {
           amount: "1000",
@@ -201,6 +203,46 @@ describe("0x quote adapter", () => {
     });
 
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it("accepts legacy payloads with top-level transaction fields", async () => {
+    const fetchFn = jest.fn(async () =>
+      createMockResponse({
+        ok: true,
+        status: 200,
+        jsonData: {
+          chainId: 11124,
+          sellToken: "0xaaaa000000000000000000000000000000000001",
+          buyToken: "0xbbbb000000000000000000000000000000000002",
+          sellAmount: "1000",
+          buyAmount: "2000",
+          to: "0xdddd000000000000000000000000000000000004",
+          data: "0xdeadbeef",
+          gas: "123456",
+          gasPrice: "999",
+          value: "0",
+        },
+      }),
+    ) as unknown as typeof fetch;
+
+    const adapter = createZeroExQuoteAdapter({ fetchFn });
+    const quote = await adapter.getQuote({
+      chainId: 11124,
+      sellToken: "0xaaaa000000000000000000000000000000000001",
+      buyToken: "0xbbbb000000000000000000000000000000000002",
+      sellAmount: "1000",
+    });
+
+    expect(quote.transaction).toEqual({
+      to: "0xdddd000000000000000000000000000000000004",
+      data: "0xdeadbeef",
+      value: "0",
+    });
+    expect(quote.gas).toEqual({
+      limit: "123456",
+      price: "999",
+      estimatedFee: null,
+    });
   });
 
   it("maps non-2xx responses into deterministic adapter errors", async () => {

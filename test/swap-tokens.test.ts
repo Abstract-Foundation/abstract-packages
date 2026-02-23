@@ -5,6 +5,7 @@ import type { ToolContext } from "../src/tools/types.js";
 import { Logger } from "../src/utils/logger.js";
 
 const AGGREGATOR = "0x3333333333333333333333333333333333333333";
+const ZEROEX_NATIVE_ETH_SENTINEL = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 function buildSessionData(overrides: Partial<AgwSessionData> = {}): AgwSessionData {
   const now = Math.floor(Date.now() / 1000);
@@ -92,6 +93,12 @@ describe("swap_tokens tool", () => {
       allowanceTarget: AGGREGATOR,
       spender: AGGREGATOR,
     });
+    expect(quoteAdapter.getQuote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sellToken: ZEROEX_NATIVE_ETH_SENTINEL,
+        buyToken: "USDC",
+      }),
+    );
     expect(sendTransaction).not.toHaveBeenCalled();
   });
 

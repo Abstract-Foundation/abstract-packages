@@ -301,6 +301,26 @@ function normalizeRouteFills(value: unknown): ZeroExRouteFill[] {
   return fills;
 }
 
+function normalizeTransaction(
+  payload: Record<string, unknown>,
+): {
+  to: string;
+  data: string;
+  value: string;
+  gasLimit: string | null;
+  gasPrice: string | null;
+} {
+  const transaction = isRecord(payload.transaction) ? payload.transaction : {};
+
+  return {
+    to: requireString(transaction.to ?? payload.to, "to"),
+    data: requireString(transaction.data ?? payload.data, "data"),
+    value: asString(transaction.value ?? payload.value) ?? "0",
+    gasLimit: asString(transaction.gas ?? payload.gas),
+    gasPrice: asString(transaction.gasPrice ?? payload.gasPrice),
+  };
+}
+
 function normalizeQuotePayload(payload: unknown, request: NormalizedQuoteRequest): ZeroExQuote {
   if (!isRecord(payload)) {
     throw new Error("response payload must be an object");
@@ -309,6 +329,7 @@ function normalizeQuotePayload(payload: unknown, request: NormalizedQuoteRequest
   const issues = isRecord(payload.issues) ? payload.issues : {};
   const route = isRecord(payload.route) ? payload.route : {};
   const fees = isRecord(payload.fees) ? payload.fees : {};
+  const transaction = normalizeTransaction(payload);
 
   return {
     quoteId: asString(payload.zid),
@@ -323,14 +344,14 @@ function normalizeQuotePayload(payload: unknown, request: NormalizedQuoteRequest
     estimatedPriceImpact: asString(payload.estimatedPriceImpact),
     allowanceTarget: asString(payload.allowanceTarget),
     gas: {
-      limit: asString(payload.gas),
-      price: asString(payload.gasPrice),
+      limit: transaction.gasLimit,
+      price: transaction.gasPrice,
       estimatedFee: asString(payload.totalNetworkFee),
     },
     transaction: {
-      to: requireString(payload.to, "to"),
-      data: requireString(payload.data, "data"),
-      value: asString(payload.value) ?? "0",
+      to: transaction.to,
+      data: transaction.data,
+      value: transaction.value,
     },
     fees: {
       integratorFee: normalizeFee(fees.integratorFee),

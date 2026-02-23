@@ -8,6 +8,8 @@ import { buildExplorerUrl } from "../utils/explorer.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
+const ZEROEX_NATIVE_ETH_SENTINEL = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
 export interface SwapTokensToolDependencies {
   quoteAdapter?: ZeroExQuoteAdapter;
   createQuoteAdapter?: () => ZeroExQuoteAdapter;
@@ -43,6 +45,15 @@ function parseOptionalString(value: unknown, field: string): string | undefined 
   return value.trim();
 }
 
+function normalizeSwapToken(value: string, nativeSymbol: string): string {
+  const normalized = value.trim();
+  if (normalized.toUpperCase() === nativeSymbol.toUpperCase()) {
+    return ZEROEX_NATIVE_ETH_SENTINEL;
+  }
+
+  return normalized;
+}
+
 export function createSwapTokensTool(
   dependencies: SwapTokensToolDependencies = {},
 ): ToolHandler {
@@ -59,8 +70,8 @@ export function createSwapTokensTool(
     inputSchema: {
       type: "object",
       properties: {
-        sellToken: { type: "string", description: "Token address/symbol to sell" },
-        buyToken: { type: "string", description: "Token address/symbol to buy" },
+        sellToken: { type: "string", description: "Token address to sell, or native symbol (for example ETH)" },
+        buyToken: { type: "string", description: "Token address to buy, or native symbol (for example ETH)" },
         sellAmount: { type: "string", description: "Amount to sell in base units (exactly one of sellAmount/buyAmount)" },
         buyAmount: { type: "string", description: "Amount to buy in base units (exactly one of sellAmount/buyAmount)" },
         slippageBps: { type: "number", description: "Optional slippage in bps (0-10000)" },
@@ -88,11 +99,14 @@ export function createSwapTokensTool(
 
       const execute = parseExecute(params.execute);
       const quoteAdapter = dependencies.quoteAdapter ?? createQuoteAdapter();
+      const networkConfig = resolveToolNetworkConfig(context, session.chainId);
+      const sellToken = normalizeSwapToken(params.sellToken, networkConfig.chain.nativeCurrency.symbol);
+      const buyToken = normalizeSwapToken(params.buyToken, networkConfig.chain.nativeCurrency.symbol);
       const quote = await quoteAdapter.getQuote({
         chainId: session.chainId,
         taker: session.accountAddress,
-        sellToken: params.sellToken.trim(),
-        buyToken: params.buyToken.trim(),
+        sellToken,
+        buyToken,
         sellAmount: parseOptionalString(params.sellAmount, "sellAmount"),
         buyAmount: parseOptionalString(params.buyAmount, "buyAmount"),
         slippageBps: parseOptionalInteger(params.slippageBps, "slippageBps"),
@@ -125,7 +139,6 @@ export function createSwapTokensTool(
         };
       }
 
-      const networkConfig = resolveToolNetworkConfig(context, session.chainId);
       await assertMainnetPolicyRegistryPreflight({
         chainId: session.chainId,
         to: txTarget as Address,
