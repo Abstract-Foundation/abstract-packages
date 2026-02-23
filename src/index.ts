@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
 import { Command } from "commander";
 import { runBootstrapFlow } from "./auth/bootstrap.js";
 import { buildMcpConfigSnippet } from "./config/mcp-config.js";
@@ -10,15 +11,29 @@ import { Logger } from "./utils/logger.js";
 
 const logger = new Logger("agw-mcp");
 
+function resolveCliVersion(): string {
+  try {
+    const packageJsonUrl = new URL("../package.json", import.meta.url);
+    const packageJsonRaw = fs.readFileSync(packageJsonUrl, "utf8");
+    const parsed = JSON.parse(packageJsonRaw) as { version?: unknown };
+    if (typeof parsed.version === "string" && parsed.version.trim().length > 0) {
+      return parsed.version.trim();
+    }
+  } catch {
+    // Fall back to the static value if package.json is unavailable.
+  }
+  return "0.1.0";
+}
+
 const program = new Command();
-program.name("agw-mcp").description("Local MCP server for AGW session-key workflows").version("0.1.0");
+program.name("agw-mcp").description("Local MCP server for AGW session-key workflows").version(resolveCliVersion());
 
 program
   .command("init")
   .description("Bootstrap local AGW MCP session storage")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
-  .option("--app-url <url>", "Hosted session onboarding URL (env: AGW_MCP_APP_URL)")
+  .option("--app-url <url>", "Hosted session onboarding URL (defaults to https://mcp.abs.xyz; env: AGW_MCP_APP_URL)")
   .option("--storage-dir <dir>", "Session storage directory")
   .action(async options => {
     const networkConfig = resolveNetworkConfig({

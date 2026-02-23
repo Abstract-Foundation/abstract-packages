@@ -114,4 +114,53 @@ describe("SessionStorage", () => {
       value: keyfilePath,
     });
   });
+
+  it("deletes both persisted session metadata and signer keyfile", () => {
+    const now = Math.floor(Date.now() / 1000);
+    const signerSecret = "0x59c6995e998f97a5a0044966f0945388cf0f5ddf3cd34e3c5d6f6e64f5f4a799";
+    const session: AgwSessionData = {
+      accountAddress: "0x123",
+      chainId: 11124,
+      expiresAt: now + 3600,
+      createdAt: now,
+      updatedAt: now,
+      status: "active",
+      sessionConfig: { test: true },
+      sessionSignerRef: { kind: "raw", value: signerSecret },
+    };
+
+    storage.save(session);
+    const keyfilePath = path.join(tmpDir, "session-signer.key");
+    expect(fs.existsSync(storage.path)).toBe(true);
+    expect(fs.existsSync(keyfilePath)).toBe(true);
+
+    storage.delete();
+
+    expect(fs.existsSync(storage.path)).toBe(false);
+    expect(fs.existsSync(keyfilePath)).toBe(false);
+  });
+
+  it("loads revoked sessions even when signer keyfile is missing", () => {
+    const now = Math.floor(Date.now() / 1000);
+    const missingKeyfilePath = path.join(tmpDir, "session-signer.key");
+    const persisted = {
+      accountAddress: "0x123",
+      chainId: 11124,
+      expiresAt: now + 3600,
+      createdAt: now,
+      updatedAt: now,
+      status: "revoked",
+      sessionConfig: { test: true },
+      sessionSignerRef: { kind: "keyfile", value: missingKeyfilePath },
+    } satisfies AgwSessionData;
+    fs.writeFileSync(storage.path, JSON.stringify(persisted, null, 2), "utf8");
+
+    const loaded = storage.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded?.status).toBe("revoked");
+    expect(loaded?.sessionSignerRef).toEqual({
+      kind: "raw",
+      value: "[REDACTED]",
+    });
+  });
 });

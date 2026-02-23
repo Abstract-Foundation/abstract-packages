@@ -87,6 +87,14 @@ export class SessionManager {
         checkedAt,
       };
     }
+    if (this.session.status === "revoked") {
+      return {
+        status: "Closed",
+        statusCode: 2,
+        source: "local",
+        checkedAt,
+      };
+    }
 
     const networkConfig = this.getNetworkConfig(this.session.chainId);
     const sessionClient = createSessionClientFromSessionData({
@@ -132,6 +140,7 @@ export class SessionManager {
       updatedAt: updatedAtUnixSeconds,
     };
     this.storage.save(this.session);
+    this.storage.deleteSignerKeyfile();
   }
 
   getChainId(): number {

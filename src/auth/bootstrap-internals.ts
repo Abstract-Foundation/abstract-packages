@@ -17,6 +17,7 @@ export interface BootstrapLockHandle {
 const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const BOOTSTRAP_LOCK_STALE_MS = 30 * 60 * 1000;
+const DEFAULT_ONBOARDING_APP_URL = "https://mcp.abs.xyz";
 
 function ensurePrivateDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -236,7 +237,16 @@ function isLoopbackHostname(hostname: string): boolean {
 }
 
 export function resolveAppUrl(options: { appUrl?: string }): string {
-  return options.appUrl ?? process.env.AGW_MCP_APP_URL ?? "https://app-jarrodwatts.vercel.app";
+  const explicitAppUrl = options.appUrl?.trim();
+  if (explicitAppUrl) {
+    return explicitAppUrl;
+  }
+
+  const envAppUrl = process.env.AGW_MCP_APP_URL?.trim();
+  if (envAppUrl) {
+    return envAppUrl;
+  }
+  return DEFAULT_ONBOARDING_APP_URL;
 }
 
 export function validateAppUrl(appUrl: string): void {

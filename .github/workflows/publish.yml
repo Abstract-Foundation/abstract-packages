@@ -17,6 +17,12 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod --audit-level=high
+      - run: pnpm --dir app install --frozen-lockfile
+      - run: pnpm --dir app audit --prod --audit-level=high
+      - name: App full audit (non-blocking visibility)
+        run: pnpm --dir app audit --prod
+        continue-on-error: true
       - run: pnpm check-types
       - run: pnpm lint
       - run: pnpm test

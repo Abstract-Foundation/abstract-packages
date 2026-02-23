@@ -55,11 +55,11 @@ describe("session policy lint", () => {
     );
   });
 
-  it("rejects sessions that are longer than 24h", () => {
+  it("rejects sessions that are longer than 30 days", () => {
     const issues = lintSessionPolicy(
       {
         ...buildSafeInput(),
-        expiresAt: NOW_UNIX_SECONDS + 86_401,
+        expiresAt: NOW_UNIX_SECONDS + 2_592_001,
       },
       { nowUnixSeconds: NOW_UNIX_SECONDS },
     );

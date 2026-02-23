@@ -64,6 +64,37 @@ describe("session status mapping", () => {
     }
   });
 
+  it("returns local Closed status for revoked sessions without on-chain call requirements", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-status-"));
+    try {
+      const manager = new SessionManager(new Logger("test"), { storageDir: tmpDir, chainId: 11124 });
+      manager.setSession(
+        buildSessionData({
+          status: "revoked",
+          sessionConfig: {
+            signer: "0x2222222222222222222222222222222222222222",
+            expiresAt: String(Math.floor(Date.now() / 1000) + 3600),
+            feeLimit: {
+              limitType: 1,
+              limit: "1000000000000000",
+              period: "0",
+            },
+            callPolicies: [],
+            transferPolicies: [],
+          },
+        }),
+      );
+      const status = await manager.getOnchainSessionStatus();
+
+      expect(status.status).toBe("Closed");
+      expect(status.statusCode).toBe(2);
+      expect(status.source).toBe("local");
+      expect(typeof status.checkedAt).toBe("number");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it("tool returns mapped on-chain enum and metadata", async () => {
     const checkedAt = 1_800_000_000;
     const session = buildSessionData({

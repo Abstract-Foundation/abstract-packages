@@ -45,6 +45,15 @@ export class SessionStorage {
   private resolveSignerRefForRuntime(data: AgwSessionData): AgwSessionData | null {
     if (data.sessionSignerRef.kind === "keyfile") {
       if (!fs.existsSync(data.sessionSignerRef.value)) {
+        if (data.status === "revoked") {
+          return {
+            ...data,
+            sessionSignerRef: {
+              kind: "raw",
+              value: REDACTED_SIGNER_REF,
+            },
+          };
+        }
         return null;
       }
       return data;
@@ -53,6 +62,9 @@ export class SessionStorage {
     const rawValue = data.sessionSignerRef.value.trim();
     if (rawValue === REDACTED_SIGNER_REF) {
       if (!fs.existsSync(this.signerKeyPath)) {
+        if (data.status === "revoked") {
+          return data;
+        }
         return null;
       }
       return {
@@ -65,6 +77,15 @@ export class SessionStorage {
     }
 
     if (!PRIVATE_KEY_PATTERN.test(rawValue)) {
+      if (data.status === "revoked") {
+        return {
+          ...data,
+          sessionSignerRef: {
+            kind: "raw",
+            value: REDACTED_SIGNER_REF,
+          },
+        };
+      }
       return null;
     }
 
@@ -132,13 +153,33 @@ export class SessionStorage {
     fs.writeFileSync(this.filePath, JSON.stringify(this.sanitizeForPersistence(normalized), null, 2), { mode: 0o600 });
   }
 
-  delete(): void {
+  private deleteFile(filePath: string, wipe = false): void {
     try {
-      if (fs.existsSync(this.filePath)) {
-        fs.unlinkSync(this.filePath);
+      if (!fs.existsSync(filePath)) {
+        return;
       }
+      if (wipe) {
+        try {
+          const stats = fs.statSync(filePath);
+          if (stats.isFile() && stats.size > 0) {
+            fs.writeFileSync(filePath, Buffer.alloc(stats.size), { flag: "r+" });
+          }
+        } catch {
+          // Ignore best-effort wipe errors.
+        }
+      }
+      fs.unlinkSync(filePath);
     } catch {
       // Ignore file deletion errors.
     }
+  }
+
+  deleteSignerKeyfile(): void {
+    this.deleteFile(this.signerKeyPath, true);
+  }
+
+  delete(): void {
+    this.deleteFile(this.filePath);
+    this.deleteSignerKeyfile();
   }
 }

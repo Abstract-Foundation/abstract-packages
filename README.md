@@ -26,7 +26,7 @@ claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
-This opens the hosted onboarding app (`https://app-jarrodwatts.vercel.app`) where you:
+This opens the hosted onboarding app (`https://mcp.abs.xyz` by default) where you:
 
 1. Choose a policy preset (or provide custom policy JSON)
 2. Connect your Abstract Global Wallet
@@ -35,6 +35,7 @@ This opens the hosted onboarding app (`https://app-jarrodwatts.vercel.app`) wher
 Session data is saved to `~/.agw-mcp/session.json` with `0o600` file permissions. The session signer key is stored separately in `~/.agw-mcp/session-signer.key`.
 If a previous active session exists locally, the CLI attempts to revoke it on-chain after creating the new one.
 Bootstrap is single-process per storage directory (lockfile: `~/.agw-mcp/.bootstrap-init.lock`) to prevent concurrent `init` races.
+When local sessions are revoked/cleared, the signer keyfile is deleted as part of local cleanup.
 
 ### 2. Start the MCP server
 
@@ -132,10 +133,11 @@ Environment variables are also supported:
 ```bash
 AGW_MCP_CHAIN_ID=2741 npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_RPC_URL=https://api.mainnet.abs.xyz npx -y @abstract-foundation/agw-mcp serve
-AGW_MCP_APP_URL=http://localhost:3001 npx -y @abstract-foundation/agw-mcp init --chain-id 2741
+AGW_MCP_APP_URL=https://mcp.abs.xyz npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
 `init` requires `https://` app URLs except for loopback local development URLs (`http://localhost`, `http://127.0.0.1`, `http://[::1]`).
+`init` defaults to `https://mcp.abs.xyz` if no app URL is configured via `--app-url` or `AGW_MCP_APP_URL`.
 
 For local hosted-app development:
 
@@ -150,6 +152,15 @@ npx -y @abstract-foundation/agw-mcp init --chain-id 2741 --app-url http://localh
 - **Local-only transport**: stdio MCP — no network exposure. Session signer keys never leave the machine.
 - **Restrictive file permissions**: Session storage directory `0o700`, files `0o600`.
 - **Stderr-only logging**: stdout is reserved for MCP stdio transport. All operational logs go to stderr.
+
+### Real Funds Checklist
+
+For production usage with real money:
+
+1. Use a trusted onboarding host (`--app-url` or `AGW_MCP_APP_URL`) and pin it in deployment config.
+2. Start with minimal intent scope (prefer payments-only) and shortest practical expiry.
+3. Keep `execute` off by default and run preview-first workflows where possible.
+4. Revoke sessions after task completion (`revoke_session`) and confirm status with `get_session_status`.
 
 ## Development
 

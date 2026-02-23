@@ -29,6 +29,7 @@ import { revokeSessionOnchain } from "../src/session/revoke.js";
 const openMock = open as unknown as jest.Mock;
 const startServerMock = startCallbackServer as unknown as jest.Mock;
 const revokeSessionOnchainMock = revokeSessionOnchain as unknown as jest.Mock;
+const ORIGINAL_APP_URL = process.env.AGW_MCP_APP_URL;
 
 function createLogger(): Logger {
   return {
@@ -47,6 +48,15 @@ function encodePayload(payload: unknown): string {
 describe("bootstrap callback/session bundle flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.AGW_MCP_APP_URL = "https://onboarding.example";
+  });
+
+  afterAll(() => {
+    if (ORIGINAL_APP_URL === undefined) {
+      delete process.env.AGW_MCP_APP_URL;
+      return;
+    }
+    process.env.AGW_MCP_APP_URL = ORIGINAL_APP_URL;
   });
 
   it("parses callback URL payloads into a validated session bundle", () => {
@@ -210,7 +220,7 @@ describe("bootstrap callback/session bundle flow", () => {
 
     openMock.mockImplementation(async (url: string) => {
       const launchUrl = new URL(url);
-      expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://app-jarrodwatts.vercel.app/session/new");
+      expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://onboarding.example/session/new");
       const callbackUrlParam = launchUrl.searchParams.get("callback_url");
       expect(callbackUrlParam).toBeTruthy();
       const callbackUrl = new URL(callbackUrlParam!);
@@ -256,6 +266,61 @@ describe("bootstrap callback/session bundle flow", () => {
       expect(session.chainId).toBe(11124);
       expect(fs.existsSync(path.join(tmpDir, ".bootstrap-init.lock"))).toBe(false);
     } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("defaults to mcp.abs.xyz when onboarding app URL is not configured", async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-flow-"));
+    const previous = process.env.AGW_MCP_APP_URL;
+    delete process.env.AGW_MCP_APP_URL;
+
+    try {
+      let resolvePayload!: (value: string) => void;
+      const payloadPromise = new Promise<string>(resolve => {
+        resolvePayload = resolve;
+      });
+
+      startServerMock.mockResolvedValue({
+        callbackUrl: "http://127.0.0.1:4567/callback/default-host",
+        waitForPayload: () => payloadPromise,
+        close: async () => undefined,
+      });
+
+      openMock.mockImplementation(async (url: string) => {
+        const launchUrl = new URL(url);
+        expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://mcp.abs.xyz/session/new");
+
+        const signer = launchUrl.searchParams.get("signer");
+        expect(signer).toMatch(/^0x[0-9a-fA-F]{40}$/);
+
+        resolvePayload(
+          encodePayload({
+            accountAddress: "0x1111111111111111111111111111111111111111",
+            chainId: 11124,
+            expiresAt: 1_900_000_000,
+            sessionConfig: {
+              signer,
+              expiresAt: "1900000000",
+              feeLimit: { limitType: 1, limit: "1", period: "0" },
+              callPolicies: [],
+              transferPolicies: [],
+            },
+          }),
+        );
+      });
+
+      const session = await runBootstrapFlow(createLogger(), {
+        chainId: 11124,
+        storageDir: tmpDir,
+      });
+      expect(session.chainId).toBe(11124);
+    } finally {
+      if (previous === undefined) {
+        delete process.env.AGW_MCP_APP_URL;
+      } else {
+        process.env.AGW_MCP_APP_URL = previous;
+      }
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });

@@ -166,7 +166,9 @@ export default function SelectPolicy() {
     agwAddress,
     selectedPreset,
     selectedAppIds,
+    dangerAcknowledged,
     setPolicyMode,
+    setDangerAcknowledged,
     selectPreset,
     toggleAppSelection,
     proceedToCreating,
@@ -188,6 +190,13 @@ export default function SelectPolicy() {
     }
   }, [selectedPreset, selectPreset, setPolicyMode]);
 
+  const intentSelectionKey = useMemo(() => selectedIntentIds.slice().sort().join(','), [selectedIntentIds]);
+  const appSelectionKey = useMemo(() => selectedAppIds.slice().sort().join(','), [selectedAppIds]);
+
+  useEffect(() => {
+    setDangerAcknowledged(false);
+  }, [intentSelectionKey, appSelectionKey, setDangerAcknowledged]);
+
   const composite = useMemo(() => {
     try {
       const preview = buildCombinedPolicyPreview(selectedIntentIds, selectedAppIds);
@@ -202,10 +211,23 @@ export default function SelectPolicy() {
     }
   }, [selectedIntentIds, selectedAppIds]);
 
+  const selectedIntentPresets = selectedIntentIds.map(intentId => BUILT_IN_POLICY_PRESETS[intentId]);
+  const policyWarnings = composite.preview?.policyPayload.policyMeta?.warnings ?? [];
+  const riskReasons = composite.risk?.reasons ?? [];
+  const requiresDangerAcknowledgement =
+    selectedIntentPresets.some(preset => preset.requiresDangerAcknowledgement) ||
+    (composite.risk?.requiresConfirmation ?? false) ||
+    policyWarnings.length > 0;
+
   const displayAddress = agwAddress ? `${agwAddress.slice(0, 6)}...${agwAddress.slice(-4)}` : 'Wallet';
   const currentStageIndex = STAGES.indexOf(stage);
   const canContinue = selectedIntentIds.length > 0;
-  const canCreate = stage === 'apps' && Boolean(composite.preview) && Boolean(composite.risk) && !composite.error;
+  const canCreate =
+    stage === 'apps' &&
+    Boolean(composite.preview) &&
+    Boolean(composite.risk) &&
+    !composite.error &&
+    (!requiresDangerAcknowledgement || dangerAcknowledged);
 
   const toggleIntentSelection = (intent: BuiltInSessionPolicyPresetId) => {
     setSelectedIntentIds(previous =>
@@ -224,6 +246,10 @@ export default function SelectPolicy() {
   const handleCreate = () => {
     if (!composite.preview || !composite.risk) {
       setValidationError(composite.error ?? 'Unable to build policy preview.');
+      return;
+    }
+    if (requiresDangerAcknowledgement && !dangerAcknowledged) {
+      setValidationError('Confirm the high-risk warnings before creating this session.');
       return;
     }
 
@@ -350,6 +376,40 @@ export default function SelectPolicy() {
                 })}
               </div>
               <p className={styles.appScopeSubhint}>More options coming soon.</p>
+              {composite.risk ? (
+                <div className={styles.riskSummary}>
+                  <p className={styles.riskHeading}>Risk: {composite.risk.level.toUpperCase()}</p>
+                  {riskReasons.length === 0 ? (
+                    <p className={styles.riskMuted}>No elevated-risk signals were detected for this selection.</p>
+                  ) : (
+                    <ul className={styles.riskList}>
+                      {riskReasons.map(reason => (
+                        <li key={reason}>{reason}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {policyWarnings.length > 0 ? (
+                    <>
+                      <p className={styles.warningHeading}>Policy warnings</p>
+                      <ul className={styles.warningList}>
+                        {policyWarnings.map(warning => (
+                          <li key={warning}>{warning}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
+              {requiresDangerAcknowledgement ? (
+                <label className={styles.dangerAck}>
+                  <input
+                    type="checkbox"
+                    checked={dangerAcknowledged}
+                    onChange={event => setDangerAcknowledged(event.target.checked)}
+                  />
+                  <span>I understand these permissions are high-risk and can move real funds.</span>
+                </label>
+              ) : null}
             </div>
           ) : null}
 

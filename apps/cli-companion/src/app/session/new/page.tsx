@@ -21,12 +21,12 @@ function toSearchParams(
   return searchParams;
 }
 
-export default function NewSessionPage({
+export default async function NewSessionPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const result = parseOnboardingParams(toSearchParams(searchParams));
+  const result = parseOnboardingParams(toSearchParams(await searchParams));
 
   if (!result.ok || !result.params) {
     return (

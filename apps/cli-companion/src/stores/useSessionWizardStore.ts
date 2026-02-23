@@ -157,9 +157,6 @@ const useSessionWizardStore = create<SessionWizardState>(set => ({
   setDangerAcknowledged: dangerAcknowledged =>
     set({
       dangerAcknowledged,
-      policyPreview: null,
-      riskAssessment: null,
-      error: null,
     }),
   updateCustomPolicyJson: customPolicyJson =>
     set({

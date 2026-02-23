@@ -16,3 +16,15 @@
 ## Reporting
 
 Please report vulnerabilities privately to the Abstract security channel before public disclosure.
+
+## Dependency Exceptions
+
+Some upstream transitive vulnerabilities may remain when no patched version exists yet. These are tracked in
+`SECURITY_EXCEPTIONS.md` with:
+
+- package/advisory details
+- impact assessment and scope
+- explicit acceptance rationale
+- review cadence and exit criteria
+
+As of February 23, 2026, no high/critical dependency exceptions are permitted for release.

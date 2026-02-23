@@ -353,6 +353,57 @@
   text-align: center;
 }
 
+.riskSummary {
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid #d8e1ed;
+  background: #f7faff;
+  padding: 10px;
+}
+
+.riskHeading {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334259;
+}
+
+.riskMuted {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #65758a;
+}
+
+.riskList,
+.warningList {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #4c5b72;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.warningHeading {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #344866;
+}
+
+.dangerAck {
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #36465c;
+}
+
+.dangerAck input {
+  margin-top: 2px;
+}
+
 .appList {
   max-height: 420px;
   overflow: auto;

@@ -2,7 +2,7 @@ const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const SELECTOR_PATTERN = /^0x[0-9a-fA-F]{8}$/;
 const UINT_PATTERN = /^\d+$/;
 
-const DEFAULT_MAX_SESSION_LIFETIME_SECONDS = 24 * 60 * 60;
+const DEFAULT_MAX_SESSION_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
 const EQUAL_CONDITION = 1n;
 const UNSAFE_DESTINATION_SELECTORS = new Set(["0xa22cb465", "0x095ea7b3", "0xa9059cbb"]);
 

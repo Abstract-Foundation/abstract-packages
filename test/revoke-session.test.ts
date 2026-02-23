@@ -60,7 +60,14 @@ describe("revoke_session tool", () => {
     try {
       const logger = new Logger("test");
       const sessionManager = new SessionManager(logger, { storageDir: tmpDir, chainId: abstractTestnet.id });
-      const session = buildSessionData();
+      const signerKeyPath = path.join(tmpDir, "session-signer.key");
+      fs.writeFileSync(signerKeyPath, "0x59c6995e998f97a5a0044966f0945388cf0f5ddf3cd34e3c5d6f6e64f5f4a799\n", { mode: 0o600 });
+      const session = buildSessionData({
+        sessionSignerRef: {
+          kind: "keyfile",
+          value: signerKeyPath,
+        },
+      });
       sessionManager.setSession(session);
 
       const transactionHash = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" as const;
@@ -102,6 +109,7 @@ describe("revoke_session tool", () => {
 
       expect(sessionManager.getSessionStatus()).toBe("revoked");
       expect(sessionManager.getSession()?.status).toBe("revoked");
+      expect(fs.existsSync(signerKeyPath)).toBe(false);
 
       const persisted = JSON.parse(fs.readFileSync(path.join(tmpDir, "session.json"), "utf8")) as Record<string, unknown>;
       expect(persisted.status).toBe("revoked");
