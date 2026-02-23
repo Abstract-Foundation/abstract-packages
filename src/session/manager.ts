@@ -1,6 +1,6 @@
 import type { SessionClient } from "@abstract-foundation/agw-client/sessions";
 import type { AgwChainConfig } from "../agw/client.js";
-import { resolveNetworkConfig, type ResolvedNetworkConfig } from "../config/network.js";
+import { DEFAULT_CHAIN_ID, resolveNetworkConfig, type ResolvedNetworkConfig } from "../config/network.js";
 import { assertSafeSessionPolicy } from "../policy/lint.js";
 import type { Logger } from "../utils/logger.js";
 import { createSessionClientFromSessionData } from "./client.js";
@@ -38,7 +38,7 @@ export class SessionManager {
   constructor(logger: Logger, options: SessionManagerOptions = {}) {
     this.logger = logger.child("session");
     this.storage = new SessionStorage(options.storageDir);
-    this.chainId = options.chainId ?? 11124;
+    this.chainId = options.chainId ?? DEFAULT_CHAIN_ID;
     this.rpcUrl = options.rpcUrl;
   }
 

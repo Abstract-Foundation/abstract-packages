@@ -2,12 +2,12 @@ import { abstract, abstractTestnet } from "viem/chains";
 import { resolveNetworkConfig } from "../src/config/network.js";
 
 describe("network config resolution", () => {
-  it("defaults to Abstract testnet with default RPC", () => {
+  it("defaults to Abstract mainnet with default RPC", () => {
     const config = resolveNetworkConfig({ env: {} });
 
-    expect(config.chainId).toBe(abstractTestnet.id);
-    expect(config.chain.id).toBe(abstractTestnet.id);
-    expect(config.rpcUrl).toBe("https://api.testnet.abs.xyz");
+    expect(config.chainId).toBe(abstract.id);
+    expect(config.chain.id).toBe(abstract.id);
+    expect(config.rpcUrl).toBe("https://api.mainnet.abs.xyz");
   });
 
   it("supports mainnet selection via env", () => {

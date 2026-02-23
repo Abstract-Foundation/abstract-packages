@@ -7,7 +7,7 @@ const SUPPORTED_CHAINS: Record<number, ChainEIP712> = {
   [abstract.id]: abstract,
 };
 
-export const DEFAULT_CHAIN_ID = abstractTestnet.id;
+export const DEFAULT_CHAIN_ID = abstract.id;
 
 export interface ResolveNetworkConfigInput {
   chainId?: number | string;

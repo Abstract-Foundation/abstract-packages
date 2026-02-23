@@ -9,13 +9,13 @@ MCP server for [Abstract Global Wallet](https://abs.xyz) session-key workflows â
 ## Quick Start
 
 ```bash
-npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
+npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
 
 Or add it to Claude Code directly:
 
 ```bash
-claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
+claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
 
 ## Setup
@@ -23,7 +23,7 @@ claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
 ### 1. Bootstrap a session
 
 ```bash
-npx -y @abstract-foundation/agw-mcp init --chain-id 11124
+npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
 This opens the hosted onboarding app (`https://app-jarrodwatts.vercel.app`) where you:
@@ -39,7 +39,7 @@ Bootstrap is single-process per storage directory (lockfile: `~/.agw-mcp/.bootst
 ### 2. Start the MCP server
 
 ```bash
-npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
+npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
 
 ## Client Configuration
@@ -47,7 +47,7 @@ npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
 ### Claude Code
 
 ```bash
-claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 11124
+claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
 
 ### Claude Desktop
@@ -62,7 +62,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "agw-mcp": {
       "command": "npx",
-      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "11124"]
+      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "2741"]
     }
   }
 }
@@ -78,7 +78,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "agw-mcp": {
       "command": "npx",
-      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "11124"]
+      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "2741"]
     }
   }
 }
@@ -93,7 +93,7 @@ Use the same JSON block as Claude Desktop in your editor's MCP configuration fil
 ### Generate config snippet
 
 ```bash
-npx -y @abstract-foundation/agw-mcp config --npx --chain-id 11124
+npx -y @abstract-foundation/agw-mcp config --npx --chain-id 2741
 ```
 
 ## Tools
@@ -117,7 +117,7 @@ npx -y @abstract-foundation/agw-mcp config --npx --chain-id 11124
 
 ## Network Configuration
 
-Defaults to Abstract testnet (chain ID `11124`). Switch to mainnet or override RPC:
+Defaults to Abstract mainnet (chain ID `2741`). Override RPC or switch to testnet when needed:
 
 ```bash
 # Mainnet
@@ -132,7 +132,7 @@ Environment variables are also supported:
 ```bash
 AGW_MCP_CHAIN_ID=2741 npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_RPC_URL=https://api.mainnet.abs.xyz npx -y @abstract-foundation/agw-mcp serve
-AGW_MCP_APP_URL=http://localhost:3001 npx -y @abstract-foundation/agw-mcp init --chain-id 11124
+AGW_MCP_APP_URL=http://localhost:3001 npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
 `init` requires `https://` app URLs except for loopback local development URLs (`http://localhost`, `http://127.0.0.1`, `http://[::1]`).
@@ -140,7 +140,7 @@ AGW_MCP_APP_URL=http://localhost:3001 npx -y @abstract-foundation/agw-mcp init -
 For local hosted-app development:
 
 ```bash
-npx -y @abstract-foundation/agw-mcp init --chain-id 11124 --app-url http://localhost:3001
+npx -y @abstract-foundation/agw-mcp init --chain-id 2741 --app-url http://localhost:3001
 ```
 
 ## Security Model
