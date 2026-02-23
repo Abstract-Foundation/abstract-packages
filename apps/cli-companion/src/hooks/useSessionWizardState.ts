@@ -1,13 +1,20 @@
 'use client';
 
-import { useLoginWithAbstract } from '@abstract-foundation/agw-react';
-import { useAccount } from 'wagmi';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useAccount, useConnect } from 'wagmi';
 import useSessionWizardStore from '@/stores/useSessionWizardStore';
 
 export function useSessionWizardState() {
-  const { login } = useLoginWithAbstract();
   const { isConnected, address } = useAccount();
+  const { connect, connectors, isPending: isLoginPending } = useConnect();
+
+  const login = useCallback(() => {
+    const connector = connectors.find(c => c.id === 'xyz.abs.privy');
+    if (!connector) {
+      throw new Error('Abstract connector not found');
+    }
+    connect({ connector });
+  }, [connect, connectors]);
 
   const currentStep = useSessionWizardStore(state => state.currentStep);
   const agwAddress = useSessionWizardStore(state => state.agwAddress);
@@ -53,6 +60,7 @@ export function useSessionWizardState() {
     markCreationSuccess,
     markCreationError,
     isConnected,
+    isLoginPending,
     login,
   };
 }

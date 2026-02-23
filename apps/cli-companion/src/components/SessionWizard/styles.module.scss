@@ -38,8 +38,8 @@
 
 .walletAddress {
   margin: 0;
-  font-size: 34px;
-  line-height: 1;
+  font-size: 22px;
+  line-height: 1.15;
   letter-spacing: -0.03em;
   font-weight: 500;
 }
@@ -55,6 +55,17 @@
   flex-direction: column;
   gap: 12px;
   padding: 20px 24px 16px;
+}
+
+.loginContent {
+  text-align: center;
+}
+
+.badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .sectionTitle {
@@ -87,6 +98,17 @@
   font-family: inherit;
   font-size: 14px;
   color: #2a313c;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3.5 5.5L7 9L10.5 5.5' stroke='%233D4450' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 14px 14px;
+  background-position: right 16px center;
 }
 
 .textarea {
