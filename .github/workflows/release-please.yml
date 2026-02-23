@@ -9,6 +9,12 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      - name: Release token preflight
+        run: |
+          if [ -z "${{ secrets.RELEASE_PLEASE_TOKEN }}" ]; then
+            echo "::warning::RELEASE_PLEASE_TOKEN is not set. Falling back to GITHUB_TOKEN. If this repository blocks GITHUB_TOKEN from creating pull requests, set RELEASE_PLEASE_TOKEN to a PAT with repo scope."
+          fi
       - uses: googleapis/release-please-action@v4
         with:
           release-type: node
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN != '' && secrets.RELEASE_PLEASE_TOKEN || github.token }}
