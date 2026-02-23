@@ -22,7 +22,14 @@
 }
 
 .logo {
+  display: block;
   width: 117px;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
 }
 
 .buttons {
