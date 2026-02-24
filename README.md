@@ -4,44 +4,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/Abstract-Foundation/agw-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Abstract-Foundation/agw-mcp/actions/workflows/ci.yml)
 
-MCP server for [Abstract Global Wallet](https://abs.xyz) session-key workflows — scoped wallet actions without custodial signing.
+MCP server for Abstract wallet, chain, and Portal API data.
 
 ## Quick Start
 
 ```bash
-npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
-```
-
-Or add it to Claude Code directly:
-
-```bash
-claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
-```
-
-## Setup
-
-### 1. Bootstrap a session
-
-```bash
 npx -y @abstract-foundation/agw-mcp init --chain-id 2741
-```
-
-This opens the hosted onboarding app (`https://mcp.abs.xyz` by default) where you:
-
-1. Choose a policy preset (or provide custom policy JSON)
-2. Connect your Abstract Global Wallet
-3. Approve the session key
-
-Session data is saved to `~/.agw-mcp/session.json` with `0o600` file permissions. The session signer key is stored separately in `~/.agw-mcp/session-signer.key`.
-If a previous active session exists locally, the CLI attempts to revoke it on-chain after creating the new one.
-Bootstrap is single-process per storage directory (lockfile: `~/.agw-mcp/.bootstrap-init.lock`) to prevent concurrent `init` races.
-When local sessions are revoked/cleared, the signer keyfile is deleted as part of local cleanup.
-
-### 2. Start the MCP server
-
-```bash
 npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
+
+`init` opens the hosted onboarding app (`https://mcp.abs.xyz` by default), links your wallet address for local context, and writes `~/.agw-mcp/session.json`.
 
 ## Client Configuration
 
@@ -50,46 +22,6 @@ npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```bash
 claude mcp add agw -- npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
-
-<details>
-<summary>macOS: ~/Library/Application Support/Claude/claude_desktop_config.json</summary>
-
-```json
-{
-  "mcpServers": {
-    "agw-mcp": {
-      "command": "npx",
-      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "2741"]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary>Windows: %APPDATA%\Claude\claude_desktop_config.json</summary>
-
-```json
-{
-  "mcpServers": {
-    "agw-mcp": {
-      "command": "npx",
-      "args": ["-y", "@abstract-foundation/agw-mcp", "serve", "--chain-id", "2741"]
-    }
-  }
-}
-```
-
-</details>
-
-### Cursor / Windsurf
-
-Use the same JSON block as Claude Desktop in your editor's MCP configuration file.
 
 ### Generate config snippet
 
@@ -101,24 +33,27 @@ npx -y @abstract-foundation/agw-mcp config --npx --chain-id 2741
 
 | Tool | Description |
 |------|-------------|
-| `get_wallet_address` | Returns AGW account address from local session |
-| `get_balances` | Native + ERC-20 balances with formatted amounts |
-| `get_token_list` | Wallet ERC-20 holdings via network discovery |
-| `get_session_status` | On-chain session state + local expiry metadata |
-| `sign_message` | Signs UTF-8 message via session signer |
-| `sign_transaction` | Signs EVM transaction, returns signed payload (no broadcast) |
-| `preview_transaction` | Impact/risk preview without signing |
-| `send_transaction` | Preview by default, broadcast on `execute: true` |
-| `send_calls` | EIP-5792 batch call execution |
-| `transfer_token` | Native/ERC-20 transfer with policy checks |
-| `swap_tokens` | 0x quote + execute via session key |
-| `write_contract` | Contract write with target/selector policy validation |
-| `deploy_contract` | Contract deployment with ABI/bytecode validation |
-| `revoke_session` | Revoke session key, invalidate local session |
+| `get_wallet_address` | Returns the linked AGW account address from local session storage |
+| `get_balances` | Returns native and ERC-20 balances |
+| `get_token_list` | Returns wallet ERC-20 holdings |
+| `portal_list_apps` | Lists Portal apps (`/api/v1/app/`) |
+| `portal_get_app` | Fetches Portal app detail (`/api/v1/app/{id}/`) |
+| `portal_list_streams` | Lists streams for a Portal app (`/api/v1/streams/{app}/`) |
+| `portal_get_user_profile` | Fetches Portal user profile (`/api/v1/user/profile/{address}/`) |
+| `abstract_rpc_call` | Calls supported Abstract JSON-RPC methods |
+
+### `abstract_rpc_call` constraints
+
+Blocked by design in v0:
+- `eth_sendRawTransaction`
+- `zks_sendRawTransactionWithDetailedOutput`
+- `debug_*`
+- `eth_subscribe`, `eth_unsubscribe`
+- filter lifecycle methods (`eth_newFilter`, `eth_getFilterChanges`, etc.)
 
 ## Network Configuration
 
-Defaults to Abstract mainnet (chain ID `2741`). Override RPC or switch to testnet when needed:
+Defaults to Abstract mainnet (`2741`).
 
 ```bash
 # Mainnet
@@ -126,22 +61,17 @@ npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 
 # Custom RPC
 npx -y @abstract-foundation/agw-mcp serve --chain-id 2741 --rpc-url https://api.mainnet.abs.xyz
-
-# 0x API key override (for swap_tokens quote requests)
-npx -y @abstract-foundation/agw-mcp serve --chain-id 2741 --zeroex-api-key YOUR_0X_API_KEY
 ```
 
-Environment variables are also supported:
+Environment variables:
 
 ```bash
 AGW_MCP_CHAIN_ID=2741 npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_RPC_URL=https://api.mainnet.abs.xyz npx -y @abstract-foundation/agw-mcp serve
-AGW_MCP_ZEROEX_API_KEY=YOUR_0X_API_KEY npx -y @abstract-foundation/agw-mcp serve
 AGW_MCP_APP_URL=https://mcp.abs.xyz npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 ```
 
-`init` requires `https://` app URLs except for loopback local development URLs (`http://localhost`, `http://127.0.0.1`, `http://[::1]`).
-`init` defaults to `https://mcp.abs.xyz` if no app URL is configured via `--app-url` or `AGW_MCP_APP_URL`.
+`init` requires `https://` app URLs except loopback (`http://localhost`, `http://127.0.0.1`, `http://[::1]`).
 
 For local hosted-app development:
 
@@ -149,22 +79,13 @@ For local hosted-app development:
 npx -y @abstract-foundation/agw-mcp init --chain-id 2741 --app-url http://localhost:3001
 ```
 
-## Security Model
+## Security Model (v0)
 
-- **Non-custodial**: Session keys are scoped and time-limited. No full wallet access.
-- **Default-deny policies**: Write tools fail unless a matching policy explicitly allows the target address, function selector, or transfer amount.
-- **Local-only transport**: stdio MCP — no network exposure. Session signer keys never leave the machine.
-- **Restrictive file permissions**: Session storage directory `0o700`, files `0o600`.
-- **Stderr-only logging**: stdout is reserved for MCP stdio transport. All operational logs go to stderr.
-
-### Real Funds Checklist
-
-For production usage with real money:
-
-1. Use a trusted onboarding host (`--app-url` or `AGW_MCP_APP_URL`) and pin it in deployment config.
-2. Start with minimal intent scope (prefer payments-only) and shortest practical expiry.
-3. Keep `execute` off by default and run preview-first workflows where possible.
-4. Revoke sessions after task completion (`revoke_session`) and confirm status with `get_session_status`.
+- **Scoped MCP surface**: no signing, transfers, swaps, deploys, or session-key actions exposed.
+- **No delegated signer provisioning in onboarding**: local context stores wallet address + chain only.
+- **Local-only transport**: stdio MCP (no network listener).
+- **Restrictive file permissions**: storage dir `0o700`, files `0o600`.
+- **Stderr-only logging**: stdout is reserved for MCP transport.
 
 ## Development
 

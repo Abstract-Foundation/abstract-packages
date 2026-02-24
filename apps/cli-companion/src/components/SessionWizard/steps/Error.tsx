@@ -13,20 +13,20 @@ import { useSessionWizardState } from '@/hooks/useSessionWizardState';
 import styles from '../styles.module.scss';
 
 export default function ErrorStep() {
-  const { error, backToPolicySelection } = useSessionWizardState();
+  const { error, backToStart } = useSessionWizardState();
 
   return (
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
-          <CardTitle>Session Creation Failed</CardTitle>
+          <CardTitle>Wallet Linking Failed</CardTitle>
           <CardDescription>Review the error and try again.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.error}>{error ?? 'Unknown error occurred.'}</p>
         </CardContent>
         <CardFooter className={styles.footer}>
-          <Button className={styles.footerButton} height="40" variant="primary" onClick={backToPolicySelection}>
+          <Button className={styles.footerButton} height="40" variant="primary" onClick={backToStart}>
             Try Again
           </Button>
         </CardFooter>

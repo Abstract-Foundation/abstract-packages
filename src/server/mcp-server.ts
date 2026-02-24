@@ -3,10 +3,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { AuditLog } from "../audit/index.js";
 import { toMcpErrorContract } from "../errors/index.js";
-import { assertToolAllowedByPolicyMeta } from "../policy/meta.js";
 import { SessionManager } from "../session/manager.js";
-import { SessionReconcileWorker } from "../session/reconcile.js";
-import { getTool, tools } from "../tools/index.js";
+import { getTool, publicTools } from "../tools/index.js";
 import { Logger } from "../utils/logger.js";
 
 export interface AgwMcpServerOptions {
@@ -20,7 +18,6 @@ export class AgwMcpServer {
   private readonly logger: Logger;
   private readonly sessionManager: SessionManager;
   private readonly auditLog: AuditLog;
-  private readonly reconcileWorker: SessionReconcileWorker;
 
   constructor(options: AgwMcpServerOptions = {}) {
     this.logger = new Logger("agw-mcp");
@@ -30,7 +27,6 @@ export class AgwMcpServer {
       rpcUrl: options.rpcUrl,
     });
     this.auditLog = new AuditLog(options.storageDir);
-    this.reconcileWorker = new SessionReconcileWorker(this.sessionManager, this.logger.child("reconcile"));
 
     this.server = new Server(
       {
@@ -48,7 +44,7 @@ export class AgwMcpServer {
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: tools.map(tool => ({
+        tools: publicTools.map(tool => ({
           name: tool.name,
           description: tool.description,
           inputSchema: tool.inputSchema,
@@ -76,8 +72,6 @@ export class AgwMcpServer {
             arguments: (request.params.arguments ?? {}) as Record<string, unknown>,
           },
         });
-
-        assertToolAllowedByPolicyMeta(this.sessionManager.getSession(), toolName);
 
         const result = await tool.handler(request.params.arguments ?? {}, {
           sessionManager: this.sessionManager,
@@ -114,9 +108,7 @@ export class AgwMcpServer {
 
   async start(): Promise<void> {
     this.sessionManager.initialize();
-    this.reconcileWorker.start();
     process.once("beforeExit", () => {
-      this.reconcileWorker.stop();
       void this.auditLog.flush().catch(() => undefined);
     });
     await this.server.connect(new StdioServerTransport());

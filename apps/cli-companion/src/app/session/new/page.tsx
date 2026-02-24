@@ -44,7 +44,6 @@ export default async function NewSessionPage({
       <SessionFlowClient
         callbackUrl={result.params.callbackUrl}
         chainId={result.params.chainId}
-        signerAddress={result.params.signerAddress}
       />
     </div>
   );

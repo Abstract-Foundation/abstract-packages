@@ -13,20 +13,19 @@ import { useSessionWizardState } from '@/hooks/useSessionWizardState';
 import styles from '../styles.module.scss';
 
 export default function Success() {
-  const { redirectUrl, transactionHash } = useSessionWizardState();
+  const { redirectUrl } = useSessionWizardState();
 
   return (
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
-          <CardTitle>Session Created</CardTitle>
+          <CardTitle>Wallet Linked</CardTitle>
           <CardDescription>Return to your CLI callback to finish setup.</CardDescription>
         </CardHeader>
         <CardContent className={styles.content}>
-          {transactionHash ? <p className={styles.success}>Transaction: {transactionHash}</p> : null}
           {redirectUrl ? (
             <p className={styles.helper}>
-              Open the link below to hand off your new session to the CLI.
+              Open the link below to hand off your linked wallet context to the CLI.
             </p>
           ) : null}
           {redirectUrl ? (
@@ -35,7 +34,7 @@ export default function Success() {
             </p>
           ) : null}
           <p className={styles.helper}>
-            After returning to CLI, run <code>get_session_status</code> to confirm and <code>revoke_session</code> when done.
+            After returning to CLI, start the server with <code>agw-mcp serve</code>.
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>
