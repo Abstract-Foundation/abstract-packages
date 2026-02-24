@@ -5,7 +5,7 @@ import type { ToolHandler } from "./types.js";
 export const abstractRpcCallTool: ToolHandler = {
   name: "abstract_rpc_call",
   description:
-    "Call an allowlisted Abstract JSON-RPC method in strict read-only mode (no sendRawTransaction/debug/pubsub/filter lifecycle).",
+    "Call supported Abstract JSON-RPC methods in this build (no sendRawTransaction/debug/pubsub/filter lifecycle).",
   inputSchema: {
     type: "object",
     properties: {

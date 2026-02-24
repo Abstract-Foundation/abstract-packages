@@ -40,7 +40,7 @@ describe("abstract_rpc_call tool", () => {
     const tool = getTool("abstract_rpc_call");
 
     await expect(tool?.handler({ method: "eth_sendRawTransaction", params: [] }, buildContext())).rejects.toThrow(
-      "disabled in read-only mode",
+      "not enabled in this build",
     );
   });
 });

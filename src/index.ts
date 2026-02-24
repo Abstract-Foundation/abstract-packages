@@ -26,11 +26,11 @@ function resolveCliVersion(): string {
 }
 
 const program = new Command();
-program.name("agw-mcp").description("Read-only MCP server for Abstract wallet + chain data").version(resolveCliVersion());
+program.name("agw-mcp").description("MCP server for Abstract wallet + chain data").version(resolveCliVersion());
 
 program
   .command("init")
-  .description("Link a wallet for read-only local AGW MCP context")
+  .description("Link a wallet for local AGW MCP context")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
   .option("--app-url <url>", "Hosted onboarding URL (defaults to https://mcp.abs.xyz; env: AGW_MCP_APP_URL)")
@@ -54,7 +54,7 @@ program
       storageDir: options.storageDir,
     });
     manager.setSession(session);
-    logger.info("Wallet linked for read-only MCP usage. You can now run `agw-mcp serve`.");
+    logger.info("Wallet linked. You can now run `agw-mcp serve`.");
   });
 
 program
@@ -74,7 +74,7 @@ program
 
 program
   .command("serve")
-  .description("Run the local stdio read-only MCP server")
+  .description("Run the local stdio MCP server")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
   .option("--storage-dir <dir>", "Session storage directory")

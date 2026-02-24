@@ -32,7 +32,7 @@ export class SessionManager {
     }
 
     this.session = session;
-    this.logger.info(`Loaded read-only session for ${session.accountAddress}`);
+    this.logger.info(`Loaded linked wallet session for ${session.accountAddress}`);
   }
 
   getSession(): AgwSessionData | null {

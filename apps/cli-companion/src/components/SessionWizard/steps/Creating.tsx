@@ -74,7 +74,7 @@ export default function Creating({
       <Card>
         <CardHeader>
           <CardTitle>Linking Wallet</CardTitle>
-          <CardDescription>Preparing read-only wallet context for your local MCP server.</CardDescription>
+          <CardDescription>Preparing wallet context for your local MCP server.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.helper}>

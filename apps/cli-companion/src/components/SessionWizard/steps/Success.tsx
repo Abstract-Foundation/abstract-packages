@@ -34,7 +34,7 @@ export default function Success() {
             </p>
           ) : null}
           <p className={styles.helper}>
-            After returning to CLI, start the read-only server with <code>agw-mcp serve</code>.
+            After returning to CLI, start the server with <code>agw-mcp serve</code>.
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>

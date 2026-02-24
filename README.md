@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/Abstract-Foundation/agw-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Abstract-Foundation/agw-mcp/actions/workflows/ci.yml)
 
-Read-only MCP server for Abstract wallet, chain, and Portal API data.
+MCP server for Abstract wallet, chain, and Portal API data.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ npx -y @abstract-foundation/agw-mcp init --chain-id 2741
 npx -y @abstract-foundation/agw-mcp serve --chain-id 2741
 ```
 
-`init` opens the hosted onboarding app (`https://mcp.abs.xyz` by default), links your wallet address for local read-only context, and writes `~/.agw-mcp/session.json`.
+`init` opens the hosted onboarding app (`https://mcp.abs.xyz` by default), links your wallet address for local context, and writes `~/.agw-mcp/session.json`.
 
 ## Client Configuration
 
@@ -40,9 +40,9 @@ npx -y @abstract-foundation/agw-mcp config --npx --chain-id 2741
 | `portal_get_app` | Fetches Portal app detail (`/api/v1/app/{id}/`) |
 | `portal_list_streams` | Lists streams for a Portal app (`/api/v1/streams/{app}/`) |
 | `portal_get_user_profile` | Fetches Portal user profile (`/api/v1/user/profile/{address}/`) |
-| `abstract_rpc_call` | Calls allowlisted read-only Abstract JSON-RPC methods |
+| `abstract_rpc_call` | Calls supported Abstract JSON-RPC methods |
 
-### `abstract_rpc_call` read-only constraints
+### `abstract_rpc_call` constraints
 
 Blocked by design in v0:
 - `eth_sendRawTransaction`
@@ -81,7 +81,7 @@ npx -y @abstract-foundation/agw-mcp init --chain-id 2741 --app-url http://localh
 
 ## Security Model (v0)
 
-- **Read-only MCP surface**: no signing, transfers, swaps, deploys, or session-key actions exposed.
+- **Scoped MCP surface**: no signing, transfers, swaps, deploys, or session-key actions exposed.
 - **No delegated signer provisioning in onboarding**: local context stores wallet address + chain only.
 - **Local-only transport**: stdio MCP (no network listener).
 - **Restrictive file permissions**: storage dir `0o700`, files `0o600`.

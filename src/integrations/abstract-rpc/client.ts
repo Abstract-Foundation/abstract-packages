@@ -66,10 +66,10 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 
 export function assertMethodAllowed(method: string): void {
   if (BLOCKED_METHODS.has(method)) {
-    throw new Error(`RPC method "${method}" is disabled in read-only mode.`);
+    throw new Error(`RPC method "${method}" is not enabled in this build.`);
   }
   if (!ALLOWED_METHODS.has(method)) {
-    throw new Error(`RPC method "${method}" is not in the v0 allowlist.`);
+    throw new Error(`RPC method "${method}" is not supported in this build.`);
   }
 }
 

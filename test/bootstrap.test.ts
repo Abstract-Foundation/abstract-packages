@@ -63,7 +63,7 @@ describe("bootstrap callback/session bundle flow", () => {
     expect(parsed.chainId).toBe(11124);
   });
 
-  it("materializes minimal read-only session bundle", () => {
+  it("materializes minimal session bundle", () => {
     const now = 1_800_000_000;
 
     const session = materializeSessionFromBundle(
