@@ -6,8 +6,6 @@ describe('redirect helpers', () => {
     const url = buildRedirectUrl('http://127.0.0.1:8787/cb/test', {
       accountAddress: '0x1111111111111111111111111111111111111111',
       chainId: 11124,
-      expiresAt: 1_900_000_000,
-      sessionConfig: { signer: '0x2222222222222222222222222222222222222222' },
     });
 
     const parsed = new URL(url);
@@ -21,8 +19,6 @@ describe('redirect helpers', () => {
       buildRedirectUrl('https://evil.example/callback', {
         accountAddress: '0x1111111111111111111111111111111111111111',
         chainId: 11124,
-        expiresAt: 1_900_000_000,
-        sessionConfig: {},
       }),
     ).toThrow('Only loopback');
 

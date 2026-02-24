@@ -25,11 +25,10 @@ export default function NotLoggedIn() {
           </div>
         </CardHeader>
         <CardContent className={styles.loginContent}>
-          <CardTitle>AGW MCP Server Onboarding</CardTitle>
+          <CardTitle>AGW MCP Read-Only Onboarding</CardTitle>
           <CardDescription>
-            Connect your Abstract Global Wallet to finish AGW MCP Server setup for local tools.
-            After login, you will choose a scoped session policy and create a session for secure
-            automated actions. This flow only configures MCP access for this machine.
+            Connect your Abstract Global Wallet to link local read-only MCP access.
+            This does not create session keys or delegated signer access.
           </CardDescription>
         </CardContent>
         <CardFooter className={styles.footer}>

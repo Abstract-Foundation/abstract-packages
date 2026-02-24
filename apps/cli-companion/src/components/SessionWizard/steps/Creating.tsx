@@ -14,32 +14,25 @@ import {
 import { useCreateSession } from '@/hooks/useCreateSession';
 import { useSessionWizardState } from '@/hooks/useSessionWizardState';
 import { buildRedirectUrl } from '@/lib/redirect';
-import { serializeSessionConfig } from '@/lib/session-config';
 import styles from '../styles.module.scss';
 
 export default function Creating({
   callbackUrl,
-  signerAddress,
   chain,
 }: {
   callbackUrl: string;
-  signerAddress: `0x${string}`;
   chain: Chain;
 }) {
   const hasStartedRef = useRef(false);
   const {
     agwAddress,
-    policyPreview,
     markCreationError,
     markCreationSuccess,
   } = useSessionWizardState();
-  const { createSession, isPending, isClientReady, isClientLoading } = useCreateSession(chain);
+  const { createSession, isPending } = useCreateSession();
 
   useEffect(() => {
     if (hasStartedRef.current) {
-      return;
-    }
-    if (!isClientReady) {
       return;
     }
 
@@ -50,28 +43,15 @@ export default function Creating({
         if (!agwAddress) {
           throw new Error('Wallet is not connected.');
         }
-        if (!policyPreview) {
-          throw new Error('Policy preview is missing.');
-        }
         const accountAddress = agwAddress as `0x${string}`;
 
-        const result = await createSession({
-          accountAddress,
-          signerAddress,
-          policyPayload: policyPreview.policyPayload,
-        });
-
-        const bundle = {
+        const bundle = await createSession({
           accountAddress,
           chainId: chain.id,
-          expiresAt: Number(result.sessionConfig.expiresAt),
-          sessionConfig: serializeSessionConfig(result.sessionConfig),
-          policyMeta: policyPreview.policyPayload.policyMeta,
-        };
+        });
 
         const redirectUrl = buildRedirectUrl(callbackUrl, bundle);
         markCreationSuccess({
-          transactionHash: result.transactionHash ?? null,
           redirectUrl,
         });
       } catch (error) {
@@ -82,12 +62,9 @@ export default function Creating({
     void run();
   }, [
     agwAddress,
-    policyPreview,
     createSession,
-    signerAddress,
     callbackUrl,
     chain.id,
-    isClientReady,
     markCreationError,
     markCreationSuccess,
   ]);
@@ -96,16 +73,14 @@ export default function Creating({
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
-          <CardTitle>Creating Session</CardTitle>
-          <CardDescription>Approve the transaction in your wallet to create the session key.</CardDescription>
+          <CardTitle>Linking Wallet</CardTitle>
+          <CardDescription>Preparing read-only wallet context for your local MCP server.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.helper}>
-            {!isClientReady || isClientLoading
-              ? 'Preparing wallet client...'
-              : isPending
-                ? 'Waiting for wallet approval...'
-                : 'Preparing transaction...'}
+            {isPending
+              ? 'Finalizing wallet link...'
+              : 'Building local callback payload...'}
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>

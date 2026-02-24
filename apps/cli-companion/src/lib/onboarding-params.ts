@@ -1,5 +1,3 @@
-import type { Address } from 'viem';
-import { isAddress } from 'viem';
 import { isSupportedChainId, resolveChain, type SupportedChainId } from './chains';
 import { SUPPORTED_CHAIN_IDS } from './config';
 import { isLoopbackCallbackUrl } from './redirect';
@@ -7,7 +5,6 @@ import { isLoopbackCallbackUrl } from './redirect';
 export interface OnboardingParams {
   callbackUrl: string;
   chainId: SupportedChainId;
-  signerAddress: Address;
 }
 
 export interface OnboardingValidationResult {
@@ -19,12 +16,11 @@ export interface OnboardingValidationResult {
 export function parseOnboardingParams(searchParams: URLSearchParams): OnboardingValidationResult {
   const callbackUrl = searchParams.get('callback_url');
   const chainIdRaw = searchParams.get('chain_id');
-  const signerRaw = searchParams.get('signer');
 
-  if (!callbackUrl || !chainIdRaw || !signerRaw) {
+  if (!callbackUrl || !chainIdRaw) {
     return {
       ok: false,
-      error: 'Missing required parameters: callback_url, chain_id, signer.',
+      error: 'Missing required parameters: callback_url, chain_id.',
     };
   }
 
@@ -64,13 +60,6 @@ export function parseOnboardingParams(searchParams: URLSearchParams): Onboarding
     };
   }
 
-  if (!isAddress(signerRaw)) {
-    return {
-      ok: false,
-      error: 'Invalid signer address. Expected 0x-prefixed EVM address.',
-    };
-  }
-
   resolveChain(chainId);
 
   return {
@@ -78,7 +67,6 @@ export function parseOnboardingParams(searchParams: URLSearchParams): Onboarding
     params: {
       callbackUrl,
       chainId,
-      signerAddress: signerRaw,
     },
   };
 }

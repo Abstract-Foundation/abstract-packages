@@ -10,7 +10,6 @@ import { SessionManager } from "./session/manager.js";
 import { Logger } from "./utils/logger.js";
 
 const logger = new Logger("agw-mcp");
-const ZEROEX_API_KEY_ENV = "AGW_MCP_ZEROEX_API_KEY";
 
 function resolveCliVersion(): string {
   try {
@@ -26,27 +25,15 @@ function resolveCliVersion(): string {
   return "0.1.0";
 }
 
-function applyZeroExApiKeyOverride(apiKeyValue: unknown): void {
-  if (apiKeyValue === undefined) {
-    return;
-  }
-
-  if (typeof apiKeyValue !== "string" || apiKeyValue.trim() === "") {
-    throw new Error("--zeroex-api-key must be a non-empty string");
-  }
-
-  process.env[ZEROEX_API_KEY_ENV] = apiKeyValue.trim();
-}
-
 const program = new Command();
-program.name("agw-mcp").description("Local MCP server for AGW session-key workflows").version(resolveCliVersion());
+program.name("agw-mcp").description("Read-only MCP server for Abstract wallet + chain data").version(resolveCliVersion());
 
 program
   .command("init")
-  .description("Bootstrap local AGW MCP session storage")
+  .description("Link a wallet for read-only local AGW MCP context")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
-  .option("--app-url <url>", "Hosted session onboarding URL (defaults to https://mcp.abs.xyz; env: AGW_MCP_APP_URL)")
+  .option("--app-url <url>", "Hosted onboarding URL (defaults to https://mcp.abs.xyz; env: AGW_MCP_APP_URL)")
   .option("--storage-dir <dir>", "Session storage directory")
   .action(async options => {
     const networkConfig = resolveNetworkConfig({
@@ -67,7 +54,7 @@ program
       storageDir: options.storageDir,
     });
     manager.setSession(session);
-    logger.info("Session saved. You can now run `agw-mcp serve`.");
+    logger.info("Wallet linked for read-only MCP usage. You can now run `agw-mcp serve`.");
   });
 
 program
@@ -87,14 +74,11 @@ program
 
 program
   .command("serve")
-  .description("Run the local stdio MCP server")
+  .description("Run the local stdio read-only MCP server")
   .option("--chain-id <chainId>", "EVM chain id (env: AGW_MCP_CHAIN_ID)")
   .option("--rpc-url <rpcUrl>", "RPC URL override (env: AGW_MCP_RPC_URL)")
-  .option("--zeroex-api-key <apiKey>", "0x API key override (env: AGW_MCP_ZEROEX_API_KEY)")
   .option("--storage-dir <dir>", "Session storage directory")
   .action(async options => {
-    applyZeroExApiKeyOverride(options.zeroexApiKey);
-
     const networkConfig = resolveNetworkConfig({
       chainId: options.chainId,
       rpcUrl: options.rpcUrl,

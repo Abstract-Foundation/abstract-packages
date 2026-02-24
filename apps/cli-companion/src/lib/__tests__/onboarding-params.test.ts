@@ -7,7 +7,6 @@ describe('onboarding params', () => {
       new URLSearchParams({
         callback_url: 'http://127.0.0.1:8787/cb/abc',
         chain_id: '11124',
-        signer: '0x1111111111111111111111111111111111111111',
       }),
     );
 
@@ -20,7 +19,6 @@ describe('onboarding params', () => {
       new URLSearchParams({
         callback_url: 'http://127.0.0.1:8787/cb/abc',
         chain_id: '1',
-        signer: '0x1111111111111111111111111111111111111111',
       }),
     );
 
@@ -33,7 +31,6 @@ describe('onboarding params', () => {
       new URLSearchParams({
         callback_url: 'http://example.com/cb',
         chain_id: '11124',
-        signer: '0x1111111111111111111111111111111111111111',
       }),
     );
 
@@ -46,7 +43,6 @@ describe('onboarding params', () => {
       new URLSearchParams({
         callback_url: 'http://[::1]:8787/cb/abc',
         chain_id: '2741',
-        signer: '0x1111111111111111111111111111111111111111',
       }),
     );
 
@@ -59,7 +55,6 @@ describe('onboarding params', () => {
       new URLSearchParams({
         callback_url: 'http://127.0.0.1:8787/cb/abc?session=malicious',
         chain_id: '11124',
-        signer: '0x1111111111111111111111111111111111111111',
       }),
     );
 

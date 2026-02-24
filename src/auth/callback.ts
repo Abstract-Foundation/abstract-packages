@@ -1,17 +1,10 @@
 import { isAddress } from "viem";
-import { parseSessionPolicyMeta } from "../policy/meta.js";
-import type { SessionPolicyMeta } from "../session/types.js";
 
 const CALLBACK_PAYLOAD_QUERY_KEY = "session";
 
 export interface SessionBundlePayload {
   accountAddress: string;
   chainId: number;
-  expiresAt: number;
-  sessionConfig: {
-    signer: `0x${string}`;
-  } & Record<string, unknown>;
-  policyMeta?: SessionPolicyMeta;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -94,24 +87,8 @@ export function parseSessionBundleInput(input: string): SessionBundlePayload {
     throw new Error("Invalid session bundle accountAddress.");
   }
 
-  const sessionConfig = payload.sessionConfig;
-  if (!isRecord(sessionConfig)) {
-    throw new Error("Invalid session bundle sessionConfig.");
-  }
-  if (typeof sessionConfig.signer !== "string" || !isAddress(sessionConfig.signer)) {
-    throw new Error("Invalid session bundle sessionConfig.signer.");
-  }
-
-  const chainId = parsePositiveInt(payload.chainId, "chainId");
-
   return {
     accountAddress: payload.accountAddress,
-    chainId,
-    expiresAt: parsePositiveInt(payload.expiresAt, "expiresAt"),
-    sessionConfig: {
-      ...sessionConfig,
-      signer: sessionConfig.signer,
-    },
-    policyMeta: parseSessionPolicyMeta(payload.policyMeta),
+    chainId: parsePositiveInt(payload.chainId, "chainId"),
   };
 }

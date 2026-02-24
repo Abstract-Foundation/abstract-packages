@@ -15,26 +15,9 @@ function buildSessionData(overrides: Partial<AgwSessionData> = {}): AgwSessionDa
   return {
     accountAddress: "0x1111111111111111111111111111111111111111",
     chainId: 11124,
-    expiresAt: now + 3600,
     createdAt: now,
     updatedAt: now,
     status: "active",
-    sessionConfig: {
-      signer: "0x2222222222222222222222222222222222222222",
-      expiresAt: String(now + 3600),
-      feeLimit: {
-        limitType: "lifetime",
-        limit: "1000000000000000",
-        period: "0",
-      },
-      maxValuePerUse: "1000000000000000",
-      callPolicies: [],
-      transferPolicies: [],
-    },
-    sessionSignerRef: {
-      kind: "keyfile",
-      value: "/tmp/session.key",
-    },
     ...overrides,
   };
 }
