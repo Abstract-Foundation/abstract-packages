@@ -92,7 +92,7 @@ export default function HomePage() {
         </div>
         <h1 className={styles.title}>Abstract Global Wallet<br />for AI Agents</h1>
         <p className={styles.subtitle}>
-          Give AI agents secure, scoped access to your Abstract Global Wallet.
+          Connect your wallet once, then query wallet, chain, and Portal data from your AI client.
         </p>
       </div>
 
@@ -101,12 +101,12 @@ export default function HomePage() {
           {/* Step 1 */}
           <div className={styles.sectionHeader}>
             <div className={styles.stepNumber}>1</div>
-            <h2 className={styles.sectionTitle}>Create a session</h2>
+            <h2 className={styles.sectionTitle}>Link your wallet</h2>
           </div>
           <div className={styles.sectionBody}>
             <p className={styles.text}>
               Open your terminal and run this command. It will open a browser window
-              where you connect your wallet and choose what your agent is allowed to do.
+              where you connect your wallet and approve linking this machine.
             </p>
             <div className={styles.codeBlock}>
               <CopyButton text={COMMANDS.init} />
@@ -275,7 +275,7 @@ export default function HomePage() {
           {/* Step 3 */}
           <div className={styles.sectionHeader}>
             <div className={styles.stepNumber}>3</div>
-            <h2 className={styles.sectionTitle}>Start using it</h2>
+            <h2 className={styles.sectionTitle}>Run your first prompts</h2>
           </div>
           <div className={styles.sectionBody}>
             <p className={styles.text}>
@@ -283,14 +283,14 @@ export default function HomePage() {
             </p>
             <div className={styles.codeBlock}>
               <code className={styles.code}>
-                <span className={styles.codeComment}># Check your wallet</span>{'\n'}
-                <span className={styles.codeString}>&quot;What&#39;s my wallet address and balance?&quot;</span>{'\n'}
+                <span className={styles.codeComment}># Wallet snapshot</span>{'\n'}
+                <span className={styles.codeString}>&quot;Show my wallet address, ETH balance, and token balances.&quot;</span>{'\n'}
                 {'\n'}
-                <span className={styles.codeComment}># Send a token</span>{'\n'}
-                <span className={styles.codeString}>&quot;Send 0.01 ETH to 0x1234...&quot;</span>{'\n'}
+                <span className={styles.codeComment}># Chain data</span>{'\n'}
+                <span className={styles.codeString}>&quot;What is the current gas price on Abstract?&quot;</span>{'\n'}
                 {'\n'}
-                <span className={styles.codeComment}># Use an app</span>{'\n'}
-                <span className={styles.codeString}>&quot;Bet $5 USDC on Man United on Myriad&quot;</span>
+                <span className={styles.codeComment}># Portal data</span>{'\n'}
+                <span className={styles.codeString}>&quot;Get my account portfolio summary from the Abstract Portal API.&quot;</span>
               </code>
             </div>
           </div>

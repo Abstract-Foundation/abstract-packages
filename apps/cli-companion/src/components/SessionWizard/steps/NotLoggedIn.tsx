@@ -27,8 +27,7 @@ export default function NotLoggedIn() {
         <CardContent className={styles.loginContent}>
           <CardTitle>AGW MCP Onboarding</CardTitle>
           <CardDescription>
-            Connect your Abstract Global Wallet to link local MCP access.
-            This does not create session keys or delegated signer access.
+            Connect your Abstract Global Wallet to link local MCP access for this device.
           </CardDescription>
         </CardContent>
         <CardFooter className={styles.footer}>
