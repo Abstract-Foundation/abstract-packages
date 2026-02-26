@@ -36,4 +36,4 @@ agw-mcp handles wallet *execution*. Pair it with these skills for domain *knowle
 | Deploy contracts | `deploying-contracts-on-abstract` |
 | Understand AGW architecture | `abstract-global-wallet` |
 | Trade on Myriad markets | `myriad-on-abstract` |
-| Understand gas sponsorship / paymasters | `abstract-native-aa` |
+| Understand gas sponsorship | `abstract-global-wallet` |

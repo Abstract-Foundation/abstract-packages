@@ -30,7 +30,6 @@ claude plugin add ./abstract-skills
 | [connecting-to-abstract](skills/connecting-to-abstract/) | Network config, RPC endpoints, chain IDs, explorers |
 | [deploying-contracts-on-abstract](skills/deploying-contracts-on-abstract/) | Foundry-first smart contract deployment (Hardhat alternative in references) |
 | [abstract-global-wallet](skills/abstract-global-wallet/) | AGW integration — React hooks, session keys, wallet providers |
-| [abstract-native-aa](skills/abstract-native-aa/) | Native account abstraction — paymasters, smart accounts |
 | [using-agw-mcp](skills/using-agw-mcp/) | AI agent wallet access via the AGW MCP server |
 | [myriad-on-abstract](skills/myriad-on-abstract/) | Prediction market integration with Myriad |
 

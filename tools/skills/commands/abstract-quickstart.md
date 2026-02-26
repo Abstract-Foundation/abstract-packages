@@ -61,39 +61,9 @@ Which smart contract framework?
 </options>
 </question>
 
-2. For Foundry:
-```bash
-# Install foundry-zksync (overwrites standard Foundry)
-curl -L https://raw.githubusercontent.com/matter-labs/foundry-zksync/main/install-foundry-zksync | bash
-foundryup-zksync
+2. Follow the setup steps from the `deploying-contracts-on-abstract` skill for the chosen framework (Foundry or Hardhat). That skill has the complete install, config, compile, and deploy workflow.
 
-# Create project
-forge init <project-name> && cd <project-name>
-```
-
-Then update `foundry.toml`:
-```toml
-[profile.default]
-src = 'src'
-libs = ['lib']
-fallback_oz = true
-is_system = false
-mode = "3"
-
-[etherscan]
-abstractTestnet = { chain = "11124", url = "https://api-sepolia.abscan.org/api", key = "${ABSCAN_API_KEY}" }
-abstractMainnet = { chain = "2741", url = "https://api.abscan.org/api", key = "${ABSCAN_API_KEY}" }
-```
-
-3. For Hardhat:
-```bash
-npx hardhat init
-npm install -D @matterlabs/hardhat-zksync zksync-ethers@6 ethers@6
-```
-
-Then configure `hardhat.config.ts` with Abstract network settings.
-
-4. Remind them:
+3. Remind them:
    - All `forge` commands need `--zksync` flag
    - Compiled output goes to `zkout/` (Foundry) or `artifacts-zk/` (Hardhat)
    - Get testnet ETH from faucets: https://docs.abs.xyz/tooling/faucets

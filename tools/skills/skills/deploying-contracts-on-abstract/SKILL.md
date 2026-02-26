@@ -1,6 +1,6 @@
 ---
 name: deploying-contracts-on-abstract
-description: Deploy smart contracts on Abstract using Foundry (default) or Hardhat. Covers zksolc compilation, deployment, Abscan verification, and testnet faucets for the Abstract Ethereum L2. This skill should be used when deploying or compiling contracts on Abstract, using forge/foundry-zksync, verifying on Abscan, or working with the zkSync compiler on Abstract.
+description: Deploy smart contracts on Abstract using Foundry (default) or Hardhat. Covers zksolc compilation, deployment, Abscan verification, and testnet faucets for the Abstract Ethereum L2. This skill should be used when deploying or compiling contracts on Abstract, using forge/foundry-zksync, forge build --zksync, forge create --zksync, anvil-zksync, verifying on Abscan, or working with the zkSync compiler on Abstract.
 ---
 
 # Deploying Contracts on Abstract
@@ -96,12 +96,12 @@ Append `--constructor-args <arg1> <arg2>` in the order defined in the constructo
 
 ```bash
 forge verify-contract <address> src/Counter.sol:Counter \
-  --chain abstract-testnet \
+  --chain 11124 \
   --etherscan-api-key ${ABSCAN_API_KEY} \
   --zksync
 ```
 
-Use `--chain abstract` for mainnet.
+Use `--chain 2741` for mainnet. Chain names (`abstract-testnet`, `abstract`) also work.
 
 ## Testing
 

@@ -1,6 +1,6 @@
 ---
 name: connecting-to-abstract
-description: Abstract network configuration — chain IDs, RPC endpoints, WebSocket URLs, block explorers, and wallet setup for the Abstract Ethereum L2. This skill should be used when configuring clients, wallets, or dev environments for Abstract, including questions about Abstract RPC URLs, chain IDs (2741/11124), testnet config, Abscan explorer, or connecting to the Abstract network.
+description: Abstract network configuration — chain IDs, RPC endpoints, WebSocket URLs, block explorers, and wallet setup for the Abstract Ethereum L2. This skill should be used when configuring clients, wallets, or dev environments for Abstract, including questions about Abstract RPC URLs, chain IDs (2741/11124), testnet config, Abscan explorer, connecting to the Abstract network, or importing abstract/abstractTestnet from viem/chains.
 ---
 
 # Connecting to Abstract
@@ -17,6 +17,7 @@ Abstract is a Layer 2 ZK rollup on Ethereum (ZK Stack). Use these values wheneve
 | WebSocket | `wss://api.mainnet.abs.xyz/ws` | `wss://api.testnet.abs.xyz/ws` |
 | Block explorer | `https://abscan.org` | `https://sepolia.abscan.org` |
 | Verify API | `https://api.abscan.org/api` | `https://api-sepolia.abscan.org/api` |
+| Block time | ~200ms | ~100ms |
 | Currency | ETH | ETH |
 
 ## Viem Chain Config

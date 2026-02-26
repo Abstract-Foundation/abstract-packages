@@ -15,7 +15,7 @@ import * as polkamarketsjs from "polkamarkets-js";
 
 const polkamarkets = new polkamarketsjs.Application({
   web3Provider: "https://api.mainnet.abs.xyz",
-  web3PrivateKey: "<private_key>", // optional — skip for browser wallet flow
+  web3PrivateKey: process.env.MYRIAD_PRIVATE_KEY, // optional — skip for browser wallet flow
   web3EventsProvider: "<events_rpc>", // optional — for event subscriptions
 });
 ```
@@ -144,7 +144,7 @@ import * as polkamarketsjs from "polkamarkets-js";
 
 const polkamarkets = new polkamarketsjs.Application({
   web3Provider: "https://api.mainnet.abs.xyz",
-  web3PrivateKey: "<your_private_key>",
+  web3PrivateKey: process.env.MYRIAD_PRIVATE_KEY,
 });
 
 const pm = polkamarkets.getPredictionMarketV3PlusContract({
