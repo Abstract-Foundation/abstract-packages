@@ -1,6 +1,6 @@
 ---
 name: using-agw-mcp
-description: Use the Abstract Global Wallet MCP server to give AI agents wallet capabilities on Abstract — read chain data, check balances, and (coming soon) send transactions on behalf of users. Use this skill when setting up agw-mcp, giving AI agents wallet access on Abstract, or building MCP-powered agent workflows that interact with Abstract chain data.
+description: Give AI agents wallet capabilities on Abstract via the Abstract Global Wallet MCP server — read chain data, check balances, and (coming soon) send transactions on behalf of users. This skill should be used when setting up agw-mcp, giving AI agents wallet access on Abstract, or building MCP-powered agent workflows that interact with Abstract chain data.
 ---
 
 # Using AGW MCP

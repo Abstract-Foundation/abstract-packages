@@ -1,6 +1,6 @@
 ---
 name: myriad-on-abstract
-description: Integrate Myriad Protocol prediction markets on Abstract — REST API for market data, polkamarkets-js SDK for trading, builder revenue sharing via referralBuy, and contract addresses. Use this skill when working with Myriad API, prediction markets on Abstract, polkamarkets-js, buying/selling prediction shares, builder codes, referralBuy, or Myriad Protocol integration.
+description: Integrate Myriad Protocol prediction markets on Abstract — REST API for market data, polkamarkets-js SDK for trading outcome shares, builder revenue sharing via referralBuy, and contract addresses. This skill should be used when working with Myriad API, prediction markets on Abstract, polkamarkets-js SDK, trading or buying/selling prediction shares, builder codes, referralBuy, claiming winnings, Myriad contract addresses, or Myriad Protocol integration.
 ---
 
 # Myriad on Abstract
@@ -96,6 +96,15 @@ const claim = await fetch("https://api-v2.myriadprotocol.com/markets/claim", {
 Builders earn the `distributor_fee` (typically 1%) on eligible buy trades by using `referralBuy` with a whitelisted builder code. Must apply for whitelisting with the Myriad team.
 
 See `references/revenue-sharing.md` for full integration details.
+
+## Gotchas
+
+- **ERC-20 approval required before trading** — call `erc20.approve()` for the PredictionMarket contract before any buy/sell
+- **Buy quotes take `value` only** — the amount of the collateral token to spend (not shares)
+- **Sell quotes accept `value` or `shares`** — provide exactly one, not both
+- **`referralBuy` works on any market** — calling it without a whitelisted code is safe, it just won't earn revenue
+- **`network_id` is required on most API calls** — use `2741` for Abstract mainnet, `11124` for testnet
+- **Token decimals vary** — USDC.e on Abstract uses 6 decimals; always check `decimals()` before formatting amounts
 
 ## Feature Reference
 

@@ -1,6 +1,6 @@
 # AGW React Hooks Reference
 
-All hooks require your app to be wrapped in `<AbstractWalletProvider>`.
+All hooks require the app to be wrapped in `<AbstractWalletProvider>`.
 
 ## useLoginWithAbstract
 
@@ -81,7 +81,7 @@ const { createSession, data, isPending } = useCreateSession();
 
 ## useRevokeSessions
 
-Revoke active session keys.
+Revoke active session keys. See `references/session-keys.md` for full session lifecycle details.
 
 ```tsx
 import { useRevokeSessions } from "@abstract-foundation/agw-react";

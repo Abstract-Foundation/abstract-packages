@@ -52,6 +52,8 @@ npx hardhat vars set DEPLOYER_PRIVATE_KEY
 Access in config:
 
 ```ts
+import { vars } from "hardhat/config";
+
 const DEPLOYER_PRIVATE_KEY = vars.get("DEPLOYER_PRIVATE_KEY");
 ```
 
@@ -71,6 +73,7 @@ Create `deploy/deploy.ts`:
 import { Deployer } from "@matterlabs/hardhat-zksync";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Wallet } from "zksync-ethers";
+import { vars } from "hardhat/config";
 
 export default async function (hre: HardhatRuntimeEnvironment) {
   const wallet = new Wallet(vars.get("DEPLOYER_PRIVATE_KEY"));

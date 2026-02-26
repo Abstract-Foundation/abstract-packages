@@ -1,6 +1,6 @@
 ---
 name: abstract-global-wallet
-description: Integrate Abstract Global Wallet (AGW) into React applications — email/social/passkey login, smart contract wallet, session keys, gas sponsorship, and wallet provider integrations for the Abstract Ethereum L2. Use this skill when working with AGW, AbstractWalletProvider, useLoginWithAbstract, useAbstractClient, useWriteContractSponsored, agw-react, agw-client, create-abstract-app, session keys on Abstract, or gas-sponsored transactions on Abstract.
+description: Integrate Abstract Global Wallet (AGW) into React applications — email/social/passkey login, smart contract wallet, session keys, gas sponsorship, and wallet provider integrations for the Abstract Ethereum L2. This skill should be used when working with AGW, AbstractWalletProvider, useLoginWithAbstract, useAbstractClient, useWriteContractSponsored, agw-react, agw-client, create-abstract-app, session keys on Abstract, or gas-sponsored transactions on Abstract.
 ---
 
 # Abstract Global Wallet

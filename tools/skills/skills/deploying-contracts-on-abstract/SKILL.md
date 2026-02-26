@@ -1,6 +1,6 @@
 ---
 name: deploying-contracts-on-abstract
-description: Deploy smart contracts on Abstract using Foundry (default) or Hardhat. Covers zksolc compilation, deployment, Abscan verification, and testnet faucets for the Abstract Ethereum L2. Use this skill when deploying or compiling contracts on Abstract, using forge/foundry-zksync, verifying on Abscan, or working with the zkSync compiler on Abstract.
+description: Deploy smart contracts on Abstract using Foundry (default) or Hardhat. Covers zksolc compilation, deployment, Abscan verification, and testnet faucets for the Abstract Ethereum L2. This skill should be used when deploying or compiling contracts on Abstract, using forge/foundry-zksync, verifying on Abscan, or working with the zkSync compiler on Abstract.
 ---
 
 # Deploying Contracts on Abstract
@@ -138,6 +138,6 @@ forge test --zksync --fork-url http://localhost:8011
 
 - **All `forge` commands need `--zksync`** — without it, you get standard EVM bytecode that won't run on Abstract
 - **`foundryup-zksync` overwrites standard Foundry** — use `foundryup` to switch back
-- **Abscan API key required** — get one from [abscan.org](https://abscan.org) for both testnet and mainnet verification
+- **Abscan API key required** — get one from [abscan.org](https://abscan.org); set via `export ABSCAN_API_KEY=<key>` or `.env`
 - **`zkout/` not `out/`** — compiled artifacts go to a different directory
 - Never commit private keys — use `cast wallet import` or environment variables

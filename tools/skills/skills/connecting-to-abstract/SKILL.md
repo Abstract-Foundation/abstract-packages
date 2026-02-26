@@ -1,6 +1,6 @@
 ---
 name: connecting-to-abstract
-description: Abstract network configuration — chain IDs, RPC endpoints, WebSocket URLs, block explorers, and wallet setup for the Abstract Ethereum L2. Use this skill when configuring clients, wallets, or dev environments for Abstract, including questions about Abstract RPC URLs, chain IDs (2741/11124), testnet config, Abscan explorer, or connecting to the Abstract network.
+description: Abstract network configuration — chain IDs, RPC endpoints, WebSocket URLs, block explorers, and wallet setup for the Abstract Ethereum L2. This skill should be used when configuring clients, wallets, or dev environments for Abstract, including questions about Abstract RPC URLs, chain IDs (2741/11124), testnet config, Abscan explorer, or connecting to the Abstract network.
 ---
 
 # Connecting to Abstract

@@ -23,6 +23,7 @@ import { toFunctionSelector, parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 const sessionPrivateKey = generatePrivateKey();
+// Store sessionPrivateKey securely — see Production Requirements below
 const sessionSigner = privateKeyToAccount(sessionPrivateKey);
 
 const { data: agwClient } = useAbstractClient();

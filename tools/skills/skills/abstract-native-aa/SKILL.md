@@ -1,6 +1,6 @@
 ---
 name: abstract-native-aa
-description: Native account abstraction on Abstract — IAccount smart contract wallets, IPaymaster gas sponsorship, transaction flow, signature validation, and nonce handling for the Abstract Ethereum L2. Use this skill when building custom paymasters, smart contract wallets, or working with Abstract's native AA system (IAccount, IPaymaster, DefaultAccount, bootloader, NonceHolder).
+description: Native account abstraction on Abstract — IAccount smart contract wallets, IPaymaster gas sponsorship, transaction flow, signature validation, and nonce handling for the Abstract Ethereum L2. This skill should be used when building custom paymasters, smart contract wallets, or working with Abstract's native AA system (IAccount, IPaymaster, DefaultAccount, bootloader, NonceHolder).
 ---
 
 # Native Account Abstraction on Abstract
