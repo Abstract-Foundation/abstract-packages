@@ -32,12 +32,21 @@ claude plugin add ./abstract-skills
 | [abstract-global-wallet](skills/abstract-global-wallet/) | AGW integration — React hooks, session keys, wallet providers |
 | [using-agw-mcp](skills/using-agw-mcp/) | AI agent wallet access via the AGW MCP server |
 | [myriad-on-abstract](skills/myriad-on-abstract/) | Prediction market integration with Myriad |
+| [erc8004-on-abstract](skills/erc8004-on-abstract/) | Onchain agent identity and reputation via ERC-8004 |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `/abstract-quickstart` | Scaffold a new Abstract project |
+
+## Ecosystem App Plugins
+
+Other Abstract ecosystem apps with their own Claude Code plugins:
+
+| App | What it does | Plugin |
+|-----|-------------|--------|
+| [Gigaverse](https://gigaverse.io) | Rogue-lite dungeon crawler — AI agents quest, battle, loot, and compete on leaderboards | [Gigaverse-Games/play](https://github.com/Gigaverse-Games/play) |
 
 ## Design Philosophy
 

@@ -35,3 +35,7 @@ Get testnet ETH from faucets or bridge from Sepolia. See [Faucets](https://docs.
 ## Additional RPC Providers
 
 For production traffic beyond the default public endpoints, see [RPC Providers](https://docs.abs.xyz/ecosystem/rpc-providers) for Alchemy, QuickNode, and other options.
+
+## Deployed Contracts
+
+For WETH, USDC, USDT, Uniswap, Safe, Seaport, ERC-8004 registries, and other infrastructure contract addresses, see `references/deployed-contracts.md`.
