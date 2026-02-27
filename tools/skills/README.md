@@ -2,20 +2,18 @@
     <img src="https://mintlify.s3-us-west-1.amazonaws.com/abstract/images/Block.svg" width="700px" alt="abstract banner"/>
     <br />
     <h1>Abstract Skills</h1>
-    <p align="center">A <a href="https://docs.anthropic.com/en/docs/claude-code/plugins">Claude Code plugin</a> for building on <a href="https://abs.xyz">Abstract</a> — the blockchain leading the next generation of consumer crypto.</p>
+    <p align="center">Skills for building on <a href="https://abs.xyz">Abstract</a> — the blockchain leading the next generation of consumer crypto.</p>
 </div>
 
 <br/>
 
 ## What is this?
 
-Install this plugin and Claude learns how to build smart contracts and applications on Abstract — from connecting to the network and deploying contracts, to integrating wallets, prediction markets, and onchain agent identity.
-
-Complements [agw-mcp](https://github.com/Abstract-Foundation/agw-mcp) — this plugin teaches *how to build*, agw-mcp gives AI agents *wallet capabilities* on Abstract.
+A collection of skills that teach AI coding agents how to build smart contracts and applications on Abstract — from connecting to the network and deploying contracts, to integrating wallets, prediction markets, and onchain agent identity.
 
 ## Installation
 
-### As a Claude Code plugin
+### Claude Code
 
 ```bash
 claude plugin add abstract-skills
@@ -48,9 +46,9 @@ Each skill is a standalone module that Claude loads on-demand when relevant to y
 | --- | --- |
 | `/abstract-quickstart` | Scaffold a new Abstract project. |
 
-## Ecosystem Plugins
+## Ecosystem
 
-Other apps in the Abstract ecosystem with their own Claude Code plugins:
+Other apps in the Abstract ecosystem with their own skills:
 
 | App | Description | Plugin |
 | --- | --- | --- |
