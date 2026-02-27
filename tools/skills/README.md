@@ -1,6 +1,11 @@
-# Abstract Skills
+<div align="center">
+    <img src="https://mintlify.s3-us-west-1.amazonaws.com/abstract/images/Block.svg" width="700px" alt="abstract banner"/>
+    <br />
+    <h1>Abstract Skills</h1>
+    <p align="center">Curated skills for building on <a href="https://abs.xyz">Abstract</a> — the consumer-focused Ethereum L2.</p>
+</div>
 
-Curated skills for building on [Abstract](https://abs.xyz) — the consumer-focused Ethereum L2.
+<br/>
 
 ## What is this?
 
@@ -25,28 +30,31 @@ claude plugin add ./abstract-skills
 
 ## Skills
 
-| Skill | What it covers |
-|-------|---------------|
-| [connecting-to-abstract](skills/connecting-to-abstract/) | Network config, RPC endpoints, chain IDs, explorers |
-| [deploying-contracts-on-abstract](skills/deploying-contracts-on-abstract/) | Foundry-first smart contract deployment (Hardhat alternative in references) |
-| [abstract-global-wallet](skills/abstract-global-wallet/) | AGW integration — React hooks, session keys, wallet providers |
-| [using-agw-mcp](skills/using-agw-mcp/) | AI agent wallet access via the AGW MCP server |
-| [myriad-on-abstract](skills/myriad-on-abstract/) | Prediction market integration with Myriad |
-| [erc8004-on-abstract](skills/erc8004-on-abstract/) | Onchain agent identity and reputation via ERC-8004 |
+Each skill is a standalone module that Claude loads on-demand when relevant to your task. Within each directory, you'll find a `SKILL.md` with core guidance and a `references/` directory with detailed documentation.
+
+| Skill | Description |
+| --- | --- |
+| [connecting-to-abstract](skills/connecting-to-abstract/) | Network config, RPC endpoints, chain IDs, block explorers, and deployed contract addresses for Abstract mainnet and testnet. |
+| [deploying-contracts-on-abstract](skills/deploying-contracts-on-abstract/) | Deploy smart contracts to Abstract using Foundry (default) or Hardhat. Covers zksolc compilation, verification on Abscan, and testing. |
+| [abstract-global-wallet](skills/abstract-global-wallet/) | Integrate Abstract Global Wallet into React apps — email/social login, smart contract wallet, session keys, gas sponsorship, and wallet providers. |
+| [using-agw-mcp](skills/using-agw-mcp/) | Give AI agents wallet capabilities on Abstract via the AGW MCP server — read chain data, check balances, and execute transactions. |
+| [safe-multisig-on-abstract](skills/safe-multisig-on-abstract/) | Create and manage Safe multi-signature wallets on Abstract — deploy Safes, configure owners and thresholds, propose and execute multi-sig transactions. |
+| [myriad-on-abstract](skills/myriad-on-abstract/) | Integrate Myriad Protocol prediction markets — REST API for market data, SDK for trading outcome shares, and builder revenue sharing. |
+| [erc8004-on-abstract](skills/erc8004-on-abstract/) | Register AI agents, track reputation, and discover agents onchain using ERC-8004 — the identity and reputation protocol for agent economies. |
 
 ## Commands
 
 | Command | Description |
-|---------|-------------|
-| `/abstract-quickstart` | Scaffold a new Abstract project |
+| --- | --- |
+| `/abstract-quickstart` | Scaffold a new Abstract project. |
 
 ## Ecosystem App Plugins
 
 Other Abstract ecosystem apps with their own Claude Code plugins:
 
-| App | What it does | Plugin |
-|-----|-------------|--------|
-| [Gigaverse](https://gigaverse.io) | Rogue-lite dungeon crawler — AI agents quest, battle, loot, and compete on leaderboards | [Gigaverse-Games/play](https://github.com/Gigaverse-Games/play) |
+| App | Description | Plugin |
+| --- | --- | --- |
+| [Gigaverse](https://gigaverse.io) | Rogue-lite dungeon crawler — AI agents quest, battle, loot, and compete on leaderboards. | [Gigaverse-Games/play](https://github.com/Gigaverse-Games/play) |
 
 ## Design Philosophy
 
