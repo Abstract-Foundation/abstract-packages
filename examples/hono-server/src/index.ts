@@ -2,7 +2,7 @@
  * Example: Hono server with Abstract MPP payments.
  *
  * Exposes two paid endpoints:
- *   GET /api/data     — charges 0.01 USDC.e per request (ERC-3009, one-shot)
+ *   GET /api/data     — charges 0.01 USDC.e per request (ERC-3009 charge)
  *   GET /api/stream   — charges 0.001 USDC.e per request (session channel)
  *
  * Run:
@@ -15,6 +15,8 @@
 
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+// Use Mppx from mppx/hono — it wraps the server Mppx and exposes .charge/.session
+// accessors that are compatible with payment() middleware
 import { Mppx, payment } from 'mppx/hono'
 import { privateKeyToAccount } from 'viem/accounts'
 import { abstract } from 'mppx-abstract/server'
@@ -39,39 +41,40 @@ console.log('Server account:', serverAccount.address)
 
 // ── MPP setup ──────────────────────────────────────────────────────────────
 
+const chargeMethods = [
+  abstract.charge({
+    account: serverAccount,
+    recipient: PAY_TO,
+    currency: USDC_E_TESTNET,
+    amount: '0.01',
+    decimals: 6,
+    testnet: true,
+    // Optionally sponsor gas with an Abstract paymaster contract:
+    // paymasterAddress: process.env.PAYMASTER as `0x${string}`,
+  }),
+]
+
+const sessionMethods = ESCROW_CONTRACT
+  ? [
+      abstract.session({
+        account: serverAccount,
+        recipient: PAY_TO,
+        currency: USDC_E_TESTNET,
+        escrowContract: ESCROW_CONTRACT,
+        amount: '0.001',
+        suggestedDeposit: '1',
+        unitType: 'request',
+        decimals: 6,
+        testnet: true,
+      }),
+    ]
+  : []
+
+// mppx/hono Mppx.create() adds .charge / .session / .<name> accessors for payment()
 const mppx = Mppx.create({
   realm: 'example.abs.xyz',
   secretKey: SECRET_KEY,
-  methods: [
-    // Charge: one-time ERC-3009 authorization per request
-    abstract.charge({
-      account: serverAccount,
-      recipient: PAY_TO,
-      currency: USDC_E_TESTNET,
-      amount: '0.01',
-      decimals: 6,
-      testnet: true,
-      // Optionally sponsor gas with a paymaster:
-      // paymasterAddress: process.env.PAYMASTER as `0x${string}`,
-    }),
-
-    // Session: payment channel backed by AbstractStreamChannel
-    ...(ESCROW_CONTRACT
-      ? [
-          abstract.session({
-            account: serverAccount,
-            recipient: PAY_TO,
-            currency: USDC_E_TESTNET,
-            escrowContract: ESCROW_CONTRACT,
-            amount: '0.001',
-            suggestedDeposit: '1',
-            unitType: 'request',
-            decimals: 6,
-            testnet: true,
-          }),
-        ]
-      : []),
-  ],
+  methods: [...chargeMethods, ...sessionMethods],
 })
 
 // ── Routes ─────────────────────────────────────────────────────────────────
@@ -81,47 +84,48 @@ const app = new Hono()
 // Free health check
 app.get('/health', (c) => c.json({ ok: true }))
 
-// Paid: one-time ERC-3009 charge
+// Paid: one-time ERC-3009 charge — $0.01 USDC.e per request
 app.get(
   '/api/data',
-  payment(mppx.charge, {
+  // mppx exposes abstract/charge as a key on the hono Mppx instance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payment((mppx as any)['abstract/charge'], {
     amount: '0.01',
     currency: USDC_E_TESTNET,
     decimals: 6,
-    recipient: PAY_TO,
+    recipient: PAY_TO!,
     description: 'Premium data — 0.01 USDC.e',
   }),
   (c) =>
     c.json({
       data: 'Here is your premium content!',
       timestamp: new Date().toISOString(),
-      block: 'Abstract Testnet',
+      chain: 'Abstract Testnet',
     }),
 )
 
-// Paid: session channel (lower per-request cost via vouchers)
-app.get(
-  '/api/stream',
-  ...(ESCROW_CONTRACT
-    ? [
-        payment(mppx.session, {
-          amount: '0.001',
-          currency: USDC_E_TESTNET,
-          decimals: 6,
-          recipient: PAY_TO,
-          escrowContract: ESCROW_CONTRACT,
-          unitType: 'request',
-          suggestedDeposit: '1',
-          description: 'Streaming data — 0.001 USDC.e / request',
-        }),
-      ]
-    : []),
-  (c) =>
-    c.json({
-      stream: 'Streaming content via payment channel',
-      timestamp: new Date().toISOString(),
+// Paid: session channel — $0.001 USDC.e per request via payment vouchers
+if (ESCROW_CONTRACT) {
+  app.get(
+    '/api/stream',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payment((mppx as any)['abstract/session'], {
+      amount: '0.001',
+      currency: USDC_E_TESTNET,
+      decimals: 6,
+      recipient: PAY_TO!,
+      escrowContract: ESCROW_CONTRACT,
+      unitType: 'request',
+      suggestedDeposit: '1',
+      description: 'Streaming data — 0.001 USDC.e per request',
     }),
-)
+    (c) =>
+      c.json({
+        stream: 'Streaming content via payment channel',
+        timestamp: new Date().toISOString(),
+      }),
+  )
+}
 
 // ── Start ───────────────────────────────────────────────────────────────────
 
@@ -132,6 +136,7 @@ serve({ fetch: app.fetch, port: PORT }, () => {
   if (ESCROW_CONTRACT) {
     console.log(`   GET /api/stream    — 0.001 USDC.e (session / payment channel)`)
   }
-  console.log(`\n   Testnet chain: Abstract Testnet (chainId 11124)`)
-  console.log(`   Token:         USDC.e ${USDC_E_TESTNET}`)
+  console.log(`\n   Chain:  Abstract Testnet (chainId 11124)`)
+  console.log(`   Token:  USDC.e ${USDC_E_TESTNET}`)
+  console.log(`   Pay to: ${PAY_TO}`)
 })

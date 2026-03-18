@@ -7,7 +7,12 @@
     "strict": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "mppx-abstract": ["../../packages/mppx-abstract/src/index.ts"],
+      "mppx-abstract/server": ["../../packages/mppx-abstract/src/server/index.ts"],
+      "mppx-abstract/client": ["../../packages/mppx-abstract/src/client/index.ts"]
+    }
   },
   "include": ["src/**/*"]
 }
