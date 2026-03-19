@@ -14,20 +14,24 @@
  *   tsx src/agent.ts
  */
 
-import { Mppx } from 'mppx/client'
-import { privateKeyToAccount } from 'viem/accounts'
-import { abstractCharge, abstractSession } from 'mppx-abstract/client'
+import { Mppx } from 'mppx/client';
+import { abstractCharge, abstractSession } from 'mppx-abstract/client';
+import { privateKeyToAccount } from 'viem/accounts';
 
-const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY as `0x${string}` | undefined
-const SERVER_URL = process.env.SERVER_URL ?? 'http://localhost:3000'
-const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as `0x${string}` | undefined
+const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY as
+  | `0x${string}`
+  | undefined;
+const SERVER_URL = process.env.SERVER_URL ?? 'http://localhost:3000';
+const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as
+  | `0x${string}`
+  | undefined;
 
-if (!AGENT_PRIVATE_KEY) throw new Error('AGENT_PRIVATE_KEY required')
+if (!AGENT_PRIVATE_KEY) throw new Error('AGENT_PRIVATE_KEY required');
 
 // ── Account ────────────────────────────────────────────────────────────────
 
-const agentAccount = privateKeyToAccount(AGENT_PRIVATE_KEY)
-console.log('Agent account:', agentAccount.address)
+const agentAccount = privateKeyToAccount(AGENT_PRIVATE_KEY);
+console.log('Agent account:', agentAccount.address);
 
 // ── MPP client ─────────────────────────────────────────────────────────────
 
@@ -47,28 +51,28 @@ const mppx = Mppx.create({
         ]
       : []),
   ],
-})
+});
 
 // ── Demo: Charge request ───────────────────────────────────────────────────
 
 async function demoCharge() {
-  console.log('\n── Charge demo ────────────────────────────────────────')
-  console.log(`Fetching ${SERVER_URL}/api/data (0.01 USDC.e charge)...`)
+  console.log('\n── Charge demo ────────────────────────────────────────');
+  console.log(`Fetching ${SERVER_URL}/api/data (0.01 USDC.e charge)...`);
 
   // mppx.fetch() automatically handles the 402 → sign → retry flow
-  const response = await mppx.fetch(`${SERVER_URL}/api/data`)
+  const response = await mppx.fetch(`${SERVER_URL}/api/data`);
 
   if (!response.ok) {
-    console.error('Request failed:', response.status, await response.text())
-    return
+    console.error('Request failed:', response.status, await response.text());
+    return;
   }
 
-  const receipt = response.headers.get('Payment-Receipt')
-  const body = await response.json()
+  const receipt = response.headers.get('Payment-Receipt');
+  const body = await response.json();
 
-  console.log('✅ Response:', JSON.stringify(body, null, 2))
+  console.log('✅ Response:', JSON.stringify(body, null, 2));
   if (receipt) {
-    console.log('🧾 Payment-Receipt:', receipt)
+    console.log('🧾 Payment-Receipt:', receipt);
   }
 }
 
@@ -76,35 +80,41 @@ async function demoCharge() {
 
 async function demoSession() {
   if (!ESCROW_CONTRACT) {
-    console.log('\nSkipping session demo (ESCROW_CONTRACT not set)')
-    return
+    console.log('\nSkipping session demo (ESCROW_CONTRACT not set)');
+    return;
   }
 
-  console.log('\n── Session demo ────────────────────────────────────────')
-  console.log('Opening payment channel and sending 3 requests...')
+  console.log('\n── Session demo ────────────────────────────────────────');
+  console.log('Opening payment channel and sending 3 requests...');
 
   for (let i = 1; i <= 3; i++) {
-    console.log(`\nRequest ${i}: ${SERVER_URL}/api/stream (0.001 USDC.e)`)
+    console.log(`\nRequest ${i}: ${SERVER_URL}/api/stream (0.001 USDC.e)`);
 
-    const response = await mppx.fetch(`${SERVER_URL}/api/stream`)
+    const response = await mppx.fetch(`${SERVER_URL}/api/stream`);
 
     if (!response.ok) {
-      console.error(`Request ${i} failed:`, response.status, await response.text())
-      continue
+      console.error(
+        `Request ${i} failed:`,
+        response.status,
+        await response.text(),
+      );
+      continue;
     }
 
-    const receipt = response.headers.get('Payment-Receipt')
-    const body = await response.json()
+    const receipt = response.headers.get('Payment-Receipt');
+    const body = await response.json();
 
-    console.log(`  ✅ Response:`, JSON.stringify(body))
+    console.log(`  ✅ Response:`, JSON.stringify(body));
     if (receipt) {
       try {
         const parsed = JSON.parse(
           Buffer.from(receipt.replace('Payment ', ''), 'base64url').toString(),
-        )
-        console.log(`  🧾 Cumulative paid: ${parsed.acceptedCumulative} (${i} unit(s))`)
+        );
+        console.log(
+          `  🧾 Cumulative paid: ${parsed.acceptedCumulative} (${i} unit(s))`,
+        );
       } catch {
-        console.log(`  🧾 Receipt: ${receipt}`)
+        console.log(`  🧾 Receipt: ${receipt}`);
       }
     }
   }
@@ -114,13 +124,13 @@ async function demoSession() {
 
 async function main() {
   try {
-    await demoCharge()
-    await demoSession()
-    console.log('\n✅ Demo complete')
+    await demoCharge();
+    await demoSession();
+    console.log('\n✅ Demo complete');
   } catch (err) {
-    console.error('Error:', err)
-    process.exit(1)
+    console.error('Error:', err);
+    process.exit(1);
   }
 }
 
-main()
+main();

@@ -13,31 +13,35 @@
  *   tsx src/index.ts
  */
 
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
 // Use Mppx from mppx/hono — it wraps the server Mppx and exposes .charge/.session
 // accessors that are compatible with payment() middleware
-import { Mppx, payment } from 'mppx/hono'
-import { privateKeyToAccount } from 'viem/accounts'
-import { abstract } from 'mppx-abstract/server'
-import { USDC_E_TESTNET } from 'mppx-abstract'
+import { Mppx, payment } from 'mppx/hono';
+import { USDC_E_TESTNET } from 'mppx-abstract';
+import { abstract } from 'mppx-abstract/server';
+import { privateKeyToAccount } from 'viem/accounts';
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
-const SECRET_KEY = process.env.MPP_SECRET_KEY
-const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as `0x${string}` | undefined
-const PAY_TO = process.env.PAY_TO as `0x${string}` | undefined
-const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as `0x${string}` | undefined
-const PORT = Number(process.env.PORT ?? 3000)
+const SECRET_KEY = process.env.MPP_SECRET_KEY;
+const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as
+  | `0x${string}`
+  | undefined;
+const PAY_TO = process.env.PAY_TO as `0x${string}` | undefined;
+const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as
+  | `0x${string}`
+  | undefined;
+const PORT = Number(process.env.PORT ?? 3000);
 
-if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required')
-if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required')
-if (!PAY_TO) throw new Error('PAY_TO required')
+if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required');
+if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required');
+if (!PAY_TO) throw new Error('PAY_TO required');
 
 // ── Account ────────────────────────────────────────────────────────────────
 
-const serverAccount = privateKeyToAccount(SERVER_PRIVATE_KEY)
-console.log('Server account:', serverAccount.address)
+const serverAccount = privateKeyToAccount(SERVER_PRIVATE_KEY);
+console.log('Server account:', serverAccount.address);
 
 // ── MPP setup ──────────────────────────────────────────────────────────────
 
@@ -52,7 +56,7 @@ const chargeMethods = [
     // Optionally sponsor gas with an Abstract paymaster contract:
     // paymasterAddress: process.env.PAYMASTER as `0x${string}`,
   }),
-]
+];
 
 const sessionMethods = ESCROW_CONTRACT
   ? [
@@ -68,21 +72,21 @@ const sessionMethods = ESCROW_CONTRACT
         testnet: true,
       }),
     ]
-  : []
+  : [];
 
 // mppx/hono Mppx.create() adds .charge / .session / .<name> accessors for payment()
 const mppx = Mppx.create({
   realm: 'example.abs.xyz',
   secretKey: SECRET_KEY,
   methods: [...chargeMethods, ...sessionMethods],
-})
+});
 
 // ── Routes ─────────────────────────────────────────────────────────────────
 
-const app = new Hono()
+const app = new Hono();
 
 // Free health check
-app.get('/health', (c) => c.json({ ok: true }))
+app.get('/health', (c) => c.json({ ok: true }));
 
 // Paid: one-time ERC-3009 charge — $0.01 USDC.e per request
 app.get(
@@ -102,7 +106,7 @@ app.get(
       timestamp: new Date().toISOString(),
       chain: 'Abstract Testnet',
     }),
-)
+);
 
 // Paid: session channel — $0.001 USDC.e per request via payment vouchers
 if (ESCROW_CONTRACT) {
@@ -124,19 +128,23 @@ if (ESCROW_CONTRACT) {
         stream: 'Streaming content via payment channel',
         timestamp: new Date().toISOString(),
       }),
-  )
+  );
 }
 
 // ── Start ───────────────────────────────────────────────────────────────────
 
 serve({ fetch: app.fetch, port: PORT }, () => {
-  console.log(`\n🚀 MPP Abstract example server running on http://localhost:${PORT}`)
-  console.log(`   GET /health        — free`)
-  console.log(`   GET /api/data      — 0.01 USDC.e (charge / ERC-3009)`)
+  console.log(
+    `\n🚀 MPP Abstract example server running on http://localhost:${PORT}`,
+  );
+  console.log(`   GET /health        — free`);
+  console.log(`   GET /api/data      — 0.01 USDC.e (charge / ERC-3009)`);
   if (ESCROW_CONTRACT) {
-    console.log(`   GET /api/stream    — 0.001 USDC.e (session / payment channel)`)
+    console.log(
+      `   GET /api/stream    — 0.001 USDC.e (session / payment channel)`,
+    );
   }
-  console.log(`\n   Chain:  Abstract Testnet (chainId 11124)`)
-  console.log(`   Token:  USDC.e ${USDC_E_TESTNET}`)
-  console.log(`   Pay to: ${PAY_TO}`)
-})
+  console.log(`\n   Chain:  Abstract Testnet (chainId 11124)`);
+  console.log(`   Token:  USDC.e ${USDC_E_TESTNET}`);
+  console.log(`   Pay to: ${PAY_TO}`);
+});
