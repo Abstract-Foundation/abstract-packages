@@ -11,7 +11,7 @@
     "@hono/node-server": "^1.13.7",
     "hono": "^4.7.7",
     "mppx": "0.4.7",
-    "mppx-abstract": "*",
+    "mppx-abstract": "workspace:*",
     "viem": "^2.29.2"
   },
   "devDependencies": {

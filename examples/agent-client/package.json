@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "mppx": "0.4.7",
-    "mppx-abstract": "*",
+    "mppx-abstract": "workspace:*",
     "viem": "^2.29.2"
   },
   "devDependencies": {
