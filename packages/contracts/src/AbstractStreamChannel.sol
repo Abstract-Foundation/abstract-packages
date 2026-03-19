@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IAbstractStreamChannel } from "./interfaces/IAbstractStreamChannel.sol";
-import { ECDSA } from "solady/utils/ECDSA.sol";
-import { EIP712 } from "solady/utils/EIP712.sol";
+import {IERC20} from "forge-std-1.15.0/src/interfaces/IERC20.sol";
+import {IAbstractStreamChannel} from "./interfaces/IAbstractStreamChannel.sol";
+import {ECDSA} from "solady-0.1.26/src/utils/ECDSA.sol";
+import {EIP712} from "solady-0.1.26/src/utils/EIP712.sol";
 
 /**
  * @title AbstractStreamChannel
@@ -21,11 +21,9 @@ import { EIP712 } from "solady/utils/EIP712.sol";
  *      grace period following a payer's requestClose().
  */
 contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
-
     // --- Constants ---
 
-    bytes32 public constant VOUCHER_TYPEHASH =
-        keccak256("Voucher(bytes32 channelId,uint128 cumulativeAmount)");
+    bytes32 public constant VOUCHER_TYPEHASH = keccak256("Voucher(bytes32 channelId,uint128 cumulativeAmount)");
 
     uint64 public constant CLOSE_GRACE_PERIOD = 15 minutes;
 
@@ -35,12 +33,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
 
     // --- EIP-712 Domain ---
 
-    function _domainNameAndVersion()
-        internal
-        pure
-        override
-        returns (string memory name, string memory version)
-    {
+    function _domainNameAndVersion() internal pure override returns (string memory name, string memory version) {
         name = "Abstract Stream Channel";
         version = "1";
     }
@@ -56,13 +49,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
      * @param authorizedSigner Address authorized to sign vouchers (address(0) = use msg.sender)
      * @return channelId The unique channel identifier
      */
-    function open(
-        address payee,
-        address token,
-        uint128 deposit,
-        bytes32 salt,
-        address authorizedSigner
-    )
+    function open(address payee, address token, uint128 deposit, bytes32 salt, address authorizedSigner)
         external
         override
         returns (bytes32 channelId)
@@ -108,14 +95,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
      * @param cumulativeAmount Total amount authorized by the voucher
      * @param signature EIP-712 signature from the payer / authorizedSigner
      */
-    function settle(
-        bytes32 channelId,
-        uint128 cumulativeAmount,
-        bytes calldata signature
-    )
-        external
-        override
-    {
+    function settle(bytes32 channelId, uint128 cumulativeAmount, bytes calldata signature) external override {
         Channel storage channel = channels[channelId];
 
         if (channel.finalized) {
@@ -138,8 +118,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
         bytes32 digest = _hashTypedData(structHash);
         address signer = ECDSA.recoverCalldata(digest, signature);
 
-        address expectedSigner =
-            channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
+        address expectedSigner = channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
 
         if (signer != expectedSigner) {
             revert InvalidSignature();
@@ -153,9 +132,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
             revert TransferFailed();
         }
 
-        emit Settled(
-            channelId, channel.payer, channel.payee, cumulativeAmount, delta, channel.settled
-        );
+        emit Settled(channelId, channel.payer, channel.payee, cumulativeAmount, delta, channel.settled);
     }
 
     /**
@@ -184,8 +161,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
 
         channel.deposit += uint128(additionalDeposit);
 
-        bool success =
-            IERC20(channel.token).transferFrom(msg.sender, address(this), additionalDeposit);
+        bool success = IERC20(channel.token).transferFrom(msg.sender, address(this), additionalDeposit);
         if (!success) {
             revert TransferFailed();
         }
@@ -218,9 +194,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
 
         if (channel.closeRequestedAt == 0) {
             channel.closeRequestedAt = uint64(block.timestamp);
-            emit CloseRequested(
-                channelId, channel.payer, channel.payee, block.timestamp + CLOSE_GRACE_PERIOD
-            );
+            emit CloseRequested(channelId, channel.payer, channel.payee, block.timestamp + CLOSE_GRACE_PERIOD);
         }
     }
 
@@ -231,14 +205,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
      * @param cumulativeAmount Final cumulative amount (0 if no payments)
      * @param signature EIP-712 signature (empty if cumulativeAmount == 0 or already settled)
      */
-    function close(
-        bytes32 channelId,
-        uint128 cumulativeAmount,
-        bytes calldata signature
-    )
-        external
-        override
-    {
+    function close(bytes32 channelId, uint128 cumulativeAmount, bytes calldata signature) external override {
         Channel storage channel = channels[channelId];
 
         if (channel.finalized) {
@@ -263,13 +230,11 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
                 revert AmountExceedsDeposit();
             }
 
-            bytes32 structHash =
-                keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
+            bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
             bytes32 digest = _hashTypedData(structHash);
             address signer = ECDSA.recoverCalldata(digest, signature);
 
-            address expectedSigner =
-                channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
+            address expectedSigner = channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
 
             if (signer != expectedSigner) {
                 revert InvalidSignature();
@@ -316,8 +281,8 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
             revert NotPayer();
         }
 
-        bool closeGracePassed = channel.closeRequestedAt != 0
-            && block.timestamp >= channel.closeRequestedAt + CLOSE_GRACE_PERIOD;
+        bool closeGracePassed =
+            channel.closeRequestedAt != 0 && block.timestamp >= channel.closeRequestedAt + CLOSE_GRACE_PERIOD;
 
         if (!closeGracePassed) {
             revert CloseNotReady();
@@ -355,21 +320,13 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
     /**
      * @notice Compute the channel ID for given parameters.
      */
-    function computeChannelId(
-        address payer,
-        address payee,
-        address token,
-        bytes32 salt,
-        address authorizedSigner
-    )
+    function computeChannelId(address payer, address payee, address token, bytes32 salt, address authorizedSigner)
         public
         view
         override
         returns (bytes32)
     {
-        return keccak256(
-            abi.encode(payer, payee, token, salt, authorizedSigner, address(this), block.chainid)
-        );
+        return keccak256(abi.encode(payer, payee, token, salt, authorizedSigner, address(this), block.chainid));
     }
 
     /**
@@ -382,15 +339,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
     /**
      * @notice Compute the EIP-712 digest for a voucher (for off-chain signing).
      */
-    function getVoucherDigest(
-        bytes32 channelId,
-        uint128 cumulativeAmount
-    )
-        external
-        view
-        override
-        returns (bytes32)
-    {
+    function getVoucherDigest(bytes32 channelId, uint128 cumulativeAmount) external view override returns (bytes32) {
         bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
         return _hashTypedData(structHash);
     }

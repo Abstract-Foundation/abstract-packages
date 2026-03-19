@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "install": "forge soldeer install",
     "build": "forge build",
-    "test": "forge test"
+    "build:zksync": "forge build --zksync",
+    "test": "forge test",
+    "test:zksync": "forge test --zksync"
   }
 }

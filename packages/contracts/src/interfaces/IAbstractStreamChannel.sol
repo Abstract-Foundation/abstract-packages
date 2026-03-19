@@ -7,7 +7,6 @@ pragma solidity ^0.8.20;
 ///      Backed by standard ERC-20 tokens (no TIP-20 / Tempo-specific interfaces required).
 ///      Direct port of ITempoStreamChannel with ITIP20 replaced by IERC20.
 interface IAbstractStreamChannel {
-
     struct Channel {
         bool finalized;
         uint64 closeRequestedAt;
@@ -22,13 +21,7 @@ interface IAbstractStreamChannel {
     function CLOSE_GRACE_PERIOD() external view returns (uint64);
     function VOUCHER_TYPEHASH() external view returns (bytes32);
 
-    function open(
-        address payee,
-        address token,
-        uint128 deposit,
-        bytes32 salt,
-        address authorizedSigner
-    )
+    function open(address payee, address token, uint128 deposit, bytes32 salt, address authorizedSigner)
         external
         returns (bytes32 channelId);
 
@@ -44,29 +37,14 @@ interface IAbstractStreamChannel {
 
     function getChannel(bytes32 channelId) external view returns (Channel memory);
 
-    function getChannelsBatch(bytes32[] calldata channelIds)
-        external
-        view
-        returns (Channel[] memory);
+    function getChannelsBatch(bytes32[] calldata channelIds) external view returns (Channel[] memory);
 
-    function computeChannelId(
-        address payer,
-        address payee,
-        address token,
-        bytes32 salt,
-        address authorizedSigner
-    )
+    function computeChannelId(address payer, address payee, address token, bytes32 salt, address authorizedSigner)
         external
         view
         returns (bytes32);
 
-    function getVoucherDigest(
-        bytes32 channelId,
-        uint128 cumulativeAmount
-    )
-        external
-        view
-        returns (bytes32);
+    function getVoucherDigest(bytes32 channelId, uint128 cumulativeAmount) external view returns (bytes32);
 
     function domainSeparator() external view returns (bytes32);
 
@@ -90,10 +68,7 @@ interface IAbstractStreamChannel {
     );
 
     event CloseRequested(
-        bytes32 indexed channelId,
-        address indexed payer,
-        address indexed payee,
-        uint256 closeGraceEnd
+        bytes32 indexed channelId, address indexed payer, address indexed payee, uint256 closeGraceEnd
     );
 
     event TopUp(
@@ -112,9 +87,7 @@ interface IAbstractStreamChannel {
         uint256 refundedToPayer
     );
 
-    event CloseRequestCancelled(
-        bytes32 indexed channelId, address indexed payer, address indexed payee
-    );
+    event CloseRequestCancelled(bytes32 indexed channelId, address indexed payer, address indexed payee);
 
     event ChannelExpired(bytes32 indexed channelId, address indexed payer, address indexed payee);
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { Script, console2 } from "forge-std/Script.sol";
-import { AbstractStreamChannel } from "../src/AbstractStreamChannel.sol";
+import {Script, console2} from "forge-std-1.15.0/src/Script.sol";
+import {AbstractStreamChannel} from "../src/AbstractStreamChannel.sol";
 
 /**
  * @notice Deployment script for AbstractStreamChannel.

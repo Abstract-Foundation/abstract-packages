@@ -1,15 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import { Test, console2 } from "forge-std/Test.sol";
-import { AbstractStreamChannel } from "../src/AbstractStreamChannel.sol";
-import { IAbstractStreamChannel } from "../src/interfaces/IAbstractStreamChannel.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Test, console2} from "forge-std-1.15.0/src/Test.sol";
+import {AbstractStreamChannel} from "../src/AbstractStreamChannel.sol";
+import {IAbstractStreamChannel} from "../src/interfaces/IAbstractStreamChannel.sol";
+import {IERC20} from "forge-std-1.15.0/src/interfaces/IERC20.sol";
+import {ERC20} from "solady-0.1.26/src/tokens/ERC20.sol";
 
 /// @dev Simple ERC-20 mock for testing.
 contract MockERC20 is ERC20 {
-    constructor() ERC20("Mock USDC", "mUSDC") {}
+    function name() public pure override returns (string memory) {
+        return "Mock USDC";
+    }
+
+    function symbol() public pure override returns (string memory) {
+        return "mUSDC";
+    }
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
@@ -24,8 +34,7 @@ contract AbstractStreamChannelTest is Test {
     address public payee = makeAddr("payee");
     uint256 public payerKey;
 
-    bytes32 internal constant VOUCHER_TYPEHASH =
-        keccak256("Voucher(bytes32 channelId,uint128 cumulativeAmount)");
+    bytes32 internal constant VOUCHER_TYPEHASH = keccak256("Voucher(bytes32 channelId,uint128 cumulativeAmount)");
 
     function setUp() public {
         // Give payer a deterministic key so we can sign vouchers
@@ -43,19 +52,12 @@ contract AbstractStreamChannelTest is Test {
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
-    function _openChannel(uint128 deposit, bytes32 salt)
-        internal
-        returns (bytes32 channelId)
-    {
+    function _openChannel(uint128 deposit, bytes32 salt) internal returns (bytes32 channelId) {
         vm.prank(payer);
         channelId = escrow.open(payee, address(token), deposit, salt, address(0));
     }
 
-    function _signVoucher(bytes32 channelId, uint128 cumulativeAmount)
-        internal
-        view
-        returns (bytes memory sig)
-    {
+    function _signVoucher(bytes32 channelId, uint128 cumulativeAmount) internal view returns (bytes memory sig) {
         bytes32 domainSep = escrow.domainSeparator();
         bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSep, structHash));
