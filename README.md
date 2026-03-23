@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Abstract-Foundation/agw-cli/main/agw-cli-banner.png" alt="AGW CLI Banner" width="100%" />
+  <img src="./agw-cli-banner.png" alt="AGW CLI Banner" width="100%" />
 </p>
 
 <p align="center">
