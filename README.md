@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Abstract-Foundation/agw-mcp/main/docs/assets/banner.png" alt="AGW CLI Banner" width="100%" />
+  <img src="https://raw.githubusercontent.com/Abstract-Foundation/agw-cli/main/agw-cli-banner.png" alt="AGW CLI Banner" width="100%" />
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@abstract-foundation/agw-cli"><img src="https://img.shields.io/npm/v/@abstract-foundation/agw-cli" alt="npm version" /></a>
-  <a href="https://github.com/Abstract-Foundation/agw-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Abstract-Foundation/agw-mcp" alt="License" /></a>
+  <a href="https://github.com/Abstract-Foundation/agw-cli/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Abstract-Foundation/agw-cli" alt="License" /></a>
   <img src="https://img.shields.io/node/v/@abstract-foundation/agw-cli" alt="Node.js version" />
 </p>
 
@@ -29,10 +29,10 @@ It also ships a built-in [MCP](https://modelcontextprotocol.io/) server, so any 
 Copy and paste this prompt to your LLM agent (Claude Code, Codex, etc.):
 
 ```text
-Install and configure the AGW CLI by following the instructions here (use curl to fetch this file, NOT WebFetch): https://raw.githubusercontent.com/Abstract-Foundation/agw-mcp/main/docs/guide/installation.md
+Install and configure the AGW CLI by following the instructions here (use curl to fetch this file, NOT WebFetch): https://raw.githubusercontent.com/Abstract-Foundation/agw-cli/main/docs/guide/installation.md
 ```
 
-Or, read the [installation guide](https://github.com/Abstract-Foundation/agw-mcp/blob/main/docs/guide/installation.md) directly.
+Or, read the [installation guide](https://github.com/Abstract-Foundation/agw-cli/blob/main/docs/guide/installation.md) directly.
 
 ### Prerequisites
 
@@ -203,7 +203,7 @@ agw-cli mcp-config --npx  # npx-based (no global install needed)
 The repo ships agent skills that teach AI agents how to use the CLI safely. Install them with:
 
 ```bash
-npx skills add https://github.com/Abstract-Foundation/agw-mcp/tree/main/packages/agw-cli/skills
+npx skills add https://github.com/Abstract-Foundation/agw-cli/tree/main/packages/agw-cli/skills
 ```
 
 Available skills:
@@ -304,7 +304,7 @@ Yes. Pass `--chain-id` or set `AGW_CHAIN_ID` to target a different network. Use 
 
 ## Contributing
 
-Issues and pull requests are welcome at [github.com/Abstract-Foundation/agw-mcp](https://github.com/Abstract-Foundation/agw-mcp/issues).
+Issues and pull requests are welcome at [github.com/Abstract-Foundation/agw-cli](https://github.com/Abstract-Foundation/agw-cli/issues).
 
 ## License
 

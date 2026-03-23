@@ -44,7 +44,7 @@ describe("SessionStorage", () => {
   let storage: SessionStorage;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-test-"));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-test-"));
     storage = new SessionStorage(tmpDir);
   });
 

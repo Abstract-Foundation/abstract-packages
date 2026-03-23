@@ -1,5 +1,5 @@
 {
-  "name": "@abstract-foundation/agw-mcp-app",
+  "name": "@abstract-foundation/agw-cli-app",
   "version": "0.1.0",
   "private": true,
   "type": "module",

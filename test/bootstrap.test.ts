@@ -157,7 +157,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("materializes session bundle with auth keyfile path", () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-"));
     const now = 1_800_000_000;
 
     try {
@@ -201,7 +201,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("opens hosted onboarding URL with callback_url + chain_id and then saves session", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-flow-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-flow-"));
 
     let resolvePayload!: (value: string) => void;
     const payloadPromise = new Promise<string>(resolve => {
@@ -272,7 +272,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("defaults to mcp.abs.xyz when onboarding app URL is not configured", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-flow-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-flow-"));
     const previous = process.env.AGW_APP_URL;
     delete process.env.AGW_APP_URL;
 
@@ -327,7 +327,7 @@ describe("bootstrap callback/signer bundle flow", () => {
   });
 
   it("rejects insecure non-loopback http app URLs", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-flow-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-flow-"));
 
     try {
       await expect(
@@ -344,7 +344,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("fails when another bootstrap lock already exists", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-lock-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-lock-"));
     fs.mkdirSync(tmpDir, { recursive: true });
     fs.writeFileSync(path.join(tmpDir, ".bootstrap-init.lock"), JSON.stringify({ pid: process.pid }), { mode: 0o600 });
 
@@ -364,7 +364,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("recovers stale bootstrap lock and continues", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-lock-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-lock-"));
     const lockPath = path.join(tmpDir, ".bootstrap-init.lock");
     fs.mkdirSync(tmpDir, { recursive: true });
     fs.writeFileSync(lockPath, "stale-lock", { mode: 0o600 });
@@ -446,7 +446,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("rejects bundle when returned chain id mismatches requested chain", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-flow-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-flow-"));
 
     let resolvePayload!: (value: string) => void;
     const payloadPromise = new Promise<string>(resolve => {
@@ -480,7 +480,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
   it("restores previous local key/session files when bootstrap fails", async () => {
     // #given
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-bootstrap-restore-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-restore-"));
     const originalKey = "wallet-auth:dGVzdC1vcmlnaW5hbC1rZXk=\n";
     const originalSession = JSON.stringify(
       {

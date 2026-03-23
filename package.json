@@ -7,11 +7,11 @@
   "author": "Abstract Foundation",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Abstract-Foundation/agw-mcp.git"
+    "url": "git+https://github.com/Abstract-Foundation/agw-cli.git"
   },
-  "homepage": "https://github.com/Abstract-Foundation/agw-mcp#readme",
+  "homepage": "https://github.com/Abstract-Foundation/agw-cli#readme",
   "bugs": {
-    "url": "https://github.com/Abstract-Foundation/agw-mcp/issues"
+    "url": "https://github.com/Abstract-Foundation/agw-cli/issues"
   },
   "type": "module",
   "packageManager": "pnpm@10.12.1",

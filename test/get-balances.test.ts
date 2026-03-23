@@ -140,7 +140,7 @@ describe("get_balances tool", () => {
   });
 
   it("integrates with SessionManager and de-duplicates token addresses", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-get-balances-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-get-balances-"));
     const logger = new Logger("test");
 
     try {

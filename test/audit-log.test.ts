@@ -5,7 +5,7 @@ import { AuditLog } from "../packages/agw-core/src/audit/log.js";
 
 describe("audit log module", () => {
   it("appends redact-safe audit entries", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-audit-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-audit-"));
 
     try {
       const audit = new AuditLog(tmpDir);
@@ -52,7 +52,7 @@ describe("audit log module", () => {
   });
 
   it("rotates audit log files when size threshold is exceeded", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-audit-rotate-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-audit-rotate-"));
 
     try {
       const audit = new AuditLog({

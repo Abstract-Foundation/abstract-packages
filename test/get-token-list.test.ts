@@ -148,7 +148,7 @@ describe("get_token_list tool", () => {
   });
 
   it("integrates with SessionManager and resolves reader for session chain", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-mcp-get-token-list-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-get-token-list-"));
     const logger = new Logger("test");
 
     try {

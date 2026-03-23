@@ -3,7 +3,7 @@
   "name": "io.github.abstract-foundation/agw-cli",
   "description": "MCP server for Abstract Global Wallet session-key workflows — scoped wallet actions without custodial signing",
   "repository": {
-    "url": "https://github.com/Abstract-Foundation/agw-mcp",
+    "url": "https://github.com/Abstract-Foundation/agw-cli",
     "source": "github"
   },
   "version": "0.1.0",
