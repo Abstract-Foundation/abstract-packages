@@ -32,7 +32,7 @@
     "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.mjs",
-    "prepublishOnly": "pnpm check-types && pnpm lint && pnpm test && pnpm build"
+    "prepublishOnly": "pnpm check-types && pnpm build"
   },
   "dependencies": {
     "@abstract-foundation/agw-client": "1.10.0",

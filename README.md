@@ -27,6 +27,8 @@ Or, read the [installation guide](https://github.com/Abstract-Foundation/agw-cli
 - **Pagination & field trimming** — narrow reads with `fields`, paginate with `--page-all`
 - **Agent skills** — installable skills that teach AI agents safe CLI usage patterns
 
+---
+
 ### Prerequisites
 
 - Node.js 18+
