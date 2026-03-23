@@ -7,7 +7,15 @@
 
 AGW is an agent-first CLI for [Abstract Global Wallet](https://docs.abs.xyz/abstract-global-wallet/overview). It enables AI agents like [Claude](https://code.claude.com/docs/en/overview) to interact with your Abstract Global Wallet autonomously — viewing wallet balances, sending transactions, and interacting with apps deployed on [Abstract](https://abs.xyz/).
 
-It also ships a built-in [MCP](https://modelcontextprotocol.io/) server, so any MCP-compatible host can use AGW as a native tool surface.
+## Get Started
+
+Copy and paste this prompt to your AI agent (Claude Code, Codex, etc.):
+
+```text
+Install and configure the AGW CLI by following the instructions here (use curl to fetch this file, NOT WebFetch): https://raw.githubusercontent.com/Abstract-Foundation/agw-cli/main/docs/guide/installation.md
+```
+
+Or, read the [installation guide](https://github.com/Abstract-Foundation/agw-cli/blob/main/docs/guide/installation.md) directly.
 
 ## Features
 
@@ -18,16 +26,6 @@ It also ships a built-in [MCP](https://modelcontextprotocol.io/) server, so any 
 - **Schema introspection** — `agw-cli schema <command>` for machine-readable input/output specs
 - **Pagination & field trimming** — narrow reads with `fields`, paginate with `--page-all`
 - **Agent skills** — installable skills that teach AI agents safe CLI usage patterns
-
-## Get Started
-
-Copy and paste this prompt to your LLM agent (Claude Code, Codex, etc.):
-
-```text
-Install and configure the AGW CLI by following the instructions here (use curl to fetch this file, NOT WebFetch): https://raw.githubusercontent.com/Abstract-Foundation/agw-cli/main/docs/guide/installation.md
-```
-
-Or, read the [installation guide](https://github.com/Abstract-Foundation/agw-cli/blob/main/docs/guide/installation.md) directly.
 
 ### Prerequisites
 
