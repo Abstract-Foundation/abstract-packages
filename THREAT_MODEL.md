@@ -14,4 +14,4 @@
 | Over-broad policies allowing unsafe agent actions | Default-deny policy validation. Policy templates with explicit target, selector, and value limits. |
 | Prompt injection causing unintended state-changing calls | Structured input validation on all command handlers. Risky commands require explicit `execute: true` confirmation. |
 | Misleading tool responses that hide execution risk | Explicit risk/impact labeling on `preview_transaction`. Preview-by-default on `send_transaction`. |
-| Stale session used after revocation/expiry | Session status checked before every write call. On-chain state validation via `get_session_status`. |
+| Stale session used after revocation/expiry | Session status checked before every write call. Expiry enforced server-side by Privy policy rules. |
