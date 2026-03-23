@@ -2,11 +2,6 @@
   <img src="./agw-cli-banner.png" alt="AGW CLI Banner" width="100%" />
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@abstract-foundation/agw-cli"><img src="https://img.shields.io/npm/v/@abstract-foundation/agw-cli" alt="npm version" /></a>
-  <a href="https://github.com/Abstract-Foundation/agw-cli/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Abstract-Foundation/agw-cli" alt="License" /></a>
-  <img src="https://img.shields.io/node/v/@abstract-foundation/agw-cli" alt="Node.js version" />
-</p>
 
 # AGW CLI
 
