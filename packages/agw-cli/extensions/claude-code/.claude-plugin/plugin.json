@@ -1,0 +1,11 @@
+{
+  "name": "agw-cli",
+  "description": "Agent-first AGW plugin with bundled skills and MCP access.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Abstract Foundation"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/agw-mcp",
+  "repository": "https://github.com/Abstract-Foundation/agw-mcp",
+  "license": "MIT"
+}

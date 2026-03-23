@@ -1,4 +1,4 @@
-import { Logger } from "../src/utils/logger.js";
+import { Logger } from "../packages/agw-core/src/utils/logger.js";
 
 describe("Logger", () => {
   let stderrWriteSpy: jest.SpyInstance;

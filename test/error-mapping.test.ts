@@ -1,5 +1,4 @@
-import { ZeroExQuoteError } from "../src/integrations/zeroex/quote-adapter.js";
-import { createMcpToolError, toMcpErrorContract } from "../src/errors/contract.js";
+import { createMcpToolError, toMcpErrorContract } from "../packages/agw-core/src/errors/contract.js";
 
 describe("error mapping", () => {
   it("preserves structured McpToolError fields", () => {
@@ -18,32 +17,6 @@ describe("error mapping", () => {
       raw: {
         name: "McpToolError",
         message: "blocked",
-      },
-    });
-  });
-
-  it("maps 0x adapter errors into deterministic contract", () => {
-    const mapped = toMcpErrorContract(
-      new ZeroExQuoteError({
-        code: "ZEROEX_HTTP_ERROR",
-        message: "quote failed",
-        status: 500,
-        details: {
-          body: "oops",
-        },
-      }),
-    );
-
-    expect(mapped).toEqual({
-      code: "ZEROEX_HTTP_ERROR",
-      message: "quote failed",
-      details: {
-        status: 500,
-        body: "oops",
-      },
-      raw: {
-        name: "ZeroExQuoteError",
-        message: "quote failed",
       },
     });
   });

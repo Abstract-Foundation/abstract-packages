@@ -1,0 +1,15 @@
+{
+  "name": "agw-cli",
+  "version": "0.1.0",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "agw-cli": {
+      "command": "agw-cli",
+      "args": ["mcp", "serve", "--sanitize", "strict"],
+      "cwd": "${workspacePath}",
+      "env": {
+        "AGW_SANITIZE_PROFILE": "strict"
+      }
+    }
+  }
+}

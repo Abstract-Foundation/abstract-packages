@@ -1,17 +1,17 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { resolveNetworkConfig } from "../src/config/network.js";
-import { SessionManager } from "../src/session/manager.js";
-import type { AgwSessionData } from "../src/session/types.js";
+import { resolveNetworkConfig } from "../packages/agw-core/src/config/network.js";
+import { SessionManager } from "../packages/agw-core/src/session/manager.js";
+import type { AgwSessionData } from "../packages/agw-core/src/session/types.js";
 import {
   createGetTokenListTool,
   type CreateTokenListReaderInput,
   type TokenListReader,
-} from "../src/tools/get-token-list.js";
-import { getTool } from "../src/tools/index.js";
-import type { ToolContext } from "../src/tools/types.js";
-import { Logger } from "../src/utils/logger.js";
+} from "../packages/agw-core/src/tools/get-token-list.js";
+import { getTool } from "../packages/agw-core/src/tools/index.js";
+import type { ToolContext } from "../packages/agw-core/src/tools/types.js";
+import { Logger } from "../packages/agw-core/src/utils/logger.js";
 
 function buildSessionData(overrides: Partial<AgwSessionData> = {}): AgwSessionData {
   const now = Math.floor(Date.now() / 1000);
@@ -35,6 +35,7 @@ function buildContext(overrides: Partial<ToolContext["sessionManager"]>): ToolCo
       ...overrides,
     } as unknown as ToolContext["sessionManager"],
     logger: new Logger("test"),
+    runtime: {},
   };
 }
 
@@ -152,7 +153,7 @@ describe("get_token_list tool", () => {
 
     try {
       const manager = new SessionManager(logger, {
-        storageDir: tmpDir,
+        homeDir: tmpDir,
         chainId: 11124,
       });
 
@@ -181,6 +182,7 @@ describe("get_token_list tool", () => {
         {
           sessionManager: manager,
           logger,
+          runtime: {},
         },
       )) as Record<string, unknown>;
 

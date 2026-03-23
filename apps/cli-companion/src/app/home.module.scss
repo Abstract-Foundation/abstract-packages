@@ -142,15 +142,13 @@
   position: relative;
   background: #0f1419;
   border-radius: 12px;
-  padding: 16px 48px 16px 18px;
-  overflow-x: auto;
+  padding: 16px 18px;
 }
 
 .copyButton {
   position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
+  top: 12px;
+  right: 10px;
   width: 28px;
   height: 28px;
   display: flex;
@@ -158,14 +156,17 @@
   justify-content: center;
   border-radius: 6px;
   border: none;
-  background: transparent;
+  background: rgba(15, 20, 25, 0.6);
+  backdrop-filter: blur(4px);
   color: #5a6a7e;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease;
   padding: 0;
+  z-index: 1;
 
   &:hover {
     color: #c9d1d9;
+    background: rgba(15, 20, 25, 0.85);
   }
 }
 
@@ -186,6 +187,8 @@
   color: #e2e8f0;
   white-space: pre;
   display: block;
+  overflow-x: auto;
+  padding-right: 34px;
 
   @include bp-768 {
     font-size: 13.5px;

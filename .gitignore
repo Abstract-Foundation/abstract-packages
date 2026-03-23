@@ -4,8 +4,10 @@ coverage
 .next
 *.tsbuildinfo
 *.log
+*.tgz
 .DS_Store
 .env
 .agent-loop.lock
 .vercel
 .env*.local
+docs/abs-portal-apps-*.md

@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useLoginWithAbstract } from '@abstract-foundation/agw-react';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 import Button from '@/@abstract-ui/components/Button';
 import Wordmark from '@/assets/wordmark.svg';
 import styles from './styles.module.scss';
@@ -10,8 +9,7 @@ import styles from './styles.module.scss';
 const abstractHome = 'https://abs.xyz';
 
 export default function Navigation() {
-  const { logout } = useLoginWithAbstract();
-  const { isConnected } = useAccount();
+  const { user, authenticated, logout } = usePrivy();
 
   return (
     <nav className={styles.navigation}>
@@ -20,9 +18,11 @@ export default function Navigation() {
           <Wordmark />
         </Link>
         <div className={styles.buttons}>
-          <Button height="32" variant="secondary" onClick={logout} disabled={!isConnected}>
-            Sign out
-          </Button>
+          {authenticated && user && (
+            <Button height="32" variant="secondary" onClick={logout}>
+              Sign out
+            </Button>
+          )}
           <Button href={abstractHome} height="32" variant="secondary">
             Back to Abstract
           </Button>

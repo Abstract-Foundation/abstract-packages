@@ -1,5 +1,6 @@
 import { abstract, abstractTestnet } from "viem/chains";
-import { resolveNetworkConfig } from "../src/config/network.js";
+import { resolveNetworkConfig } from "../packages/agw-core/src/config/network.js";
+import { resolveOutputMode, resolveSanitizeProfile } from "../packages/agw-core/src/config/runtime.js";
 
 describe("network config resolution", () => {
   it("defaults to Abstract mainnet with default RPC", () => {
@@ -13,7 +14,7 @@ describe("network config resolution", () => {
   it("supports mainnet selection via env", () => {
     const config = resolveNetworkConfig({
       env: {
-        AGW_MCP_CHAIN_ID: String(abstract.id),
+        AGW_CHAIN_ID: String(abstract.id),
       },
     });
 
@@ -26,7 +27,7 @@ describe("network config resolution", () => {
     const config = resolveNetworkConfig({
       chainId: abstract.id,
       env: {
-        AGW_MCP_CHAIN_ID: String(abstractTestnet.id),
+        AGW_CHAIN_ID: String(abstractTestnet.id),
       },
     });
 
@@ -36,7 +37,7 @@ describe("network config resolution", () => {
   it("supports rpc override via env", () => {
     const config = resolveNetworkConfig({
       env: {
-        AGW_MCP_RPC_URL: "https://rpc.custom.abs.xyz",
+        AGW_RPC_URL: "https://rpc.custom.abs.xyz",
       },
     });
 
@@ -47,7 +48,7 @@ describe("network config resolution", () => {
     const config = resolveNetworkConfig({
       rpcUrl: "https://rpc.cli.abs.xyz",
       env: {
-        AGW_MCP_RPC_URL: "https://rpc.env.abs.xyz",
+        AGW_RPC_URL: "https://rpc.env.abs.xyz",
       },
     });
 
@@ -62,9 +63,50 @@ describe("network config resolution", () => {
     expect(() =>
       resolveNetworkConfig({
         env: {
-          AGW_MCP_CHAIN_ID: "not-a-number",
+          AGW_CHAIN_ID: "not-a-number",
         },
       }),
     ).toThrow("Invalid chain id");
+  });
+
+  it("prefers explicit output mode over payload, env, and defaults", () => {
+    const mode = resolveOutputMode({
+      defaultMode: "json",
+      env: {
+        AGW_OUTPUT: "json",
+      },
+      explicit: "ndjson",
+      payload: "json",
+      stdoutIsTTY: false,
+      supportsPagination: true,
+    });
+
+    expect(mode).toBe("ndjson");
+  });
+
+  it("falls back to AGW_OUTPUT before non-tty defaults", () => {
+    const mode = resolveOutputMode({
+      defaultMode: "json",
+      env: {
+        AGW_OUTPUT: "json",
+      },
+      payload: undefined,
+      stdoutIsTTY: false,
+      supportsPagination: true,
+    });
+
+    expect(mode).toBe("json");
+  });
+
+  it("prefers explicit sanitize profile over env and command defaults", () => {
+    const profile = resolveSanitizeProfile({
+      defaultProfile: "off",
+      env: {
+        AGW_SANITIZE_PROFILE: "off",
+      },
+      explicit: "strict",
+    });
+
+    expect(profile).toBe("strict");
   });
 });

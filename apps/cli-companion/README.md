@@ -1,35 +1,93 @@
-# AGW MCP Hosted Onboarding App
+# AGW Companion App
 
-This package hosts the browser-side onboarding flow for `agw-mcp init`.
+This app is the browser-side trust boundary for AGW session approval. It is not a general control plane.
 
-## Entry Point
+## Responsibilities
 
-- Route: `/session/new`
-- File: `src/app/session/new/page.tsx`
-- Expected query parameters:
-  - `callback_url`: loopback callback URL (`http://localhost`, `http://127.0.0.1`, `http://[::1]`)
-  - `chain_id`: supported chains only (`11124`, `2741`)
+- onboarding and delegated signer approval
+- finalize-init callback token creation
+- revoke flow
+- callback verification key publication
 
-If validation fails, the page renders a non-retryable parameter error and instructs the user to restart from CLI.
+## Entry Routes
+
+- `/session/new`: onboarding entrypoint
+- `/session/revoke`: revoke entrypoint
+
+## Required Query Parameters
+
+For `/session/new`:
+
+- `callback_url`
+- `chain_id`
+- `auth_pubkey`
+
+`callback_url` must already contain a `state` query parameter before the app finalizes or revokes.
+
+Validation lives in:
+
+- `src/lib/onboarding-params.ts`
+- `src/lib/redirect.ts`
+
+## Server Routes
+
+- `POST /api/session/provision`
+- `POST /api/session/finalize-init`
+- `GET /api/session/revoke`
+- `POST /api/session/revoke`
+- `GET /api/session/callback-key`
 
 ## Callback Contract
 
-After wallet link succeeds, the app redirects to `callback_url` with:
+The app redirects back to the loopback `callback_url` with:
 
-- `session=<base64url(json-bundle)>`
+- `session=<signed-token>`
 
-Bundle payload fields:
+The token is a compact signed payload, not raw base64url JSON. It uses an EdDSA signature envelope produced by `src/lib/server/callback-attestation.ts`.
 
+For `init`, the signed payload includes:
+
+- `version: 2`
+- `action: "init"`
+- `state`
 - `accountAddress`
+- `underlyingSignerAddress`
 - `chainId`
+- `walletId`
+- `signerType`
+- `signerId`
+- `policyIds`
+- `signerFingerprint`
+- `signerLabel`
+- `signerCreatedAt`
+- `policyMeta`
+- `capabilitySummary`
+- freshness claims such as `iss`, `iat`, and `exp`
 
-No signer private key, signer reference, policy, or delegated session data is returned in the redirect.
+For `revoke`, the signed payload includes:
+
+- `version: 2`
+- `action: "revoke"`
+- `state`
+- `accountAddress`
+- `underlyingSignerAddress`
+- `chainId`
+- `walletId`
+- `signerType`
+- `signerId`
+- `revokedAt`
+- freshness claims such as `iss`, `iat`, and `exp`
 
 ## State Machine
 
-Wizard state is centralized in `src/stores/useSessionWizardStore.ts`:
+The onboarding wizard is centered in `src/stores/useSessionWizardStore.ts`.
 
-- `not_logged_in -> creating -> success`
-- Errors transition to `error` and retry returns to `not_logged_in`.
+Primary states:
 
-All transitions are invoked through explicit store actions.
+- `not_logged_in`
+- `select_policy`
+- `creating`
+- `success`
+- `error`
+
+Error recovery routes the user back through policy selection rather than directly to the initial login state.

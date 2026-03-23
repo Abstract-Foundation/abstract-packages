@@ -27,4 +27,4 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
-      - run: pnpm publish --access public --no-git-checks
+      - run: pnpm --filter @abstract-foundation/agw-cli publish --access public --no-git-checks

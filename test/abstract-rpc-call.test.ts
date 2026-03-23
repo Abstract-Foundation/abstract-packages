@@ -1,6 +1,6 @@
-import { getTool } from "../src/tools/index.js";
-import type { ToolContext } from "../src/tools/types.js";
-import { Logger } from "../src/utils/logger.js";
+import { getTool } from "../packages/agw-core/src/tools/index.js";
+import type { ToolContext } from "../packages/agw-core/src/tools/types.js";
+import { Logger } from "../packages/agw-core/src/utils/logger.js";
 
 function buildContext(): ToolContext {
   return {
@@ -11,6 +11,7 @@ function buildContext(): ToolContext {
       getNetworkConfig: () => ({ chainId: 2741, chain: {} as never, rpcUrl: "https://api.mainnet.abs.xyz" }),
     } as unknown as ToolContext["sessionManager"],
     logger: new Logger("test"),
+    runtime: {},
   };
 }
 

@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: "22"
           cache: pnpm
-      - run: pnpm --dir app install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --dir app audit --prod --audit-level=high
       - name: App full audit (non-blocking visibility)
         run: pnpm --dir app audit --prod

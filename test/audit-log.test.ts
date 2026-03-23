@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { AuditLog } from "../src/audit/log.js";
+import { AuditLog } from "../packages/agw-core/src/audit/log.js";
 
 describe("audit log module", () => {
   it("appends redact-safe audit entries", async () => {

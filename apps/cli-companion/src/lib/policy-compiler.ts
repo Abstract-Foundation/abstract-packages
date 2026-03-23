@@ -1,9 +1,11 @@
 import { APP_REGISTRY, getRegistryAppById, type AppRegistryEntry } from './app-registry';
+import { DEFAULT_POLICY_EXPIRY_SECONDS, DEFAULT_POLICY_FEE_LIMIT, DEFAULT_POLICY_MAX_VALUE_PER_USE } from './config';
 import {
   BUILT_IN_POLICY_PRESETS,
   CUSTOM_PRESET,
   ALL_SESSION_TOOLS,
 } from './policy-presets';
+import { DEFAULT_ENABLED_TOOLS } from './server/default-policy';
 import type {
   BuiltInSessionPolicyPresetId,
   GuidedSessionPolicyDraft,
@@ -280,6 +282,40 @@ export function toPolicyPreview(
       expiresAt: nowUnixSeconds + compiled.expiresInSeconds,
       sessionConfig: compiled.sessionConfig,
       policyMeta: compiled.policyMeta,
+    },
+  };
+}
+
+export function buildDefaultPolicyPreview(nowUnixSeconds = Math.floor(Date.now() / 1000)): PolicyPreview {
+  const preset = BUILT_IN_POLICY_PRESETS.full_app_control;
+
+  return {
+    presetId: preset.id,
+    label: preset.label,
+    description: preset.description,
+    policyPayload: {
+      expiresAt: nowUnixSeconds + DEFAULT_POLICY_EXPIRY_SECONDS,
+      sessionConfig: {
+        feeLimit: DEFAULT_POLICY_FEE_LIMIT,
+        maxValuePerUse: DEFAULT_POLICY_MAX_VALUE_PER_USE,
+        callPolicies: [],
+        transferPolicies: [],
+      },
+      policyMeta: {
+        version: 1,
+        mode: 'guided',
+        presetId: preset.id,
+        presetLabel: 'AGW MCP Default',
+        enabledTools: [...DEFAULT_ENABLED_TOOLS],
+        selectedAppIds: [],
+        selectedContractAddresses: [],
+        unverifiedAppIds: [],
+        warnings: [
+          'This signer can submit transactions and typed-data signatures within the remote spend and time limits.',
+          'Plain personal_sign requests are not enabled in the default policy.',
+        ],
+        generatedAt: nowUnixSeconds,
+      },
     },
   };
 }

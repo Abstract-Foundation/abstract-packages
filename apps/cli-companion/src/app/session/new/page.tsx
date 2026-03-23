@@ -33,7 +33,7 @@ export default async function NewSessionPage({
       <div className={pageStyles.container}>
         <div className={styles.wrapper}>
           <p className={styles.error}>{result.error ?? 'Invalid onboarding parameters.'}</p>
-          <p className={styles.helper}>Use the agw-mcp CLI to start this flow.</p>
+          <p className={styles.helper}>Use the agw CLI to start this flow.</p>
         </div>
       </div>
     );
@@ -44,6 +44,7 @@ export default async function NewSessionPage({
       <SessionFlowClient
         callbackUrl={result.params.callbackUrl}
         chainId={result.params.chainId}
+        authPublicKey={result.params.authPublicKey}
       />
     </div>
   );

@@ -72,7 +72,7 @@ describe('policy validation', () => {
       presetId: 'trading',
       nowUnixSeconds: 1_700_000_000,
       guidedDraft: {
-        selectedAppIds: ['12'],
+        selectedAppIds: ['136'],
         transferTargets: [],
         expiresInSeconds: 3600,
         feeLimit: '1000',
@@ -82,6 +82,6 @@ describe('policy validation', () => {
 
     expect(preview.presetId).toBe('trading');
     expect(preview.policyPayload.sessionConfig.callPolicies.length).toBeGreaterThan(0);
-    expect(preview.policyPayload.policyMeta?.selectedAppIds).toEqual(['12']);
+    expect(preview.policyPayload.policyMeta?.selectedAppIds).toEqual(['136']);
   });
 });

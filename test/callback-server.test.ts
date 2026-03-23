@@ -1,4 +1,4 @@
-import { startCallbackServer } from "../src/auth/handoff.js";
+import { startCallbackServer } from "../packages/agw-core/src/auth/handoff.js";
 
 describe("localhost callback server", () => {
   it("accepts session payload via GET query parameter", async () => {

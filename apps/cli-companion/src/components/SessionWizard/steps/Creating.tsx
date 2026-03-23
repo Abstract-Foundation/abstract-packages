@@ -11,25 +11,28 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/Card';
-import { useCreateSession } from '@/hooks/useCreateSession';
+import { useCreateAgentSigner } from '@/hooks/useCreateSession';
 import { useSessionWizardState } from '@/hooks/useSessionWizardState';
-import { buildRedirectUrl } from '@/lib/redirect';
 import styles from '../styles.module.scss';
 
 export default function Creating({
   callbackUrl,
   chain,
+  authPublicKey,
 }: {
   callbackUrl: string;
   chain: Chain;
+  authPublicKey: string;
 }) {
   const hasStartedRef = useRef(false);
   const {
     agwAddress,
+    signerAddress,
+    policyPreview,
     markCreationError,
     markCreationSuccess,
   } = useSessionWizardState();
-  const { createSession, isPending } = useCreateSession();
+  const { createAgentSigner, isPending } = useCreateAgentSigner();
 
   useEffect(() => {
     if (hasStartedRef.current) {
@@ -41,19 +44,26 @@ export default function Creating({
     const run = async () => {
       try {
         if (!agwAddress) {
-          throw new Error('Wallet is not connected.');
+          throw new Error('AGW wallet is not connected.');
         }
-        const accountAddress = agwAddress as `0x${string}`;
+        if (!signerAddress) {
+          throw new Error('Underlying signer is not connected.');
+        }
+        if (!policyPreview) {
+          throw new Error('Policy preview is missing.');
+        }
+        const agwAccountAddress = agwAddress as `0x${string}`;
+        const underlyingSignerAddress = signerAddress as `0x${string}`;
 
-        const bundle = await createSession({
-          accountAddress,
+        const { redirectUrl, provisionedSigner } = await createAgentSigner({
+          agwAccountAddress,
+          signerAddress: underlyingSignerAddress,
           chainId: chain.id,
+          authPublicKey,
+          callbackUrl,
         });
 
-        const redirectUrl = buildRedirectUrl(callbackUrl, bundle);
-        markCreationSuccess({
-          redirectUrl,
-        });
+        markCreationSuccess({ redirectUrl, provisionedSigner });
       } catch (error) {
         markCreationError(error instanceof Error ? error.message : String(error));
       }
@@ -62,7 +72,10 @@ export default function Creating({
     void run();
   }, [
     agwAddress,
-    createSession,
+    signerAddress,
+    policyPreview,
+    createAgentSigner,
+    authPublicKey,
     callbackUrl,
     chain.id,
     markCreationError,
@@ -73,14 +86,14 @@ export default function Creating({
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
-          <CardTitle>Linking Wallet</CardTitle>
-          <CardDescription>Preparing wallet context for your local MCP server.</CardDescription>
+          <CardTitle>Setting Up Agent Access</CardTitle>
+          <CardDescription>Provisioning a new AGW MCP signer for this device.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.helper}>
             {isPending
-              ? 'Finalizing wallet link...'
-              : 'Building local callback payload...'}
+              ? 'Creating signer policy and attaching it to your wallet...'
+              : 'Preparing signer attachment request...'}
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>

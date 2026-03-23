@@ -1,25 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { buildRedirectUrl, fromBase64Url, isLoopbackCallbackUrl } from '../redirect';
+import { buildRedirectUrl, isLoopbackCallbackUrl } from '../redirect';
 
 describe('redirect helpers', () => {
   it('builds loopback redirect with session payload', () => {
-    const url = buildRedirectUrl('http://127.0.0.1:8787/cb/test', {
-      accountAddress: '0x1111111111111111111111111111111111111111',
-      chainId: 11124,
-    });
+    const url = buildRedirectUrl('http://127.0.0.1:8787/cb/test?state=test-state', 'signed.callback.token');
 
     const parsed = new URL(url);
     const session = parsed.searchParams.get('session');
-    expect(session).toBeTruthy();
-    expect(JSON.parse(fromBase64Url(session!))).toMatchObject({ chainId: 11124 });
+    expect(session).toBe('signed.callback.token');
+    expect(parsed.searchParams.get('state')).toBe('test-state');
   });
 
   it('rejects non-loopback callback urls', () => {
     expect(() =>
-      buildRedirectUrl('https://evil.example/callback', {
-        accountAddress: '0x1111111111111111111111111111111111111111',
-        chainId: 11124,
-      }),
+      buildRedirectUrl('https://evil.example/callback', 'signed.callback.token'),
     ).toThrow('Only loopback');
 
     expect(isLoopbackCallbackUrl('http://localhost:8787/cb')).toBe(true);

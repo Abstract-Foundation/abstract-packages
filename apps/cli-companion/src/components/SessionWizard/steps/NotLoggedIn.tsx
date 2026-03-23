@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname, useSearchParams } from 'next/navigation';
 import Button from '@/@abstract-ui/components/Button';
 import AbstractBadge from '@/components/AbstractBadge';
 import {
@@ -10,11 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/Card';
-import { useSessionWizardState } from '@/hooks/useSessionWizardState';
 import styles from '../styles.module.scss';
 
 export default function NotLoggedIn() {
-  const { login, isLoginPending } = useSessionWizardState();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+  const redirectPath = query ? `${pathname}?${query}` : pathname;
+  const loginHref = `/login?redirect=${encodeURIComponent(redirectPath)}`;
 
   return (
     <div className={styles.wrapper}>
@@ -25,9 +29,10 @@ export default function NotLoggedIn() {
           </div>
         </CardHeader>
         <CardContent className={styles.loginContent}>
-          <CardTitle>AGW MCP Onboarding</CardTitle>
+          <CardTitle>AGW MCP Server Onboarding</CardTitle>
           <CardDescription>
-            Connect your Abstract Global Wallet to link local MCP access for this device.
+            Connect your wallet to authorize an AI agent for automated wallet actions on this
+            machine. This flow only configures MCP access for this device.
           </CardDescription>
         </CardContent>
         <CardFooter className={styles.footer}>
@@ -35,10 +40,9 @@ export default function NotLoggedIn() {
             className={styles.footerButton}
             height="40"
             variant="primary"
-            disabled={isLoginPending}
-            onClick={login}
+            href={loginHref}
           >
-            {isLoginPending ? 'Connecting wallet...' : 'Login with AGW'}
+            Login with AGW
           </Button>
         </CardFooter>
       </Card>

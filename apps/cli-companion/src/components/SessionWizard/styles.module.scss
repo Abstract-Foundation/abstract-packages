@@ -77,6 +77,14 @@
   letter-spacing: -0.01em;
 }
 
+.consentSubtitle {
+  margin: 0;
+  color: #5f6978;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -402,6 +410,163 @@
 
 .dangerAck input {
   margin-top: 2px;
+}
+
+.permissionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.permissionItem {
+  border-radius: 12px;
+  border: 1px solid #d8e1ed;
+  background: linear-gradient(180deg, #fbfdff 0%, #f6faff 100%);
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.permissionIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(25, 231, 131, 0.12);
+  color: #166644;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+}
+
+.permissionLabel {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3849;
+}
+
+.permissionDetail {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #5f6f85;
+}
+
+.consentAck {
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #36465c;
+}
+
+.consentAck input {
+  margin-top: 2px;
+}
+
+.consentTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #181818;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.consentSubtext {
+  margin: 0;
+  font-size: 14px;
+  color: #9da3ac;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.safetyPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.safetyPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(25, 231, 131, 0.08);
+  border: 1px solid rgba(25, 231, 131, 0.2);
+  font-size: 12px;
+  font-weight: 500;
+  color: #166644;
+  white-space: nowrap;
+}
+
+.safetyPillIcon {
+  width: 14px;
+  height: 14px;
+  color: #19e783;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.permissionBlock {
+  border-radius: 12px;
+  background: #f8fbff;
+  border: 1px solid #e7ebf0;
+  padding: 14px;
+}
+
+.permissionBlockTitle {
+  margin: 0 0 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9da3ac;
+  font-weight: 600;
+}
+
+.permissionListCompact {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.permissionListCompactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #2d3849;
+}
+
+.permissionCheckIcon {
+  width: 14px;
+  height: 14px;
+  color: #19e783;
+  flex-shrink: 0;
+}
+
+.consentAckSimple {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #5f6978;
+  cursor: pointer;
+}
+
+.consentAckSimple input {
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 .appList {

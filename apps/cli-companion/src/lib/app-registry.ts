@@ -28,31 +28,6 @@ export interface AppRegistryEntry {
 
 export const APP_REGISTRY: ReadonlyArray<AppRegistryEntry> = [
   {
-    id: '12',
-    name: 'MYRIAD',
-    categories: ['Trading'],
-    spotlight: true,
-    verified: true,
-    description: 'Prediction market trading on Abstract.',
-    docsUrl: 'https://help.myriad.markets/developer-docs',
-    iconUrl:
-      'https://abstract-portal-metadata-prod.s3.amazonaws.com/icons/6e85b930-49b0-4d3f-99e5-911e6ea81e4b.png',
-    bannerUrl:
-      'https://abstract-portal-metadata-prod.s3.amazonaws.com/banners/e3ebbadc-4bb9-43d1-bbc5-5a9e59af737c.png',
-    contracts: [
-      {
-        address: '0x4f4988A910f8aE9B3214149A8eA1F2E4e3Cd93CC',
-        label: 'Prediction Market',
-        verified: true,
-        selectors: [
-          { selector: '0x1281311d', label: 'Buy', enabledByDefault: true },
-          { selector: '0x3620875e', label: 'Sell', enabledByDefault: true },
-          { selector: '0x677bd9ff', label: 'Claim Winnings', enabledByDefault: true },
-        ],
-      },
-    ],
-  },
-  {
     id: '136',
     name: 'Gacha',
     categories: ['Games of Chance', 'Gaming'],

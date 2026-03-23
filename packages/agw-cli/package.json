@@ -1,0 +1,44 @@
+{
+  "name": "@abstract-foundation/agw-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Agent-first CLI for Abstract Global Wallet workflows",
+  "license": "MIT",
+  "author": "Abstract Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abstract-Foundation/agw-mcp.git"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/agw-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/agw-mcp/issues"
+  },
+  "bin": {
+    "agw-cli": "./dist/index.mjs"
+  },
+  "files": [
+    "dist/",
+    "skills/",
+    "extensions/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown --config tsdown.config.ts",
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.mjs",
+    "prepublishOnly": "pnpm check-types && pnpm lint && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@abstract-foundation/agw-client": "1.10.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "commander": "^12.1.0",
+    "open": "^10.1.0",
+    "viem": "^2.46.2"
+  }
+}
