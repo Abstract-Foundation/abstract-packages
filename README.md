@@ -78,7 +78,7 @@ Instead, AGW CLI generates a local **device authorization key** and registers it
 │           │────────────────────────────────────▶┌──────────────┐
 │           │                                     │  Companion   │
 │           │  3. User connects AGW, approves      │  App         │
-│           │     signer + selects policy preset   │  mcp.abs.xyz │
+│           │     signer + selects policy preset   │  cli.abs.xyz │
 │           │                                     └──────┬───────┘
 │           │                                            │
 │           │  4. Signed callback token (EdDSA)          │
@@ -267,7 +267,7 @@ No. The Privy policy attached to your signer defines hard limits enforced server
 
 ### What is the companion app?
 
-The companion app ([mcp.abs.xyz](https://mcp.abs.xyz)) is a hosted web interface where you approve or revoke agent signers. It handles the Privy signer registration flow and sends a cryptographically signed callback token back to the CLI. You only need it during `auth init` and `auth revoke` — normal CLI usage does not require the browser.
+The companion app ([cli.abs.xyz](https://cli.abs.xyz)) is a hosted web interface where you approve or revoke agent signers. It handles the Privy signer registration flow and sends a cryptographically signed callback token back to the CLI. You only need it during `auth init` and `auth revoke` — normal CLI usage does not require the browser.
 
 ### Can I use AGW CLI without an AI agent?
 

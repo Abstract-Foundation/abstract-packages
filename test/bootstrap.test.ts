@@ -270,7 +270,7 @@ describe("bootstrap callback/signer bundle flow", () => {
     }
   });
 
-  it("defaults to mcp.abs.xyz when onboarding app URL is not configured", async () => {
+  it("defaults to cli.abs.xyz when onboarding app URL is not configured", async () => {
     // #given
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "agw-cli-bootstrap-flow-"));
     const previous = process.env.AGW_APP_URL;
@@ -290,7 +290,7 @@ describe("bootstrap callback/signer bundle flow", () => {
 
       openMock.mockImplementation(async (url: string) => {
         const launchUrl = new URL(url);
-        expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://mcp.abs.xyz/session/new");
+        expect(`${launchUrl.origin}${launchUrl.pathname}`).toBe("https://cli.abs.xyz/session/new");
         const authPublicKey = launchUrl.searchParams.get("auth_pubkey")!;
         const callbackState = new URL(launchUrl.searchParams.get("callback_url")!).searchParams.get("state")!;
         const signerFingerprint = computePublicKeyFingerprint(authPublicKey);
@@ -334,7 +334,7 @@ describe("bootstrap callback/signer bundle flow", () => {
         runBootstrapFlow(createLogger(), {
           chainId: 11124,
           homeDir: tmpDir,
-          appUrl: "http://mcp.abs.xyz",
+          appUrl: "http://cli.abs.xyz",
         }),
       ).rejects.toThrow("Refusing insecure app URL over http for non-loopback host");
     } finally {

@@ -16,7 +16,7 @@ export interface BootstrapLockHandle {
 const AUTH_KEY_FILENAME = "privy-auth.key";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const BOOTSTRAP_LOCK_STALE_MS = 30 * 60 * 1000;
-const DEFAULT_ONBOARDING_APP_URL = "https://mcp.abs.xyz";
+const DEFAULT_ONBOARDING_APP_URL = "https://cli.abs.xyz";
 
 function ensurePrivateDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
