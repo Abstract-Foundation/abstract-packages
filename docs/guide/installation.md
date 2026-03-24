@@ -66,5 +66,5 @@ The AGW repo ships agent Skills that teach the agent how to use the CLI safely a
 Install all AGW skills by default:
 
 ```bash
-npx skills add https://github.com/Abstract-Foundation/agw-cli/tree/main/packages/agw-cli/skills
+npx skills add https://github.com/Abstract-Foundation/agw-cli/tree/main/packages/agw-cli/skills -y
 ```

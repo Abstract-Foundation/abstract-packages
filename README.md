@@ -198,7 +198,7 @@ agw-cli mcp-config --npx  # npx-based (no global install needed)
 The repo ships agent skills that teach AI agents how to use the CLI safely. Install them with:
 
 ```bash
-npx skills add https://github.com/Abstract-Foundation/agw-cli/tree/main/packages/agw-cli/skills
+npx skills add https://github.com/Abstract-Foundation/agw-cli/tree/main/packages/agw-cli/skills -y
 ```
 
 Available skills:
