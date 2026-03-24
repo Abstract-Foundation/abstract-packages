@@ -1,7 +1,6 @@
 import { createPublicKey, type KeyObject, verify as verifySignature } from "node:crypto";
 
 const DEFAULT_CALLBACK_ISSUER = "agw";
-const LOCALHOST_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const DEFAULT_CLOCK_SKEW_SECONDS = 60;
 
 export interface CallbackVerificationConfig {
@@ -39,15 +38,6 @@ function parsePublicKeyBase64(value: string): KeyObject {
   });
 }
 
-function isLoopbackAppUrl(appUrl: string): boolean {
-  try {
-    const parsed = new URL(appUrl);
-    return LOCALHOST_HOSTS.has(parsed.hostname);
-  } catch {
-    return false;
-  }
-}
-
 export async function resolveCallbackVerificationConfig(appUrl: string): Promise<CallbackVerificationConfig> {
   const explicitPublicKey = process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY?.trim();
   const explicitIssuer = process.env.AGW_CALLBACK_SIGNING_ISSUER?.trim() || DEFAULT_CALLBACK_ISSUER;
@@ -57,12 +47,6 @@ export async function resolveCallbackVerificationConfig(appUrl: string): Promise
       publicKeyBase64: explicitPublicKey,
       publicKey: parsePublicKeyBase64(explicitPublicKey),
     };
-  }
-
-  if (!isLoopbackAppUrl(appUrl)) {
-    throw new Error(
-      "AGW_CALLBACK_SIGNING_PUBLIC_KEY is required for non-localhost onboarding URLs.",
-    );
   }
 
   const callbackKeyUrl = new URL("/api/session/callback-key", appUrl);
