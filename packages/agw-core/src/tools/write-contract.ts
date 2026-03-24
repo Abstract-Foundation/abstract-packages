@@ -4,6 +4,17 @@ import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
+function toJsonSafe(value: unknown): unknown {
+  if (typeof value === "bigint") return value.toString();
+  if (Array.isArray(value)) return value.map(toJsonSafe);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, toJsonSafe(v)]),
+    );
+  }
+  return value;
+}
+
 function isViewOrPure(abi: Abi, functionName: string): boolean {
   const fn = abi.find(
     (item): item is AbiFunction =>
@@ -109,7 +120,7 @@ export const writeContractTool: ToolHandler = {
       } as never);
 
       return {
-        result,
+        result: toJsonSafe(result),
         accountAddress: session.accountAddress,
         chainId: session.chainId,
         contract: { address, functionName, args: args ?? [] },
