@@ -1,8 +1,16 @@
-import { encodeFunctionData, isAddress, type Abi, type Address } from "viem";
+import { createPublicClient, encodeFunctionData, http, isAddress, type Abi, type AbiFunction, type Address } from "viem";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
+
+function isViewOrPure(abi: Abi, functionName: string): boolean {
+  const fn = abi.find(
+    (item): item is AbiFunction =>
+      item.type === "function" && item.name === functionName,
+  );
+  return fn?.stateMutability === "view" || fn?.stateMutability === "pure";
+}
 
 function assertAddress(value: unknown, field: string): Address {
   if (typeof value !== "string" || !isAddress(value)) {
@@ -80,14 +88,37 @@ export const writeContractTool: ToolHandler = {
       throw new Error("invalid abi/functionName/args payload");
     }
 
-    const status = context.sessionManager.getSessionStatus();
-    if (status !== "active") {
-      throw new Error(`session must be active (current status: ${status})`);
-    }
-
     const session = context.sessionManager.getSession();
     if (!session) {
       throw new Error("session is missing");
+    }
+
+    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
+
+    if (isViewOrPure(abi, functionName)) {
+      const publicClient = createPublicClient({
+        chain: networkConfig.chain,
+        transport: http(networkConfig.rpcUrl),
+      });
+
+      const result = await publicClient.readContract({
+        address,
+        abi,
+        functionName,
+        args,
+      } as never);
+
+      return {
+        result,
+        accountAddress: session.accountAddress,
+        chainId: session.chainId,
+        contract: { address, functionName, args: args ?? [] },
+      };
+    }
+
+    const status = context.sessionManager.getSessionStatus();
+    if (status !== "active") {
+      throw new Error(`session must be active (current status: ${status})`);
     }
 
     const abstractClient = await context.sessionManager.getAbstractClient();
@@ -99,7 +130,6 @@ export const writeContractTool: ToolHandler = {
       value,
     } as never);
 
-    const networkConfig = resolveToolNetworkConfig(context, session.chainId);
     const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
 
     return {

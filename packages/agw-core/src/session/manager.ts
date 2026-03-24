@@ -43,7 +43,6 @@ export class SessionManager {
     }
 
     this.session = session;
-    this.logger.info(`Loaded session for ${session.accountAddress}`);
   }
 
   getSession(): AgwSessionData | null {
