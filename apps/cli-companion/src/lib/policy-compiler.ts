@@ -305,7 +305,7 @@ export function buildDefaultPolicyPreview(nowUnixSeconds = Math.floor(Date.now()
         version: 1,
         mode: 'guided',
         presetId: preset.id,
-        presetLabel: 'AGW MCP Default',
+        presetLabel: 'AGW CLI Default',
         enabledTools: [...DEFAULT_ENABLED_TOOLS],
         selectedAppIds: [],
         selectedContractAddresses: [],

@@ -44,7 +44,7 @@ export function useCreateAgentSigner() {
         });
         const provisionBody = (await provisionResponse.json()) as ProvisionedSignerResult & { error?: string };
         if (!provisionResponse.ok) {
-          throw new Error(provisionBody.error ?? 'Failed to provision AGW MCP signer.');
+          throw new Error(provisionBody.error ?? 'Failed to provision AGW CLI signer.');
         }
 
         await addSessionSigners({
@@ -69,7 +69,7 @@ export function useCreateAgentSigner() {
         });
         const finalized = (await finalizeResponse.json()) as { redirectUrl?: string; error?: string };
         if (!finalizeResponse.ok || !finalized.redirectUrl) {
-          throw new Error(finalized.error ?? 'Failed to finalize AGW MCP signer provisioning.');
+          throw new Error(finalized.error ?? 'Failed to finalize AGW CLI signer provisioning.');
         }
 
         return {

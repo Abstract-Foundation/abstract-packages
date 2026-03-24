@@ -8,9 +8,9 @@ import AbstractProvider from '@/providers/AbstractProvider';
 import styles from './styles.module.scss';
 
 export const metadata = {
-  title: 'AGW MCP Onboarding',
-  description: 'Hosted onboarding flow for AGW MCP wallet linking.',
-  applicationName: 'AGW MCP',
+  title: 'AGW CLI Onboarding',
+  description: 'Hosted onboarding flow for AGW CLI wallet linking.',
+  applicationName: 'AGW CLI',
 };
 
 export const viewport: Viewport = {

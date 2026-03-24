@@ -129,7 +129,7 @@ function normalizeKeyQuorumRecord(value: Record<string, unknown>): PrivyKeyQuoru
   const id = typeof value.id === "string" ? value.id : "";
   const displayName = typeof value.display_name === "string" && value.display_name.trim()
     ? value.display_name.trim()
-    : "AGW MCP signer";
+    : "AGW CLI signer";
   const publicKeys = Array.isArray(value.authorization_keys)
     ? value.authorization_keys.flatMap(entry => {
         if (!entry || typeof entry !== "object") {

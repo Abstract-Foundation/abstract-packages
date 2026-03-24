@@ -87,7 +87,7 @@ export default function Creating({
       <Card>
         <CardHeader>
           <CardTitle>Setting Up Agent Access</CardTitle>
-          <CardDescription>Provisioning a new AGW MCP signer for this device.</CardDescription>
+          <CardDescription>Provisioning a new AGW CLI signer for this device.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.helper}>

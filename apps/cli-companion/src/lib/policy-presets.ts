@@ -182,7 +182,7 @@ export const BUILT_IN_POLICY_PRESETS: Readonly<
   },
   full_app_control: {
     id: 'full_app_control',
-    label: 'Broad AGW MCP Access',
+    label: 'Broad AGW CLI Access',
     description: 'Broad device signer access with chain, time, and native value limits.',
     customMode: false,
     riskHint: 'critical',

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 const PRIVY_API_BASE = 'https://api.privy.io';
-const AGW_MCP_SIGNER_LABEL_PREFIX = 'AGW MCP';
+const SIGNER_LABEL_PREFIX = 'AGW CLI';
 
 export interface PrivyAdminConfig {
   appId: string;
@@ -173,7 +173,7 @@ function normalizeKeyQuorumRecord(value: Record<string, unknown>): PrivyKeyQuoru
   const id = typeof value.id === 'string' ? value.id : '';
   const displayName = typeof value.display_name === 'string' && value.display_name.trim()
     ? value.display_name.trim()
-    : `${AGW_MCP_SIGNER_LABEL_PREFIX} signer`;
+    : `${SIGNER_LABEL_PREFIX} signer`;
   const publicKeys = Array.isArray(value.authorization_keys)
     ? value.authorization_keys.flatMap(entry => {
         if (!entry || typeof entry !== 'object') {
@@ -202,7 +202,7 @@ export function computeSignerFingerprint(publicKeyBase64: string): string {
 }
 
 export function buildSignerLabel(fingerprint: string): string {
-  return `${AGW_MCP_SIGNER_LABEL_PREFIX} ${fingerprint}`;
+  return `${SIGNER_LABEL_PREFIX} ${fingerprint}`;
 }
 
 export async function findWalletByAddress(address: string): Promise<PrivyWalletRecord> {
@@ -288,7 +288,7 @@ export async function listExistingAgwMcpSigners(wallet: PrivyWalletRecord) {
     wallet.additionalSigners.map(async signer => {
       try {
         const keyQuorum = await getKeyQuorumById(signer.signerId);
-        if (!keyQuorum.displayName.startsWith(AGW_MCP_SIGNER_LABEL_PREFIX)) {
+        if (!keyQuorum.displayName.startsWith(SIGNER_LABEL_PREFIX)) {
           return null;
         }
         return {

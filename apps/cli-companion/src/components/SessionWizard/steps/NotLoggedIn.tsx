@@ -29,7 +29,7 @@ export default function NotLoggedIn() {
           </div>
         </CardHeader>
         <CardContent className={styles.loginContent}>
-          <CardTitle>AGW MCP Server Onboarding</CardTitle>
+          <CardTitle>AGW CLI Server Onboarding</CardTitle>
           <CardDescription>
             Connect your wallet to authorize an AI agent for automated wallet actions on this
             machine. This flow only configures MCP access for this device.

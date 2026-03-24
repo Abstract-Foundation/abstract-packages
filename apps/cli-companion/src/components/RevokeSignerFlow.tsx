@@ -141,7 +141,7 @@ export default function RevokeSignerFlow({
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
-          <CardTitle>Revoke AGW MCP Signer</CardTitle>
+          <CardTitle>Revoke AGW CLI Signer</CardTitle>
           <CardDescription>Remove this device signer from your wallet, then hand the result back to the CLI.</CardDescription>
         </CardHeader>
         <CardContent className={styles.content}>
@@ -156,7 +156,7 @@ export default function RevokeSignerFlow({
             </p>
           ) : null}
           <p className={styles.helper}>
-            This only removes the selected AGW MCP signer. Other AGW MCP signers on this wallet are left unchanged.
+            This only removes the selected AGW CLI signer. Other AGW CLI signers on this wallet are left unchanged.
           </p>
           {error ? <p className={styles.error}>{error}</p> : null}
         </CardContent>

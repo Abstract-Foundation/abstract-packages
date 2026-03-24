@@ -4,7 +4,7 @@ import type { ToolHandler } from "./types.js";
 export const revokeSessionTool: ToolHandler = {
   name: "revoke_session",
   description:
-    "Opens the hosted revoke flow, verifies the AGW MCP signer was removed from your wallet, then deletes the local authorization key.",
+    "Opens the hosted revoke flow, verifies the AGW CLI signer was removed from your wallet, then deletes the local authorization key.",
   inputSchema: {
     type: "object",
     properties: {},
