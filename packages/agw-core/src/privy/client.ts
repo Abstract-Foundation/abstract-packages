@@ -8,7 +8,6 @@ import type {
 } from "./types.js";
 
 const PRIVY_API_BASE = "https://api.privy.io";
-const LOCALHOST_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export interface PrivyWalletClientConfig {
   signerConfig: PrivySignerConfig;
@@ -45,14 +44,7 @@ export class PrivyWalletClient {
     return Buffer.from(`${appId}:${appSecret}`).toString("base64");
   }
 
-  private isLoopbackAppUrl(): boolean {
-    try {
-      const parsed = new URL(this.appUrl);
-      return LOCALHOST_HOSTS.has(parsed.hostname);
-    } catch {
-      return false;
-    }
-  }
+
 
   private async resolveRuntimeConfig(): Promise<{ appId: string; mode: "proxy" | "direct" }> {
     if (this.runtimeConfigPromise) {
@@ -73,12 +65,6 @@ export class PrivyWalletClient {
           appId: explicitAppId,
           mode: "proxy" as const,
         };
-      }
-
-      if (!this.isLoopbackAppUrl()) {
-        throw new Error(
-          "AGW_PRIVY_APP_ID is required for non-localhost hosted app URLs when the CLI is running without Privy server credentials.",
-        );
       }
 
       const response = await fetch(new URL("/api/session/callback-key", this.appUrl), {

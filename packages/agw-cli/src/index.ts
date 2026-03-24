@@ -145,7 +145,7 @@ async function main(): Promise<void> {
   program
     .name("agw-cli")
     .description("Agent-first CLI for Abstract Global Wallet workflows.")
-    .version("0.1.3")
+    .version("0.1.4")
     .showHelpAfterError();
 
   program
