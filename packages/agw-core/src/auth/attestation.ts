@@ -1,4 +1,5 @@
 import { createPublicKey, type KeyObject, verify as verifySignature } from "node:crypto";
+import { AGW_HTTP_HEADERS } from "../config/runtime.js";
 
 const DEFAULT_CALLBACK_ISSUER = "agw";
 const DEFAULT_CLOCK_SKEW_SECONDS = 60;
@@ -54,6 +55,7 @@ export async function resolveCallbackVerificationConfig(appUrl: string): Promise
     method: "GET",
     headers: {
       Accept: "application/json",
+      ...AGW_HTTP_HEADERS,
     },
   });
   if (!response.ok) {

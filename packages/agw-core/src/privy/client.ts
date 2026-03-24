@@ -1,4 +1,5 @@
 import type { KeyObject } from "node:crypto";
+import { AGW_HTTP_HEADERS } from "../config/runtime.js";
 import { computeAuthorizationSignature, readAuthKeyfile } from "./auth.js";
 import type {
   PrivySignerConfig,
@@ -84,6 +85,7 @@ export class PrivyWalletClient {
         method: "GET",
         headers: {
           Accept: "application/json",
+          ...AGW_HTTP_HEADERS,
         },
       });
       if (!response.ok) {
@@ -139,6 +141,7 @@ export class PrivyWalletClient {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...AGW_HTTP_HEADERS,
           },
           body: JSON.stringify({
             walletId: this.walletId,
