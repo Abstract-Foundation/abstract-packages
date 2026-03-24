@@ -7,9 +7,9 @@ import {
   verifySignedServerPayload,
 } from '../server/callback-attestation';
 
-const originalPrivateKey = process.env.AGW_MCP_CALLBACK_SIGNING_PRIVATE_KEY;
-const originalPublicKey = process.env.AGW_MCP_CALLBACK_SIGNING_PUBLIC_KEY;
-const originalIssuer = process.env.AGW_MCP_CALLBACK_SIGNING_ISSUER;
+const originalPrivateKey = process.env.AGW_CALLBACK_SIGNING_PRIVATE_KEY;
+const originalPublicKey = process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY;
+const originalIssuer = process.env.AGW_CALLBACK_SIGNING_ISSUER;
 
 declare global {
   // eslint-disable-next-line no-var
@@ -24,29 +24,29 @@ declare global {
 
 function resetSignerCache() {
   delete globalThis.__agwMcpCallbackSigner;
-  delete process.env.AGW_MCP_CALLBACK_SIGNING_PRIVATE_KEY;
-  delete process.env.AGW_MCP_CALLBACK_SIGNING_PUBLIC_KEY;
-  delete process.env.AGW_MCP_CALLBACK_SIGNING_ISSUER;
+  delete process.env.AGW_CALLBACK_SIGNING_PRIVATE_KEY;
+  delete process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY;
+  delete process.env.AGW_CALLBACK_SIGNING_ISSUER;
 }
 
 afterEach(() => {
   resetSignerCache();
 
   if (originalPrivateKey !== undefined) {
-    process.env.AGW_MCP_CALLBACK_SIGNING_PRIVATE_KEY = originalPrivateKey;
+    process.env.AGW_CALLBACK_SIGNING_PRIVATE_KEY = originalPrivateKey;
   }
   if (originalPublicKey !== undefined) {
-    process.env.AGW_MCP_CALLBACK_SIGNING_PUBLIC_KEY = originalPublicKey;
+    process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY = originalPublicKey;
   }
   if (originalIssuer !== undefined) {
-    process.env.AGW_MCP_CALLBACK_SIGNING_ISSUER = originalIssuer;
+    process.env.AGW_CALLBACK_SIGNING_ISSUER = originalIssuer;
   }
 });
 
 describe('callback attestation', () => {
   it('signs and verifies init callback payloads with freshness metadata', () => {
     resetSignerCache();
-    process.env.AGW_MCP_CALLBACK_SIGNING_ISSUER = 'agw-test';
+    process.env.AGW_CALLBACK_SIGNING_ISSUER = 'agw-test';
 
     const payload = buildSignedCallbackPayload({
       version: 2 as const,

@@ -26,11 +26,11 @@ function encodeBase64Url(input: Buffer | string): string {
 }
 
 function resolveIssuer(): string {
-  return process.env.AGW_MCP_CALLBACK_SIGNING_ISSUER?.trim() || DEFAULT_CALLBACK_ISSUER;
+  return process.env.AGW_CALLBACK_SIGNING_ISSUER?.trim() || DEFAULT_CALLBACK_ISSUER;
 }
 
 function loadConfiguredSigner(): CallbackSigner | null {
-  const privateKeyBase64 = process.env.AGW_MCP_CALLBACK_SIGNING_PRIVATE_KEY?.trim();
+  const privateKeyBase64 = process.env.AGW_CALLBACK_SIGNING_PRIVATE_KEY?.trim();
   if (!privateKeyBase64) {
     return null;
   }
@@ -44,7 +44,7 @@ function loadConfiguredSigner(): CallbackSigner | null {
     format: 'der',
     type: 'spki',
   }).toString('base64');
-  const configuredPublicKey = process.env.AGW_MCP_CALLBACK_SIGNING_PUBLIC_KEY?.trim();
+  const configuredPublicKey = process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY?.trim();
   if (configuredPublicKey && configuredPublicKey !== publicKeyBase64) {
     throw new Error('Configured callback signing public key does not match the provided private key.');
   }
@@ -87,7 +87,7 @@ function getCallbackSigner(): CallbackSigner {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('Missing AGW_MCP_CALLBACK_SIGNING_PRIVATE_KEY in production environment.');
+    throw new Error('Missing AGW_CALLBACK_SIGNING_PRIVATE_KEY in production environment.');
   }
 
   cachedCallbackSigner = createEphemeralSigner();
