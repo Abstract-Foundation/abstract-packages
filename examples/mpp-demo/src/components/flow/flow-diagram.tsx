@@ -165,8 +165,8 @@ export function FlowDiagram() {
         : SESSION_SUBSEQUENT_STEPS
 
   return (
-    <div className="relative w-full">
-      <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6 backdrop-blur-sm">
+    <div className="relative w-full lg:flex">
+      <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6 backdrop-blur-sm w-full h-full">
         <h2 className="text-lg font-semibold font-mono text-accent mb-4">
           Protocol Flow
         </h2>

@@ -21,7 +21,7 @@ export function ProtocolOverview() {
         header, and the server settles directly on-chain.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-stretch">
         <IntentCard
           title="Charge"
           description="One-time ERC-3009 payment. Client signs typed data, server broadcasts the transfer."
@@ -55,7 +55,7 @@ function IntentCard({
   traits: string[]
 }) {
   return (
-    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+    <div className="bg-white/5 border border-white/10 rounded-lg p-4 h-full">
       <h3 className="text-sm font-mono text-accent mb-1">{title}</h3>
       <p className="text-xs text-gray-400 font-sans mb-2">{description}</p>
       <ul className="space-y-1">
