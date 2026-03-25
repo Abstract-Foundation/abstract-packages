@@ -78,6 +78,13 @@ export interface AbstractSessionClientOptions {
   ) =>
     | PublicClient<Transport, ChainEIP712>
     | Promise<PublicClient<Transport, ChainEIP712>>;
+  /**
+   * Called after a channel is opened on-chain but before the first voucher is
+   * signed. If it returns a Promise the voucher signing is deferred until
+   * that Promise resolves — useful for requiring an explicit user confirmation
+   * step between the on-chain open and the first off-chain voucher.
+   */
+  onChannelOpened?: (channelId: Hex) => void | Promise<void>;
 }
 
 interface ChannelEntry {
@@ -263,6 +270,10 @@ export function abstractSession(options: AbstractSessionClientOptions) {
           opened: true,
         };
         channels.set(key, entry);
+
+        if (options.onChannelOpened) {
+          await options.onChannelOpened(channelId);
+        }
 
         // Sign opening voucher
         entry.cumulativeAmount += amount;

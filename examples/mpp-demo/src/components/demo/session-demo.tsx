@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { formatUnits } from 'viem'
 import { useAccount, useWalletClient } from 'wagmi'
 import { createSessionClient } from '@/lib/mpp-client'
-import { SESSION_AMOUNT } from '@/lib/constants'
+import { SESSION_AMOUNT, SESSION_DEPOSIT, USDC_DECIMALS } from '@/lib/constants'
 import type { Account, Transport, WalletClient } from 'viem'
 import type { ChainEIP712 } from 'viem/zksync'
-
 
 interface SessionResponse {
   message: string
@@ -23,11 +23,18 @@ interface SessionState {
   responses: SessionResponse[]
 }
 
+type Phase = 'idle' | 'opening' | 'awaitingVoucher' | 'signing'
+
+function formatCumulative(raw: string): string {
+  if (raw === '0') return '$0'
+  return `$${formatUnits(BigInt(raw), USDC_DECIMALS)}`
+}
+
 export function SessionDemo() {
   const { address } = useAccount()
   const { data: walletClient } = useWalletClient()
 
-  const [loading, setLoading] = useState(false)
+  const [phase, setPhase] = useState<Phase>('idle')
   const [state, setState] = useState<SessionState>({
     requestCount: 0,
     cumulativeAmount: '0',
@@ -38,6 +45,15 @@ export function SessionDemo() {
 
   const mppxRef = useRef<ReturnType<typeof createSessionClient> | null>(null)
   const walletRef = useRef<string | null>(null)
+  const voucherResolverRef = useRef<(() => void) | null>(null)
+  const fetchPromiseRef = useRef<Promise<Response> | null>(null)
+
+  const onChannelOpened = useCallback(async () => {
+    return new Promise<void>((resolve) => {
+      voucherResolverRef.current = resolve
+      setPhase('awaitingVoucher')
+    })
+  }, [])
 
   const getOrCreateClient = useCallback(() => {
     if (!walletClient?.account) return null
@@ -46,69 +62,115 @@ export function SessionDemo() {
     if (walletRef.current !== walletKey) {
       mppxRef.current = createSessionClient(
         walletClient as WalletClient<Transport, ChainEIP712, Account>,
+        { onChannelOpened },
       )
       walletRef.current = walletKey
     }
 
     return mppxRef.current
-  }, [walletClient])
+  }, [walletClient, onChannelOpened])
 
-  const handleSessionRequest = async () => {
+  const processResponse = useCallback(async (response: Response) => {
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(
+        `Request failed (${response.status}): ${text.slice(0, 200)}`,
+      )
+    }
+
+    const data = (await response.json()) as SessionResponse
+    const receipt = response.headers.get('Payment-Receipt')
+
+    let receiptCumulative: string | undefined
+    if (receipt) {
+      try {
+        const payload = receipt.startsWith('Payment ')
+          ? receipt.slice('Payment '.length)
+          : receipt
+        const decoded = atob(
+          payload.replace(/-/g, '+').replace(/_/g, '/'),
+        )
+        const parsed = JSON.parse(decoded)
+        if (parsed.acceptedCumulative) {
+          receiptCumulative = parsed.acceptedCumulative
+        }
+      } catch {
+        /* receipt parsing is best-effort */
+      }
+    }
+
+    setState((prev) => ({
+      requestCount: prev.requestCount + 1,
+      cumulativeAmount: receiptCumulative ?? prev.cumulativeAmount,
+      channelOpen: true,
+      responses: [data, ...prev.responses].slice(0, 5),
+    }))
+  }, [])
+
+  const handleOpenChannel = async () => {
     const mppx = getOrCreateClient()
     if (!mppx) return
 
-    setLoading(true)
+    setPhase('opening')
     setError(null)
 
+    const fetchPromise = mppx.fetch('/api/session')
+    fetchPromiseRef.current = fetchPromise
+
+    fetchPromise.catch((err) => {
+      if (voucherResolverRef.current) return
+      setPhase('idle')
+      setError(
+        err instanceof Error ? err.message.split('\n')[0] : 'Unknown error',
+      )
+      fetchPromiseRef.current = null
+    })
+  }
+
+  const handleSignVoucher = async () => {
+    setPhase('signing')
+    voucherResolverRef.current?.()
+    voucherResolverRef.current = null
+
     try {
-      const response = await mppx.fetch('/api/session')
-
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(
-          `Request failed (${response.status}): ${text.slice(0, 200)}`,
-        )
-      }
-
-      const data = (await response.json()) as SessionResponse
-      const receipt = response.headers.get('Payment-Receipt')
-
-      let cumulativeAmount = state.cumulativeAmount
-      if (receipt) {
-        try {
-          const payload = receipt.startsWith('Payment ')
-            ? receipt.slice('Payment '.length)
-            : receipt
-          const decoded = atob(
-            payload.replace(/-/g, '+').replace(/_/g, '/'),
-          )
-          const parsed = JSON.parse(decoded)
-          if (parsed.acceptedCumulative) {
-            cumulativeAmount = parsed.acceptedCumulative
-          }
-        } catch {
-          /* receipt parsing is best-effort */
-        }
-      }
-
-      setState((prev) => ({
-        requestCount: prev.requestCount + 1,
-        cumulativeAmount,
-        channelOpen: true,
-        responses: [data, ...prev.responses].slice(0, 5),
-      }))
+      const response = await fetchPromiseRef.current!
+      await processResponse(response)
     } catch (err) {
       setError(
         err instanceof Error ? err.message.split('\n')[0] : 'Unknown error',
       )
     } finally {
-      setLoading(false)
+      setPhase('idle')
+      fetchPromiseRef.current = null
+    }
+  }
+
+  const handleSessionRequest = async () => {
+    const mppx = getOrCreateClient()
+    if (!mppx) return
+
+    setPhase('signing')
+    setError(null)
+
+    try {
+      const response = await mppx.fetch('/api/session')
+      await processResponse(response)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message.split('\n')[0] : 'Unknown error',
+      )
+    } finally {
+      setPhase('idle')
     }
   }
 
   const handleReset = () => {
+    voucherResolverRef.current?.()
+    voucherResolverRef.current = null
+    fetchPromiseRef.current = null
     mppxRef.current = null
     walletRef.current = null
+    setPhase('idle')
     setState({
       requestCount: 0,
       cumulativeAmount: '0',
@@ -117,6 +179,11 @@ export function SessionDemo() {
     })
     setError(null)
   }
+
+  const busy = phase !== 'idle' && phase !== 'awaitingVoucher'
+  const btnBase =
+    'flex-1 rounded-lg border transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm px-5 h-10 font-sans disabled:opacity-40 disabled:cursor-not-allowed'
+  const btnAccent = `${btnBase} border-accent/30 bg-accent/10 text-accent hover:bg-accent/20`
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -133,31 +200,55 @@ export function SessionDemo() {
           </div>
           <div className="text-center">
             <span className="text-gray-500 block">Cumulative</span>
-            <p className="text-accent">{state.cumulativeAmount}</p>
+            <p className="text-accent">
+              {formatCumulative(state.cumulativeAmount)}
+            </p>
           </div>
         </div>
       )}
 
       <div className="flex gap-2 w-full">
-        <button
-          className="flex-1 rounded-lg border border-accent/30 bg-accent/10 text-accent transition-colors flex items-center justify-center gap-2 hover:bg-accent/20 cursor-pointer text-sm px-5 h-10 font-sans disabled:opacity-40 disabled:cursor-not-allowed"
-          onClick={handleSessionRequest}
-          disabled={!address || !walletClient || loading}
-          type="button"
-        >
-          {loading ? (
-            <>
-              <span className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin" />
-              {state.requestCount === 0
-                ? 'Opening channel...'
-                : 'Signing voucher...'}
-            </>
-          ) : state.requestCount === 0 ? (
-            `Open Channel + Pay ${SESSION_AMOUNT}`
-          ) : (
-            `Send Voucher (${SESSION_AMOUNT})`
-          )}
-        </button>
+        {phase === 'awaitingVoucher' ? (
+          <button
+            className={btnAccent}
+            onClick={handleSignVoucher}
+            type="button"
+          >
+            Sign Voucher ({SESSION_AMOUNT})
+          </button>
+        ) : state.channelOpen ? (
+          <button
+            className={btnAccent}
+            onClick={handleSessionRequest}
+            disabled={!address || !walletClient || busy}
+            type="button"
+          >
+            {phase === 'signing' ? (
+              <>
+                <span className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin" />
+                Signing voucher...
+              </>
+            ) : (
+              `Send Voucher (${SESSION_AMOUNT})`
+            )}
+          </button>
+        ) : (
+          <button
+            className={btnAccent}
+            onClick={handleOpenChannel}
+            disabled={!address || !walletClient || busy}
+            type="button"
+          >
+            {phase === 'opening' ? (
+              <>
+                <span className="w-3 h-3 border border-accent border-t-transparent rounded-full animate-spin" />
+                Opening channel...
+              </>
+            ) : (
+              `Open Channel (${SESSION_DEPOSIT} USDC.e)`
+            )}
+          </button>
+        )}
 
         {state.channelOpen && (
           <button

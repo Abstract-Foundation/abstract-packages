@@ -18,12 +18,16 @@ export function createChargeClient(walletClient: AgwWalletClient) {
   })
 }
 
-export function createSessionClient(walletClient: AgwWalletClient) {
+export function createSessionClient(
+  walletClient: AgwWalletClient,
+  options?: { onChannelOpened?: (channelId: string) => void | Promise<void> },
+) {
   return Mppx.create({
     methods: [
       abstractSession({
         account: walletClient.account,
         getClient: () => walletClient,
+        onChannelOpened: options?.onChannelOpened,
       }),
     ],
   })
