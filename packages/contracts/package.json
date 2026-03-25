@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "install": "forge soldeer install",
+    "install": "node ./scripts/install.mjs",
     "build": "forge build",
     "build:zksync": "forge build --zksync",
     "test": "forge test",

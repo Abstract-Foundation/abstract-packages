@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "build:demo": "pnpm --filter mpp-demo build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "changeset": "changeset",
