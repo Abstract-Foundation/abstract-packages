@@ -23,12 +23,6 @@ import {
   type WalletClient,
   zeroAddress,
 } from 'viem';
-import {
-  readContract,
-  signTypedData,
-  waitForTransactionReceipt,
-  writeContract,
-} from 'viem/actions';
 import type { ChainEIP712 } from 'viem/chains';
 import { eip712WalletActions } from 'viem/zksync';
 import {
@@ -148,7 +142,7 @@ export function abstractSession(options: AbstractSessionClientOptions) {
     cumulativeAmount: bigint,
     walletClient: WalletClient,
   ): Promise<Hex> {
-    return signTypedData(walletClient, {
+    return walletClient.signTypedData({
       account,
       domain: {
         name: VOUCHER_DOMAIN_NAME,
@@ -213,7 +207,7 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         const salt = randomBytes32();
 
         // Ensure allowance
-        const currentAllowance = await readContract(publicClient, {
+        const currentAllowance = await publicClient.readContract({
           address: currency,
           abi: ERC20_ABI,
           functionName: 'allowance',
@@ -221,19 +215,18 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         });
 
         if ((currentAllowance as bigint) < deposit) {
-          const approveTx = await writeContract(walletClient, {
+          const approveTx = await walletClient.writeContract({
             account,
             address: currency,
             abi: ERC20_ABI,
             functionName: 'approve',
             args: [escrowContract, deposit],
-            chain: null,
           });
-          await waitForTransactionReceipt(publicClient, { hash: approveTx });
+          await publicClient.waitForTransactionReceipt({ hash: approveTx });
         }
 
         // Open channel
-        const openTx = await writeContract(walletClient, {
+        const openTx = await walletClient.writeContract({
           account,
           address: escrowContract,
           abi: ABSTRACT_STREAM_CHANNEL_ABI,
@@ -245,12 +238,11 @@ export function abstractSession(options: AbstractSessionClientOptions) {
             salt,
             zeroAddress,
           ],
-          chain: null,
         });
-        await waitForTransactionReceipt(publicClient, { hash: openTx });
+        await publicClient.waitForTransactionReceipt({ hash: openTx });
 
         // Compute channelId
-        const channelId = (await readContract(publicClient, {
+        const channelId = (await publicClient.readContract({
           address: escrowContract,
           abi: ABSTRACT_STREAM_CHANNEL_ABI,
           functionName: 'computeChannelId',

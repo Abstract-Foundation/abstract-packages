@@ -19,7 +19,6 @@ import {
   type WalletClient,
   zeroAddress,
 } from 'viem';
-import { verifyTypedData } from 'viem/actions';
 import { abstract, abstractTestnet } from 'viem/chains';
 import {
   type ChainEIP712,
@@ -156,7 +155,7 @@ async function verifyVoucherSig(
   expectedSigner: Address,
 ): Promise<boolean> {
   try {
-    return await verifyTypedData(publicClient, {
+    return await publicClient.verifyTypedData({
       address: expectedSigner,
       domain: {
         name: VOUCHER_DOMAIN_NAME,
@@ -597,7 +596,6 @@ export function session(params: AbstractSessionServerOptions) {
               abi: ABSTRACT_STREAM_CHANNEL_ABI,
               functionName: 'close',
               args: closeArgs,
-              chain: null,
               ...{
                 paymaster: paymasterAddress,
                 paymasterInput: getGeneralPaymasterInput({
@@ -612,7 +610,6 @@ export function session(params: AbstractSessionServerOptions) {
               abi: ABSTRACT_STREAM_CHANNEL_ABI,
               functionName: 'close',
               args: closeArgs,
-              chain: null,
             });
           }
 
