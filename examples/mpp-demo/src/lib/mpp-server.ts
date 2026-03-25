@@ -85,7 +85,7 @@ export function chargeHandler(request: Request) {
       currency: USDC_E_TESTNET,
       decimals: 6,
       recipient: getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`,
-      description: `Premium data — ${CHARGE_AMOUNT} USDC.e`,
+      description: `Premium data - ${CHARGE_AMOUNT} USDC.e`,
     },
     () =>
       Response.json({
@@ -110,7 +110,7 @@ export function sessionHandler(request: Request) {
       recipient: getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`,
       unitType: 'request',
       suggestedDeposit: SESSION_DEPOSIT,
-      description: `Streaming data — ${SESSION_AMOUNT} USDC.e per request`,
+      description: `Streaming data - ${SESSION_AMOUNT} USDC.e per request`,
     },
     () =>
       Response.json({
