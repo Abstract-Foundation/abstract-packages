@@ -1,12 +1,14 @@
 {
   "name": "@abstract-foundation/mpp",
   "version": "0.1.2",
+  "license": "MIT",
   "description": "MPP payment method plugin for Abstract chain — ERC-3009 charge + ERC-20 session escrow",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "exports": {
     ".": {
