@@ -91,9 +91,9 @@ function channelStoreFromStore(store: Store.Store): ChannelStore {
     );
 
     try {
-      const current = await store.get<ChannelState | null>(channelId);
+      const current = (await store.get(channelId)) as ChannelState | null;
       const next = fn(current);
-      if (next) await store.put(channelId, next);
+      if (next) await store.put(channelId, next as never);
       else await store.delete(channelId);
       return next;
     } finally {
@@ -104,7 +104,7 @@ function channelStoreFromStore(store: Store.Store): ChannelStore {
 
   return {
     async getChannel(channelId) {
-      return store.get<ChannelState | null>(channelId);
+      return (await store.get(channelId)) as ChannelState | null;
     },
     async updateChannel(channelId, fn) {
       return update(channelId, fn);
@@ -205,7 +205,7 @@ function makeSessionReceipt(params: {
  * @example
  * ```ts
  * import { Mppx } from 'mppx/server'
- * import { abstract } from 'mppx-abstract/server'
+ * import { abstract } from '@abstract-foundation/mpp/server'
  *
  * const mppx = Mppx.create({
  *   methods: [abstract.session({

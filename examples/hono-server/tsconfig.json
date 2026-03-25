@@ -9,12 +9,12 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "paths": {
-      "mppx-abstract": ["../../packages/mppx-abstract/src/index.ts"],
-      "mppx-abstract/server": [
-        "../../packages/mppx-abstract/src/server/index.ts"
+      "@abstract-foundation/mpp": ["../../packages/mpp/src/index.ts"],
+      "@abstract-foundation/mpp/server": [
+        "../../packages/mpp/src/server/index.ts"
       ],
-      "mppx-abstract/client": [
-        "../../packages/mppx-abstract/src/client/index.ts"
+      "@abstract-foundation/mpp/client": [
+        "../../packages/mpp/src/client/index.ts"
       ]
     }
   },

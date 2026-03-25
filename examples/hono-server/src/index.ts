@@ -18,8 +18,8 @@ import { Hono } from 'hono';
 // Use Mppx from mppx/hono — it wraps the server Mppx and exposes .charge/.session
 // accessors that are compatible with payment() middleware
 import { Mppx, payment } from 'mppx/hono';
-import { USDC_E_TESTNET } from 'mppx-abstract';
-import { abstract } from 'mppx-abstract/server';
+import { USDC_E_TESTNET } from '@abstract-foundation/mpp';
+import { abstract } from '@abstract-foundation/mpp/server';
 import { privateKeyToAccount } from 'viem/accounts';
 
 // ── Config ─────────────────────────────────────────────────────────────────

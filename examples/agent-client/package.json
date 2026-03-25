@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "mppx": "catalog:",
-    "mppx-abstract": "workspace:*",
+    "@abstract-foundation/mpp": "workspace:*",
     "viem": "catalog:"
   },
   "devDependencies": {

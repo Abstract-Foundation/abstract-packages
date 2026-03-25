@@ -10,7 +10,7 @@ pnpm build          # Build all packages
 pnpm typecheck      # Type-check all packages
 pnpm test           # Run all tests
 
-# packages/mppx-abstract
+# packages/mpp
 pnpm build          # tsc compile → dist/
 pnpm dev            # tsc --watch
 pnpm typecheck      # tsc --noEmit
@@ -36,7 +36,7 @@ This is a **Machine Payments Protocol (MPP)** plugin for the Abstract blockchain
 
 ```
 packages/contracts/        Solidity — AbstractStreamChannel.sol
-packages/mppx-abstract/    TypeScript plugin (npm: mppx-abstract)
+packages/mpp/    TypeScript plugin (npm: @abstract-foundation/mpp)
 examples/hono-server/      Server example using the plugin
 examples/agent-client/     Autonomous client that pays via 402 flow
 ```
@@ -48,7 +48,7 @@ Both payment intents follow the same HTTP protocol:
 2. Client signs and retries with `Authorization: Payment <base64url>`
 3. Server verifies, settles on-chain, responds `200 OK` with `Payment-Receipt`
 
-The `mppx` framework (peer dep `^0.4.7`) handles this 402 negotiation loop. `mppx-abstract` implements the Abstract-specific signing and settlement logic on top.
+The `mppx` framework (peer dep `^0.4.9`) handles this 402 negotiation loop. `@abstract-foundation/mpp` implements the Abstract-specific signing and settlement logic on top.
 
 ### Two Intents
 
@@ -56,14 +56,14 @@ The `mppx` framework (peer dep `^0.4.7`) handles this 402 negotiation loop. `mpp
 - Client signs typed data only — no transaction from client
 - Server calls `transferWithAuthorization()` on USDC.e, paying gas (or via Abstract paymaster)
 - One signature per request; replay-protected by nonce + `validBefore` expiry
-- Implementation: `packages/mppx-abstract/src/client/charge.ts` + `server/charge.ts`
+- Implementation: `packages/mpp/src/client/charge.ts` + `server/charge.ts`
 
 **`session` (AbstractStreamChannel payment channels)**
 - Client opens a channel on-chain once (approve + `open()`), depositing USDC.e into escrow
 - Each subsequent request exchanges a signed EIP-712 voucher with a cumulative amount
 - Server accumulates the highest accepted voucher; calls `settle()` or `close()` to finalize
 - Payer escape hatch: `requestClose()` → 15-minute grace period → `withdraw()`
-- Implementation: `packages/mppx-abstract/src/client/session.ts` + `server/session.ts`
+- Implementation: `packages/mpp/src/client/session.ts` + `server/session.ts`
 
 ### Smart Contract
 
@@ -80,11 +80,11 @@ All business logic is identical to Tempo's implementation.
 - Standard `forge test` works without `foundry-zksync` (tests run against a fork-std EVM)
 - Gas sponsorship uses **native ZKsync paymasters** (`customData.paymasterParams`) — no separate fee-payer service needed
 - Chain IDs: `11124` (testnet), `2741` (mainnet)
-- Token: USDC.e (6 decimals); constants in `packages/mppx-abstract/src/constants.ts`
+- Token: USDC.e (6 decimals); constants in `packages/mpp/src/constants.ts`
 
 ### TypeScript Module Resolution
 
-`packages/mppx-abstract` exports three entry points: `mppx-abstract`, `mppx-abstract/client`, `mppx-abstract/server` (see `package.json` exports map).
+`packages/mpp` exports three entry points: `@abstract-foundation/mpp`, `@abstract-foundation/mpp/client`, `@abstract-foundation/mpp/server` (see `package.json` exports map).
 
 Examples use **path mappings** in `tsconfig.json` to resolve these from local source during development — no need to build the package first when working in examples.
 

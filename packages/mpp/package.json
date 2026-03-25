@@ -1,5 +1,5 @@
 {
-  "name": "mppx-abstract",
+  "name": "@abstract-foundation/mpp",
   "version": "0.1.0",
   "description": "MPP payment method plugin for Abstract chain — ERC-3009 charge + ERC-20 session escrow",
   "type": "module",

@@ -1,5 +1,5 @@
 /**
- * mppx-abstract — MPP payment method plugin for Abstract chain.
+ * @abstract-foundation/mpp — MPP payment method plugin for Abstract chain.
  */
 
 export type {

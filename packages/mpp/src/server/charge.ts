@@ -118,7 +118,7 @@ async function getErc3009Domain(
  * @example
  * ```ts
  * import { Mppx } from 'mppx/server'
- * import { abstract } from 'mppx-abstract/server'
+ * import { abstract } from '@abstract-foundation/mpp/server'
  *
  * const mppx = Mppx.create({
  *   methods: [abstract.charge({

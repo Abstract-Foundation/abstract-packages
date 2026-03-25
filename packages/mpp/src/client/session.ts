@@ -100,7 +100,7 @@ interface ChannelEntry {
  *
  * @example
  * ```ts
- * import { abstractSession } from 'mppx-abstract/client'
+ * import { abstractSession } from '@abstract-foundation/mpp/client'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const session = abstractSession({

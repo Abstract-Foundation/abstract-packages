@@ -70,7 +70,7 @@ export interface AbstractChargeClientOptions {
  *
  * @example
  * ```ts
- * import { abstractCharge } from 'mppx-abstract/client'
+ * import { abstractCharge } from '@abstract-foundation/mpp/client'
  * import { privateKeyToAccount } from 'viem/accounts'
  *
  * const charge = abstractCharge({ account: privateKeyToAccount('0x...') })

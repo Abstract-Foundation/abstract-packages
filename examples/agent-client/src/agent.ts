@@ -15,7 +15,7 @@
  */
 
 import { Mppx } from 'mppx/client';
-import { abstractCharge, abstractSession } from 'mppx-abstract/client';
+import { abstractCharge, abstractSession } from '@abstract-foundation/mpp/client';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY as
