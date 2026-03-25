@@ -16,7 +16,7 @@ export function DemoPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('charge')
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-lg p-6 backdrop-blur-sm w-full">
+    <div className="bg-white/5 border border-white/10 rounded-lg p-6 backdrop-blur-sm w-full h-full">
       <h2 className="text-lg font-semibold font-mono text-accent mb-4 text-center">
         Live Demo
       </h2>

@@ -28,9 +28,9 @@ export default function Home() {
         <ProtocolOverview />
 
         {/* Flow Diagram + Demo Panel */}
-        <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+        <div className="flex flex-col lg:flex-row gap-6 w-full items-start lg:items-stretch">
           <FlowDiagram />
-          <div className="w-full lg:w-80 lg:shrink-0">
+          <div className="w-full lg:w-80 lg:shrink-0 lg:flex">
             <DemoPanel />
           </div>
         </div>
