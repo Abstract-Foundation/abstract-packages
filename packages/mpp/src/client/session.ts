@@ -33,6 +33,7 @@ import type { ChainEIP712 } from 'viem/chains';
 import { eip712WalletActions } from 'viem/zksync';
 import {
   ABSTRACT_STREAM_CHANNEL_ABI,
+  DEFAULT_ESCROW,
   VOUCHER_DOMAIN_NAME,
   VOUCHER_DOMAIN_VERSION,
   VOUCHER_TYPES,
@@ -179,10 +180,12 @@ export function abstractSession(options: AbstractSessionClientOptions) {
       const amount = BigInt(amountRaw);
 
       const escrowContract =
-        options.escrowContract ?? (md.escrowContract as Address | undefined);
+        options.escrowContract ??
+        (md.escrowContract as Address | undefined) ??
+        (DEFAULT_ESCROW as Record<number, Address>)[chainId];
       if (!escrowContract) {
         throw new Error(
-          'escrowContract required: set options.escrowContract or ensure the server challenge includes methodDetails.escrowContract',
+          'escrowContract required: set options.escrowContract, ensure the server challenge includes methodDetails.escrowContract, or use a supported Abstract chain',
         );
       }
 

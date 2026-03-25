@@ -26,8 +26,6 @@ function getMppx() {
   const SECRET_KEY = process.env.MPP_SECRET_KEY
   const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as `0x${string}` | undefined
   const PAY_TO = process.env.NEXT_PUBLIC_PAY_TO as `0x${string}` | undefined
-  const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as `0x${string}` | undefined
-
   if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required')
   if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required')
   if (!PAY_TO) throw new Error('NEXT_PUBLIC_PAY_TO required')
@@ -45,21 +43,18 @@ function getMppx() {
     }),
   ]
 
-  const sessionMethods = ESCROW_CONTRACT
-    ? [
-        abstract.session({
-          account: serverAccount,
-          recipient: PAY_TO,
-          currency: USDC_E_TESTNET,
-          escrowContract: ESCROW_CONTRACT,
-          amount: SESSION_AMOUNT,
-          suggestedDeposit: SESSION_DEPOSIT,
-          unitType: 'request',
-          decimals: 6,
-          testnet: true,
-        }),
-      ]
-    : []
+  const sessionMethods = [
+    abstract.session({
+      account: serverAccount,
+      recipient: PAY_TO,
+      currency: USDC_E_TESTNET,
+      amount: SESSION_AMOUNT,
+      suggestedDeposit: SESSION_DEPOSIT,
+      unitType: 'request',
+      decimals: 6,
+      testnet: true,
+    }),
+  ]
 
   _mppx = Mppx.create({
     realm: 'mpp-demo.abs.xyz',
@@ -107,10 +102,6 @@ export const sessionApp = new Hono()
 sessionApp.get('/', (c, next) => {
   const mppx = getMppx()
   const PAY_TO = getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`
-  const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as `0x${string}` | undefined
-  if (!ESCROW_CONTRACT) {
-    return c.text('ESCROW_CONTRACT not configured', 501)
-  }
   const handler = payment(
     (mppx as Record<string, unknown>)['abstract/session'] as Parameters<typeof payment>[0],
     {
@@ -118,7 +109,6 @@ sessionApp.get('/', (c, next) => {
       currency: USDC_E_TESTNET,
       decimals: 6,
       recipient: PAY_TO,
-      escrowContract: ESCROW_CONTRACT,
       unitType: 'request',
       suggestedDeposit: SESSION_DEPOSIT,
       description: `Streaming data — ${SESSION_AMOUNT} USDC.e per request`,

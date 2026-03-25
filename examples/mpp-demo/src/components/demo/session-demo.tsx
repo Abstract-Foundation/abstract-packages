@@ -7,9 +7,6 @@ import { SESSION_AMOUNT } from '@/lib/constants'
 import type { Account, Transport, WalletClient } from 'viem'
 import type { ChainEIP712 } from 'viem/zksync'
 
-const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT as
-  | `0x${string}`
-  | undefined
 
 interface SessionResponse {
   message: string
@@ -43,13 +40,12 @@ export function SessionDemo() {
   const walletRef = useRef<string | null>(null)
 
   const getOrCreateClient = useCallback(() => {
-    if (!walletClient?.account || !ESCROW_CONTRACT) return null
+    if (!walletClient?.account) return null
 
     const walletKey = walletClient.account.address
     if (walletRef.current !== walletKey) {
       mppxRef.current = createSessionClient(
         walletClient as WalletClient<Transport, ChainEIP712, Account>,
-        ESCROW_CONTRACT,
       )
       walletRef.current = walletKey
     }
@@ -120,14 +116,6 @@ export function SessionDemo() {
       responses: [],
     })
     setError(null)
-  }
-
-  if (!ESCROW_CONTRACT) {
-    return (
-      <p className="text-xs text-gray-500 text-center py-4">
-        Set NEXT_PUBLIC_ESCROW_CONTRACT in .env.local to enable sessions.
-      </p>
-    )
   }
 
   return (

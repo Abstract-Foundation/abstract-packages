@@ -30,6 +30,7 @@ import { abstractSessionMethods } from '../client/methods.js';
 import {
   ABSTRACT_STREAM_CHANNEL_ABI,
   DEFAULT_CURRENCY,
+  DEFAULT_ESCROW,
   USDC_E_DECIMALS,
   VOUCHER_DOMAIN_NAME,
   VOUCHER_DOMAIN_VERSION,
@@ -121,8 +122,8 @@ export interface AbstractSessionServerOptions {
   recipient: Address;
   /** Token address (defaults to USDC.e for the chain). */
   currency?: Address;
-  /** AbstractStreamChannel escrow contract address. */
-  escrowContract: Address;
+  /** AbstractStreamChannel escrow contract address. Defaults to the canonical deployment. */
+  escrowContract?: Address;
   /** Per-request payment amount (human-readable, e.g. "0.001"). */
   amount?: string;
   /** Suggested deposit for clients (human-readable). */
@@ -225,7 +226,6 @@ export function session(params: AbstractSessionServerOptions) {
   const {
     account,
     recipient,
-    escrowContract,
     amount,
     suggestedDeposit,
     minVoucherDelta = '0',
@@ -238,6 +238,7 @@ export function session(params: AbstractSessionServerOptions) {
   } = params;
 
   const defaultChain = testnet ? abstractTestnet : abstract;
+  const escrowContract = params.escrowContract ?? DEFAULT_ESCROW[defaultChain.id];
   const currency = params.currency ?? DEFAULT_CURRENCY[defaultChain.id];
   const minDelta = parseUnits(minVoucherDelta, decimals);
   const channelStore = channelStoreFromStore(

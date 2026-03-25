@@ -13,10 +13,11 @@ export const USDC_E_MAINNET =
 /** USDC.e decimals */
 export const USDC_E_DECIMALS = 6;
 
-// ── Open Minter (for testnet faucet) ──────────────────────────────────────
+// ── AbstractStreamChannel (deployed on both testnet & mainnet) ────────────
 
-export const OPEN_MINTER_TESTNET =
-  '0x86C3FA1c8d7dcDebAC1194531d080e6e6fF9afF5' as const;
+/** AbstractStreamChannel escrow contract — same address on testnet and mainnet. */
+export const ABSTRACT_STREAM_CHANNEL =
+  '0x331C8Ec3Fefcd2276D9AEA06cD760dE7e5c15fE9' as const;
 
 // ── ERC-3009 typehash ──────────────────────────────────────────────────────
 
@@ -277,4 +278,11 @@ export const TRANSFER_WITH_AUTHORIZATION_TYPES = {
 export const DEFAULT_CURRENCY = {
   [abstractTestnet.id]: USDC_E_TESTNET,
   [abstract.id]: USDC_E_MAINNET,
+};
+
+// ── Default escrow contract map by chainId ───────────────────────────────
+
+export const DEFAULT_ESCROW = {
+  [abstractTestnet.id]: ABSTRACT_STREAM_CHANNEL,
+  [abstract.id]: ABSTRACT_STREAM_CHANNEL,
 };

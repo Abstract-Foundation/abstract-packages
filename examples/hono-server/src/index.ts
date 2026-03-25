@@ -9,7 +9,6 @@
  *   MPP_SECRET_KEY=your-secret \
  *   SERVER_PRIVATE_KEY=0x... \
  *   PAY_TO=0x... \
- *   ESCROW_CONTRACT=0x... \
  *   tsx src/index.ts
  */
 
@@ -29,9 +28,6 @@ const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as
   | `0x${string}`
   | undefined;
 const PAY_TO = process.env.PAY_TO as `0x${string}` | undefined;
-const ESCROW_CONTRACT = process.env.ESCROW_CONTRACT as
-  | `0x${string}`
-  | undefined;
 const PORT = Number(process.env.PORT ?? 3000);
 
 if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required');
@@ -58,21 +54,18 @@ const chargeMethods = [
   }),
 ];
 
-const sessionMethods = ESCROW_CONTRACT
-  ? [
-      abstract.session({
-        account: serverAccount,
-        recipient: PAY_TO,
-        currency: USDC_E_TESTNET,
-        escrowContract: ESCROW_CONTRACT,
-        amount: '0.001',
-        suggestedDeposit: '1',
-        unitType: 'request',
-        decimals: 6,
-        testnet: true,
-      }),
-    ]
-  : [];
+const sessionMethods = [
+  abstract.session({
+    account: serverAccount,
+    recipient: PAY_TO,
+    currency: USDC_E_TESTNET,
+    amount: '0.001',
+    suggestedDeposit: '1',
+    unitType: 'request',
+    decimals: 6,
+    testnet: true,
+  }),
+];
 
 // mppx/hono Mppx.create() adds .charge / .session / .<name> accessors for payment()
 const mppx = Mppx.create({
@@ -109,27 +102,24 @@ app.get(
 );
 
 // Paid: session channel — $0.001 USDC.e per request via payment vouchers
-if (ESCROW_CONTRACT) {
-  app.get(
-    '/api/stream',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    payment((mppx as any)['abstract/session'], {
-      amount: '0.001',
-      currency: USDC_E_TESTNET,
-      decimals: 6,
-      recipient: PAY_TO!,
-      escrowContract: ESCROW_CONTRACT,
-      unitType: 'request',
-      suggestedDeposit: '1',
-      description: 'Streaming data — 0.001 USDC.e per request',
+app.get(
+  '/api/stream',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payment((mppx as any)['abstract/session'], {
+    amount: '0.001',
+    currency: USDC_E_TESTNET,
+    decimals: 6,
+    recipient: PAY_TO!,
+    unitType: 'request',
+    suggestedDeposit: '1',
+    description: 'Streaming data — 0.001 USDC.e per request',
+  }),
+  (c) =>
+    c.json({
+      stream: 'Streaming content via payment channel',
+      timestamp: new Date().toISOString(),
     }),
-    (c) =>
-      c.json({
-        stream: 'Streaming content via payment channel',
-        timestamp: new Date().toISOString(),
-      }),
-  );
-}
+);
 
 // ── Start ───────────────────────────────────────────────────────────────────
 
@@ -139,11 +129,9 @@ serve({ fetch: app.fetch, port: PORT }, () => {
   );
   console.log(`   GET /health        — free`);
   console.log(`   GET /api/data      — 0.01 USDC.e (charge / ERC-3009)`);
-  if (ESCROW_CONTRACT) {
-    console.log(
-      `   GET /api/stream    — 0.001 USDC.e (session / payment channel)`,
-    );
-  }
+  console.log(
+    `   GET /api/stream    — 0.001 USDC.e (session / payment channel)`,
+  );
   console.log(`\n   Chain:  Abstract Testnet (chainId 11124)`);
   console.log(`   Token:  USDC.e ${USDC_E_TESTNET}`);
   console.log(`   Pay to: ${PAY_TO}`);
