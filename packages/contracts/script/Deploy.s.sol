@@ -25,15 +25,13 @@ import {AbstractStreamChannel} from "../src/AbstractStreamChannel.sol";
  */
 contract DeployAbstractStreamChannel is Script {
     function run() external {
-        uint256 deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
-        address deployer = vm.addr(deployerKey);
 
-        console2.log("Deployer:", deployer);
+        console2.log("Deployer:", msg.sender);
         console2.log("Chain ID:", block.chainid);
 
-        vm.startBroadcast(deployerKey);
+        vm.startBroadcast();
 
-        AbstractStreamChannel escrow = new AbstractStreamChannel();
+        AbstractStreamChannel escrow = new AbstractStreamChannel{salt: bytes32(0)}();
         console2.log("AbstractStreamChannel deployed:", address(escrow));
         console2.log("VOUCHER_TYPEHASH:", vm.toString(escrow.VOUCHER_TYPEHASH()));
         console2.log("Domain Separator:", vm.toString(escrow.domainSeparator()));
