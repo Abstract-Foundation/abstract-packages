@@ -15,11 +15,11 @@ import {
   isAddressEqual,
   type PublicClient,
   parseUnits,
-  recoverTypedDataAddress,
   type Transport,
   type WalletClient,
   zeroAddress,
 } from 'viem';
+import { verifyTypedData } from 'viem/actions';
 import { abstract, abstractTestnet } from 'viem/chains';
 import {
   type ChainEIP712,
@@ -149,13 +149,15 @@ export interface AbstractSessionServerOptions {
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 async function verifyVoucherSig(
+  publicClient: PublicClient,
   escrowContract: Address,
   chainId: number,
   voucher: VoucherRecord,
   expectedSigner: Address,
 ): Promise<boolean> {
   try {
-    const recovered = await recoverTypedDataAddress({
+    return await verifyTypedData(publicClient, {
+      address: expectedSigner,
       domain: {
         name: VOUCHER_DOMAIN_NAME,
         version: VOUCHER_DOMAIN_VERSION,
@@ -170,7 +172,6 @@ async function verifyVoucherSig(
       },
       signature: voucher.signature,
     });
-    return isAddressEqual(recovered, expectedSigner);
   } catch {
     return false;
   }
@@ -371,6 +372,7 @@ export function session(params: AbstractSessionServerOptions) {
             signature,
           };
           const valid = await verifyVoucherSig(
+            publicClient,
             escrowContract,
             chainId,
             voucher,
@@ -501,6 +503,7 @@ export function session(params: AbstractSessionServerOptions) {
             signature,
           };
           const valid = await verifyVoucherSig(
+            publicClient,
             escrowContract,
             chainId,
             voucher,
@@ -573,6 +576,7 @@ export function session(params: AbstractSessionServerOptions) {
             signature,
           };
           const valid = await verifyVoucherSig(
+            publicClient,
             escrowContract,
             chainId,
             voucher,

@@ -13,11 +13,14 @@ export const USDC_E_MAINNET =
 /** USDC.e decimals */
 export const USDC_E_DECIMALS = 6;
 
-// ── AbstractStreamChannel (deployed on both testnet & mainnet) ────────────
+// ── AbstractStreamChannel deployments ──────────────────────────────────────
 
-/** AbstractStreamChannel escrow contract — same address on testnet and mainnet. */
-export const ABSTRACT_STREAM_CHANNEL =
-  '0x331C8Ec3Fefcd2276D9AEA06cD760dE7e5c15fE9' as const;
+/** AbstractStreamChannel escrow contract on Abstract Testnet. */
+export const ABSTRACT_STREAM_CHANNEL_TESTNET =
+  '0x29635C384f451a72ED2e2a312BCeb8b0bDC0923c' as const;
+/** AbstractStreamChannel escrow contract on Abstract Mainnet. */
+export const ABSTRACT_STREAM_CHANNEL_MAINNET =
+  '0x29635C384f451a72ED2e2a312BCeb8b0bDC0923c' as const;
 
 // ── ERC-3009 typehash ──────────────────────────────────────────────────────
 
@@ -67,6 +70,24 @@ export const ERC3009_ABI = [
     stateMutability: 'view',
     inputs: [],
     outputs: [{ name: '', type: 'string' }],
+  },
+] as const;
+
+export const ERC3009_BYTES_SIGNATURE_ABI = [
+  {
+    name: 'transferWithAuthorization',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'from', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'validAfter', type: 'uint256' },
+      { name: 'validBefore', type: 'uint256' },
+      { name: 'nonce', type: 'bytes32' },
+      { name: 'signature', type: 'bytes' },
+    ],
+    outputs: [],
   },
 ] as const;
 
@@ -283,6 +304,6 @@ export const DEFAULT_CURRENCY = {
 // ── Default escrow contract map by chainId ───────────────────────────────
 
 export const DEFAULT_ESCROW = {
-  [abstractTestnet.id]: ABSTRACT_STREAM_CHANNEL,
-  [abstract.id]: ABSTRACT_STREAM_CHANNEL,
+  [abstractTestnet.id]: ABSTRACT_STREAM_CHANNEL_TESTNET,
+  [abstract.id]: ABSTRACT_STREAM_CHANNEL_MAINNET,
 };

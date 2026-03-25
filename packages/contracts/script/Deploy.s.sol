@@ -25,7 +25,6 @@ import {AbstractStreamChannel} from "../src/AbstractStreamChannel.sol";
  */
 contract DeployAbstractStreamChannel is Script {
     function run() external {
-
         console2.log("Deployer:", msg.sender);
         console2.log("Chain ID:", block.chainid);
 

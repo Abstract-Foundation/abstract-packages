@@ -18,11 +18,12 @@ import {
   erc20Abi,
   type Hex,
   http,
+  parseSignature,
   type PublicClient,
-  recoverTypedDataAddress,
   type Transport,
   type WalletClient,
 } from 'viem';
+import { verifyTypedData } from 'viem/actions';
 import { abstract, abstractTestnet } from 'viem/chains';
 import {
   type ChainEIP712,
@@ -33,6 +34,7 @@ import { abstractChargeMethods } from '../client/methods.js';
 import {
   DEFAULT_CURRENCY,
   ERC3009_ABI,
+  ERC3009_BYTES_SIGNATURE_ABI,
   TRANSFER_WITH_AUTHORIZATION_TYPES,
   USDC_E_DECIMALS,
 } from '../constants.js';
@@ -76,6 +78,10 @@ export interface AbstractChargeServerOptions {
 
 /** Per-currency ERC-3009 domain cache to avoid redundant RPC calls. */
 const domainCache = new Map<string, { name: string; version: string }>();
+
+function isCompactSignature(signature: Hex): boolean {
+  return (signature.length - 2) / 2 === 65;
+}
 
 async function getErc3009Domain(
   publicClient: PublicClient,
@@ -211,7 +217,8 @@ export function charge(params: AbstractChargeServerOptions) {
         chainId,
       );
 
-      const recoveredAddress = await recoverTypedDataAddress({
+      const verified = await verifyTypedData(publicClient, {
+        address: from,
         domain,
         types: TRANSFER_WITH_AUTHORIZATION_TYPES,
         primaryType: 'TransferWithAuthorization',
@@ -226,10 +233,8 @@ export function charge(params: AbstractChargeServerOptions) {
         signature,
       });
 
-      if (recoveredAddress.toLowerCase() !== from.toLowerCase()) {
-        throw new Error(
-          `ERC-3009 signature mismatch: recovered ${recoveredAddress}, expected ${from}`,
-        );
+      if (!verified) {
+        throw new Error('ERC-3009 signature verification failed');
       }
 
       // Check nonce not already used
@@ -242,37 +247,59 @@ export function charge(params: AbstractChargeServerOptions) {
 
       if (used) throw new Error('ERC-3009 authorization nonce already used');
 
-      // Split compact 65-byte signature into v/r/s
-      const sigHex = signature.startsWith('0x')
-        ? signature.slice(2)
-        : signature;
-      const r = `0x${sigHex.slice(0, 64)}` as Hex;
-      const s = `0x${sigHex.slice(64, 128)}` as Hex;
-      const v = parseInt(sigHex.slice(128, 130), 16);
-
-      const txArgs = [
+      const baseArgs = [
         from,
         recipientAddr,
         BigInt(amountRaw),
         BigInt(validAfter),
         BigInt(validBefore),
         nonce,
-        v,
-        r,
-        s,
       ] as const;
+      const signerCode = await publicClient.getCode({ address: from });
+      const isContractAccount = !!signerCode && signerCode !== '0x';
 
       let txHash: Hex;
 
-      if (paymasterAddress) {
+      if (!isContractAccount && isCompactSignature(signature)) {
+        const parsed = parseSignature(signature);
+        if (!('v' in parsed)) {
+          throw new Error('Expected a 65-byte ECDSA signature');
+        }
+        const txArgs = [...baseArgs, Number(parsed.v), parsed.r, parsed.s] as const;
+
+        if (paymasterAddress) {
+          txHash = await walletClient.writeContract({
+            account,
+            address: currencyAddr,
+            abi: ERC3009_ABI,
+            functionName: 'transferWithAuthorization',
+            args: txArgs,
+            chain: null,
+            ...{
+              paymaster: paymasterAddress,
+              paymasterInput: getGeneralPaymasterInput({
+                innerInput: paymasterInput ?? '0x',
+              }),
+            },
+          });
+        } else {
+          txHash = await walletClient.writeContract({
+            account,
+            address: currencyAddr,
+            abi: ERC3009_ABI,
+            functionName: 'transferWithAuthorization',
+            args: txArgs,
+            chain: null,
+          });
+        }
+      } else if (paymasterAddress) {
         txHash = await walletClient.writeContract({
           account,
           address: currencyAddr,
-          abi: ERC3009_ABI,
+          abi: ERC3009_BYTES_SIGNATURE_ABI,
           functionName: 'transferWithAuthorization',
-          args: txArgs,
+          args: [...baseArgs, signature],
           chain: null,
-          // ZKsync-native gas sponsorship — no fee-payer service needed
           ...{
             paymaster: paymasterAddress,
             paymasterInput: getGeneralPaymasterInput({
@@ -284,9 +311,9 @@ export function charge(params: AbstractChargeServerOptions) {
         txHash = await walletClient.writeContract({
           account,
           address: currencyAddr,
-          abi: ERC3009_ABI,
+          abi: ERC3009_BYTES_SIGNATURE_ABI,
           functionName: 'transferWithAuthorization',
-          args: txArgs,
+          args: [...baseArgs, signature],
           chain: null,
         });
       }

@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import {IERC20} from "forge-std-1.15.0/src/interfaces/IERC20.sol";
 import {IAbstractStreamChannel} from "./interfaces/IAbstractStreamChannel.sol";
-import {ECDSA} from "solady-0.1.26/src/utils/ECDSA.sol";
 import {EIP712} from "solady-0.1.26/src/utils/EIP712.sol";
+import {SignatureCheckerLib} from "solady-0.1.26/src/utils/SignatureCheckerLib.sol";
 
 /**
  * @title AbstractStreamChannel
@@ -114,15 +114,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
             revert AmountNotIncreasing();
         }
 
-        bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
-        bytes32 digest = _hashTypedData(structHash);
-        address signer = ECDSA.recoverCalldata(digest, signature);
-
-        address expectedSigner = channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
-
-        if (signer != expectedSigner) {
-            revert InvalidSignature();
-        }
+        _assertValidVoucherSignature(channel, channelId, cumulativeAmount, signature);
 
         uint128 delta = cumulativeAmount - channel.settled;
         channel.settled = cumulativeAmount;
@@ -230,15 +222,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
                 revert AmountExceedsDeposit();
             }
 
-            bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
-            bytes32 digest = _hashTypedData(structHash);
-            address signer = ECDSA.recoverCalldata(digest, signature);
-
-            address expectedSigner = channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
-
-            if (signer != expectedSigner) {
-                revert InvalidSignature();
-            }
+            _assertValidVoucherSignature(channel, channelId, cumulativeAmount, signature);
 
             delta = cumulativeAmount - settledAmount;
             settledAmount = cumulativeAmount;
@@ -340,8 +324,7 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
      * @notice Compute the EIP-712 digest for a voucher (for off-chain signing).
      */
     function getVoucherDigest(bytes32 channelId, uint128 cumulativeAmount) external view override returns (bytes32) {
-        bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
-        return _hashTypedData(structHash);
+        return _getVoucherDigest(channelId, cumulativeAmount);
     }
 
     /**
@@ -366,5 +349,23 @@ contract AbstractStreamChannel is IAbstractStreamChannel, EIP712 {
     function _clearAndFinalize(bytes32 channelId) internal {
         delete channels[channelId];
         channels[channelId].finalized = true;
+    }
+
+    function _assertValidVoucherSignature(
+        Channel storage channel,
+        bytes32 channelId,
+        uint128 cumulativeAmount,
+        bytes calldata signature
+    ) internal view {
+        address expectedSigner = channel.authorizedSigner != address(0) ? channel.authorizedSigner : channel.payer;
+        bytes32 digest = _getVoucherDigest(channelId, cumulativeAmount);
+        if (!SignatureCheckerLib.isValidSignatureNowCalldata(expectedSigner, digest, signature)) {
+            revert InvalidSignature();
+        }
+    }
+
+    function _getVoucherDigest(bytes32 channelId, uint128 cumulativeAmount) internal view returns (bytes32) {
+        bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
+        return _hashTypedData(structHash);
     }
 }

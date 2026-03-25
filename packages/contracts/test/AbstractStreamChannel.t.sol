@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Test, console2} from "forge-std-1.15.0/src/Test.sol";
+import {Test} from "forge-std-1.15.0/src/Test.sol";
 import {AbstractStreamChannel} from "../src/AbstractStreamChannel.sol";
 import {IAbstractStreamChannel} from "../src/interfaces/IAbstractStreamChannel.sol";
 import {IERC20} from "forge-std-1.15.0/src/interfaces/IERC20.sol";
 import {ERC20} from "solady-0.1.26/src/tokens/ERC20.sol";
+import {SignatureCheckerLib} from "solady-0.1.26/src/utils/SignatureCheckerLib.sol";
 
 /// @dev Simple ERC-20 mock for testing.
 contract MockERC20 is ERC20 {
@@ -26,13 +27,49 @@ contract MockERC20 is ERC20 {
     }
 }
 
+contract MockERC1271Wallet {
+    address public immutable owner;
+
+    constructor(address owner_) {
+        owner = owner_;
+    }
+
+    function approveToken(IERC20 token, address spender, uint256 amount) external {
+        token.approve(spender, amount);
+    }
+
+    function openChannel(
+        AbstractStreamChannel escrow,
+        address payee,
+        address token,
+        uint128 deposit,
+        bytes32 salt,
+        address authorizedSigner
+    ) external returns (bytes32 channelId) {
+        return escrow.open(payee, token, deposit, salt, authorizedSigner);
+    }
+
+    function requestClose(AbstractStreamChannel escrow, bytes32 channelId) external {
+        escrow.requestClose(channelId);
+    }
+
+    function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
+        return SignatureCheckerLib.isValidSignatureNowCalldata(owner, hash, signature)
+            ? bytes4(0x1626ba7e)
+            : bytes4(0xffffffff);
+    }
+}
+
 contract AbstractStreamChannelTest is Test {
     AbstractStreamChannel public escrow;
     MockERC20 public token;
+    MockERC1271Wallet public smartWallet;
 
     address public payer = makeAddr("payer");
     address public payee = makeAddr("payee");
     uint256 public payerKey;
+    address public smartWalletOwner;
+    uint256 public smartWalletOwnerKey;
 
     bytes32 internal constant VOUCHER_TYPEHASH = keccak256("Voucher(bytes32 channelId,uint128 cumulativeAmount)");
 
@@ -40,14 +77,19 @@ contract AbstractStreamChannelTest is Test {
         // Give payer a deterministic key so we can sign vouchers
         payerKey = 0xA11CE;
         payer = vm.addr(payerKey);
+        smartWalletOwnerKey = 0xB0B;
+        smartWalletOwner = vm.addr(smartWalletOwnerKey);
 
         escrow = new AbstractStreamChannel();
         token = new MockERC20();
+        smartWallet = new MockERC1271Wallet(smartWalletOwner);
 
         // Fund payer
         token.mint(payer, 1_000e6);
         vm.prank(payer);
         token.approve(address(escrow), type(uint256).max);
+        token.mint(address(smartWallet), 1_000e6);
+        smartWallet.approveToken(IERC20(address(token)), address(escrow), type(uint256).max);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────
@@ -62,6 +104,20 @@ contract AbstractStreamChannelTest is Test {
         bytes32 structHash = keccak256(abi.encode(VOUCHER_TYPEHASH, channelId, cumulativeAmount));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSep, structHash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(payerKey, digest);
+        sig = abi.encodePacked(r, s, v);
+    }
+
+    function _openSmartWalletChannel(uint128 deposit, bytes32 salt) internal returns (bytes32 channelId) {
+        channelId = smartWallet.openChannel(escrow, payee, address(token), deposit, salt, address(0));
+    }
+
+    function _signSmartWalletVoucher(bytes32 channelId, uint128 cumulativeAmount)
+        internal
+        view
+        returns (bytes memory sig)
+    {
+        bytes32 digest = escrow.getVoucherDigest(channelId, cumulativeAmount);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(smartWalletOwnerKey, digest);
         sig = abi.encodePacked(r, s, v);
     }
 
@@ -195,6 +251,40 @@ contract AbstractStreamChannelTest is Test {
 
         assertEq(token.balanceOf(payee), payeeBefore + cumulative);
         assertEq(token.balanceOf(payer), payerBefore + (100e6 - cumulative));
+        assertTrue(escrow.getChannel(channelId).finalized);
+    }
+
+    function test_Settle_ERC1271Payer() public {
+        bytes32 channelId = _openSmartWalletChannel(100e6, keccak256("scw-settle"));
+        uint128 cumulative = 35e6;
+        bytes memory sig = _signSmartWalletVoucher(channelId, cumulative);
+
+        uint256 payeeBefore = token.balanceOf(payee);
+
+        vm.prank(payee);
+        escrow.settle(channelId, cumulative, sig);
+
+        assertEq(token.balanceOf(payee), payeeBefore + cumulative);
+
+        IAbstractStreamChannel.Channel memory ch = escrow.getChannel(channelId);
+        assertEq(ch.payer, address(smartWallet));
+        assertEq(ch.settled, cumulative);
+        assertFalse(ch.finalized);
+    }
+
+    function test_Close_ERC1271Payer() public {
+        bytes32 channelId = _openSmartWalletChannel(100e6, keccak256("scw-close"));
+        uint128 cumulative = 45e6;
+        bytes memory sig = _signSmartWalletVoucher(channelId, cumulative);
+
+        uint256 payeeBefore = token.balanceOf(payee);
+        uint256 payerBefore = token.balanceOf(address(smartWallet));
+
+        vm.prank(payee);
+        escrow.close(channelId, cumulative, sig);
+
+        assertEq(token.balanceOf(payee), payeeBefore + cumulative);
+        assertEq(token.balanceOf(address(smartWallet)), payerBefore + (100e6 - cumulative));
         assertTrue(escrow.getChannel(channelId).finalized);
     }
 

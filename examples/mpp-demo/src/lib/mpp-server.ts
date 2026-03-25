@@ -27,6 +27,9 @@ function getMppx() {
   const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as `0x${string}` | undefined
   const PAY_TO = process.env.NEXT_PUBLIC_PAY_TO as `0x${string}` | undefined
   const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS as `0x${string}` | undefined
+  const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT as
+    | `0x${string}`
+    | undefined
   if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required')
   if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required')
   if (!PAY_TO) throw new Error('NEXT_PUBLIC_PAY_TO required')
@@ -52,6 +55,7 @@ function getMppx() {
       account: serverAccount,
       recipient: PAY_TO,
       currency: USDC_E_TESTNET,
+      ...(ESCROW_CONTRACT ? { escrowContract: ESCROW_CONTRACT } : {}),
       amount: SESSION_AMOUNT,
       suggestedDeposit: SESSION_DEPOSIT,
       unitType: 'request',
