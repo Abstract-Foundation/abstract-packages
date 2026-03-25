@@ -1,5 +1,5 @@
-import { Hono } from 'hono'
-import { Mppx, payment } from 'mppx/hono'
+import { Mppx } from 'mppx/server'
+import { payment } from 'mppx/nextjs'
 import { abstract } from '@abstract-foundation/mpp/server'
 import { privateKeyToAccount } from 'viem/accounts'
 import {
@@ -77,56 +77,50 @@ function getEnv(key: string): string {
   return val
 }
 
-export const chargeApp = new Hono()
-
-chargeApp.get('/', (c, next) => {
-  const mppx = getMppx()
-  const PAY_TO = getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`
+export function chargeHandler(request: Request) {
   const handler = payment(
-    (mppx as Record<string, unknown>)['abstract/charge'] as Parameters<typeof payment>[0],
+    (getMppx() as Record<string, unknown>)['abstract/charge'] as Parameters<typeof payment>[0],
     {
       amount: CHARGE_AMOUNT,
       currency: USDC_E_TESTNET,
       decimals: 6,
-      recipient: PAY_TO,
+      recipient: getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`,
       description: `Premium data — ${CHARGE_AMOUNT} USDC.e`,
     },
+    () =>
+      Response.json({
+        message: 'Payment successful!',
+        timestamp: new Date().toISOString(),
+        fact: FACTS[Math.floor(Math.random() * FACTS.length)],
+        intent: 'charge',
+        chain: 'Abstract Testnet',
+      }),
   )
-  return handler(c, next)
-}, (c) =>
-  c.json({
-    message: 'Payment successful!',
-    timestamp: new Date().toISOString(),
-    fact: FACTS[Math.floor(Math.random() * FACTS.length)],
-    intent: 'charge',
-    chain: 'Abstract Testnet',
-  }),
-)
 
-export const sessionApp = new Hono()
+  return handler(request)
+}
 
-sessionApp.get('/', (c, next) => {
-  const mppx = getMppx()
-  const PAY_TO = getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`
+export function sessionHandler(request: Request) {
   const handler = payment(
-    (mppx as Record<string, unknown>)['abstract/session'] as Parameters<typeof payment>[0],
+    (getMppx() as Record<string, unknown>)['abstract/session'] as Parameters<typeof payment>[0],
     {
       amount: SESSION_AMOUNT,
       currency: USDC_E_TESTNET,
       decimals: 6,
-      recipient: PAY_TO,
+      recipient: getEnv('NEXT_PUBLIC_PAY_TO') as `0x${string}`,
       unitType: 'request',
       suggestedDeposit: SESSION_DEPOSIT,
       description: `Streaming data — ${SESSION_AMOUNT} USDC.e per request`,
     },
+    () =>
+      Response.json({
+        message: 'Session payment accepted!',
+        timestamp: new Date().toISOString(),
+        fact: FACTS[Math.floor(Math.random() * FACTS.length)],
+        intent: 'session',
+        chain: 'Abstract Testnet',
+      }),
   )
-  return handler(c, next)
-}, (c) =>
-  c.json({
-    message: 'Session payment accepted!',
-    timestamp: new Date().toISOString(),
-    fact: FACTS[Math.floor(Math.random() * FACTS.length)],
-    intent: 'session',
-    chain: 'Abstract Testnet',
-  }),
-)
+
+  return handler(request)
+}
