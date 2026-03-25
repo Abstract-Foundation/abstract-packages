@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "MPP payment method plugin for Abstract chain — ERC-3009 charge + ERC-20 session escrow",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -20,8 +25,22 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepack": "pnpm build"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abstract-Foundation/mpp-abstract.git",
+    "directory": "packages/mpp"
+  },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/mpp-abstract/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/mpp-abstract/tree/main/packages/mpp",
   "peerDependencies": {
     "mppx": "catalog:",
     "viem": "catalog:",
