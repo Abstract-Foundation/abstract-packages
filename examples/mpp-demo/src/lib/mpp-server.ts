@@ -26,9 +26,11 @@ function getMppx() {
   const SECRET_KEY = process.env.MPP_SECRET_KEY
   const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as `0x${string}` | undefined
   const PAY_TO = process.env.NEXT_PUBLIC_PAY_TO as `0x${string}` | undefined
+  const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS as `0x${string}` | undefined
   if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required')
   if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required')
   if (!PAY_TO) throw new Error('NEXT_PUBLIC_PAY_TO required')
+  if (!PAYMASTER_ADDRESS) throw new Error('PAYMASTER_ADDRESS required')
 
   const serverAccount = privateKeyToAccount(SERVER_PRIVATE_KEY)
 
@@ -40,6 +42,8 @@ function getMppx() {
       amount: CHARGE_AMOUNT,
       decimals: 6,
       testnet: true,
+      paymasterAddress: PAYMASTER_ADDRESS,
+      paymasterInput: '0x',
     }),
   ]
 
@@ -53,6 +57,8 @@ function getMppx() {
       unitType: 'request',
       decimals: 6,
       testnet: true,
+      paymasterAddress: PAYMASTER_ADDRESS,
+      paymasterInput: '0x',
     }),
   ]
 
