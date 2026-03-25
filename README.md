@@ -18,15 +18,16 @@ Implements two payment intents:
 
 ```mermaid
 sequenceDiagram
-    participant C as Agent / Client
-    participant S as Server
+    participant Client
+    participant Server
 
-    C->>S: GET /api/resource
-    S-->>C: 402 Payment Required<br/>WWW-Authenticate: Payment<br/>method="abstract"
-    Note over C: Sign ERC-3009 authorization or session voucher
-    C->>S: GET /api/resource<br/>Authorization: Payment &lt;base64url&gt;
-    Note over S: Verify signature<br/>Broadcast tx (charge)<br/>or accept voucher (session)
-    S-->>C: 200 OK<br/>Payment-Receipt: &lt;base64url&gt;
+    Client->>Server: GET resource
+    Server-->>Client: 402 payment required
+    Note over Client: Receive payment challenge
+    Note over Client: Sign payment authorization
+    Client->>Server: Retry request with payment proof
+    Note over Server: Verify proof and settle payment
+    Server-->>Client: 200 OK with receipt
 ```
 
 ```mermaid
@@ -46,17 +47,17 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant A as Abstract chain
-    participant S as Server
+    participant Client
+    participant Chain
+    participant Server
 
-    S-->>C: 402 + challenge
-    Note over C: signTypedData(TransferWithAuthorization{<br/>from, to, value,<br/>validAfter, validBefore,<br/>nonce<br/>})
-    C->>S: Authorization: Payment
-    Note over S: recoverAddress<br/>verify nonce
-    S->>A: writeContract(transferWithAuthorization)
-    Note over S,A: Server pays gas directly or via paymaster
-    S-->>C: 200 + Payment-Receipt
+    Server-->>Client: 402 challenge
+    Note over Client: Sign TransferWithAuthorization data
+    Client->>Server: Send payment authorization
+    Note over Server: Recover address and verify nonce
+    Server->>Chain: Call transferWithAuthorization
+    Note over Server: Pay gas directly or via paymaster
+    Server-->>Client: 200 with receipt
 ```
 
 Key properties:
@@ -71,23 +72,23 @@ Key properties:
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant CH as AbstractStreamChannel
-    participant S as Server
+    participant Client
+    participant Channel
+    participant Server
 
-    C->>CH: open tx<br/>approve + open()<br/>deposit escrowed
-    C->>S: Authorization: Payment<br/>action=open<br/>channelId, txHash<br/>voucher sig (cumul=1)
-    Note over S: verify open tx<br/>verify voucher sig
-    S-->>C: 200 + Receipt
+    Client->>Channel: Open channel and escrow deposit
+    Client->>Server: Send open authorization
+    Note over Server: Verify open transaction and voucher
+    Server-->>Client: 200 with receipt
     loop For each subsequent request
-        C->>S: Authorization: Payment<br/>action=voucher<br/>channelId<br/>cumulativeAmount += delta<br/>new voucher sig
-        Note over S: verify EIP-712 sig<br/>accept voucher
-        S-->>C: 200 + Receipt
+        Client->>Server: Send updated voucher
+        Note over Server: Verify EIP 712 signature and accept voucher
+        Server-->>Client: 200 with receipt
     end
-    C->>S: Authorization: Payment<br/>action=close<br/>final voucher sig
-    S->>CH: close(channelId, ...)
-    Note over S,CH: verify final voucher<br/>refund remainder
-    S-->>C: 204
+    Client->>Server: Send close authorization
+    Server->>Channel: Close channel
+    Note over Server: Verify final voucher and refund remainder
+    Server-->>Client: 204
 ```
 
 Key properties:
