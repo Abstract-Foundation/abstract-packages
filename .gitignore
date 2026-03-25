@@ -5,6 +5,7 @@ zkout/
 .env
 .env.*
 *.log
+*.tsbuildinfo
 .DS_Store
 packages/contracts/lib/
 packages/contracts/cache/
