@@ -1,5 +1,12 @@
 # @abstract-foundation/mpp
 
+## 0.1.3
+
+### Patch Changes
+
+- cce56d5: Add npm README and MIT license
+- 4f4a2fd: Add onChannelOpened callback to abstractSession client options, called after the on-chain channel open but before voucher signing — supports deferring the voucher via a returned Promise
+
 ## 0.1.2
 
 ### Patch Changes
