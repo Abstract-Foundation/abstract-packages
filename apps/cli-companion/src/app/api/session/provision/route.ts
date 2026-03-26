@@ -1,16 +1,22 @@
-import { randomUUID } from 'node:crypto';
-import { NextResponse } from 'next/server';
-import { getDefaultPolicyId } from '@/lib/config';
-import { buildDefaultPolicyMeta, buildDefaultCapabilitySummary } from '@/lib/server/default-policy';
+import { randomUUID } from "node:crypto";
+import { NextResponse } from "next/server";
+import { getDefaultPolicyId } from "@/lib/config";
+import {
+  buildSignedCallbackPayload,
+  signCallbackPayload,
+} from "@/lib/server/callback-attestation";
+import {
+  buildDefaultCapabilitySummary,
+  buildDefaultPolicyMeta,
+} from "@/lib/server/default-policy";
 import {
   buildSignerLabel,
   computeSignerFingerprint,
   createKeyQuorum,
   findWalletByAddress,
   listExistingAgwMcpSigners,
-} from '@/lib/server/privy-api';
-import { buildSignedCallbackPayload, signCallbackPayload } from '@/lib/server/callback-attestation';
-import type { ProvisionedSignerResult } from '@/lib/session-config';
+} from "@/lib/server/privy-api";
+import type { ProvisionedSignerResult } from "@/lib/session-config";
 
 interface ProvisionRequestBody {
   agwAccountAddress?: string;
@@ -26,17 +32,29 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as ProvisionRequestBody;
 
-    if (!body.agwAccountAddress || !ADDRESS_PATTERN.test(body.agwAccountAddress)) {
-      return NextResponse.json({ error: 'Invalid agwAccountAddress.' }, { status: 400 });
+    if (
+      !body.agwAccountAddress ||
+      !ADDRESS_PATTERN.test(body.agwAccountAddress)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid agwAccountAddress." },
+        { status: 400 },
+      );
     }
     if (!body.signerAddress || !ADDRESS_PATTERN.test(body.signerAddress)) {
-      return NextResponse.json({ error: 'Invalid signerAddress.' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid signerAddress." },
+        { status: 400 },
+      );
     }
     if (!Number.isInteger(body.chainId) || body.chainId! <= 0) {
-      return NextResponse.json({ error: 'Invalid chainId.' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid chainId." }, { status: 400 });
     }
     if (!body.authPublicKey || !BASE64_PATTERN.test(body.authPublicKey)) {
-      return NextResponse.json({ error: 'Invalid authPublicKey.' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid authPublicKey." },
+        { status: 400 },
+      );
     }
 
     const chainId = body.chainId as number;
@@ -54,28 +72,31 @@ export async function POST(request: Request) {
     const capabilitySummary = buildDefaultCapabilitySummary(chainId);
 
     const provisionAttestation = signCallbackPayload(
-      buildSignedCallbackPayload({
-        kind: 'provision' as const,
-        nonce: randomUUID(),
-        accountAddress: body.agwAccountAddress,
-        underlyingSignerAddress: body.signerAddress,
-        chainId,
-        authPublicKey: body.authPublicKey,
-        walletId: wallet.id,
-        signerId: signer.id,
-        policyIds: [policyId],
-        signerFingerprint,
-        signerLabel,
-        signerCreatedAt: signer.createdAt,
-        policyMeta,
-        capabilitySummary,
-      }, 30 * 60),
+      buildSignedCallbackPayload(
+        {
+          kind: "provision" as const,
+          nonce: randomUUID(),
+          accountAddress: body.agwAccountAddress,
+          underlyingSignerAddress: body.signerAddress,
+          chainId,
+          authPublicKey: body.authPublicKey,
+          walletId: wallet.id,
+          signerId: signer.id,
+          policyIds: [policyId],
+          signerFingerprint,
+          signerLabel,
+          signerCreatedAt: signer.createdAt,
+          policyMeta,
+          capabilitySummary,
+        },
+        30 * 60,
+      ),
     );
     const result: ProvisionedSignerResult = {
       walletId: wallet.id,
       agwAccountAddress: body.agwAccountAddress,
       signerAddress: body.signerAddress,
-      signerType: 'device_authorization_key',
+      signerType: "device_authorization_key",
       signerId: signer.id,
       provisionAttestation,
       policyIds: [policyId],

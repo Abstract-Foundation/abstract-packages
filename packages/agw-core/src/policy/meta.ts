@@ -1,4 +1,8 @@
-import type { AgwSessionData, SessionPolicyMeta, SessionToolName } from "../session/types.js";
+import type {
+  AgwSessionData,
+  SessionPolicyMeta,
+  SessionToolName,
+} from "../session/types.js";
 
 const PRESET_IDS = new Set([
   "payments",
@@ -28,14 +32,19 @@ export const KNOWN_SESSION_TOOLS: SessionToolName[] = [
   "deploy_contract",
 ];
 
-const ALWAYS_ALLOWED_TOOLS = new Set<SessionToolName>(["get_session_status", "revoke_session"]);
+const ALWAYS_ALLOWED_TOOLS = new Set<SessionToolName>([
+  "get_session_status",
+  "revoke_session",
+]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every(entry => typeof entry === "string");
+  return (
+    Array.isArray(value) && value.every((entry) => typeof entry === "string")
+  );
 }
 
 function isKnownTool(value: string): value is SessionToolName {
@@ -46,7 +55,9 @@ function isAddress(value: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(value);
 }
 
-export function isSessionPolicyMeta(value: unknown): value is SessionPolicyMeta {
+export function isSessionPolicyMeta(
+  value: unknown,
+): value is SessionPolicyMeta {
   if (!isRecord(value)) {
     return false;
   }
@@ -60,16 +71,27 @@ export function isSessionPolicyMeta(value: unknown): value is SessionPolicyMeta 
   if (typeof value.presetId !== "string" || !PRESET_IDS.has(value.presetId)) {
     return false;
   }
-  if (typeof value.presetLabel !== "string" || value.presetLabel.trim() === "") {
+  if (
+    typeof value.presetLabel !== "string" ||
+    value.presetLabel.trim() === ""
+  ) {
     return false;
   }
-  if (!Array.isArray(value.enabledTools) || !value.enabledTools.every(entry => typeof entry === "string" && isKnownTool(entry))) {
+  if (
+    !Array.isArray(value.enabledTools) ||
+    !value.enabledTools.every(
+      (entry) => typeof entry === "string" && isKnownTool(entry),
+    )
+  ) {
     return false;
   }
   if (!isStringArray(value.selectedAppIds)) {
     return false;
   }
-  if (!isStringArray(value.selectedContractAddresses) || !value.selectedContractAddresses.every(entry => isAddress(entry))) {
+  if (
+    !isStringArray(value.selectedContractAddresses) ||
+    !value.selectedContractAddresses.every((entry) => isAddress(entry))
+  ) {
     return false;
   }
   if (!isStringArray(value.unverifiedAppIds)) {
@@ -78,14 +100,20 @@ export function isSessionPolicyMeta(value: unknown): value is SessionPolicyMeta 
   if (!isStringArray(value.warnings)) {
     return false;
   }
-  if (typeof value.generatedAt !== "number" || !Number.isInteger(value.generatedAt) || value.generatedAt <= 0) {
+  if (
+    typeof value.generatedAt !== "number" ||
+    !Number.isInteger(value.generatedAt) ||
+    value.generatedAt <= 0
+  ) {
     return false;
   }
 
   return true;
 }
 
-export function parseSessionPolicyMeta(value: unknown): SessionPolicyMeta | undefined {
+export function parseSessionPolicyMeta(
+  value: unknown,
+): SessionPolicyMeta | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -97,7 +125,10 @@ export function parseSessionPolicyMeta(value: unknown): SessionPolicyMeta | unde
   return value;
 }
 
-export function assertToolAllowedByPolicyMeta(session: AgwSessionData | null, toolName: string): void {
+export function assertToolAllowedByPolicyMeta(
+  session: AgwSessionData | null,
+  toolName: string,
+): void {
   if (!session || !session.policyMeta) {
     return;
   }

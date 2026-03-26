@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { PrivySignerInitBundlePayload, PrivySignerRevokeBundlePayload } from "./callback.js";
+import type {
+  PrivySignerInitBundlePayload,
+  PrivySignerRevokeBundlePayload,
+} from "./callback.js";
 
 export interface StorageSnapshot {
   keyPath: string;
@@ -55,7 +58,11 @@ function shouldRecoverStaleLock(lockPath: string): boolean {
   try {
     const metadataRaw = fs.readFileSync(lockPath, "utf8");
     const metadata = JSON.parse(metadataRaw) as { pid?: unknown };
-    if (typeof metadata.pid === "number" && Number.isInteger(metadata.pid) && metadata.pid > 0) {
+    if (
+      typeof metadata.pid === "number" &&
+      Number.isInteger(metadata.pid) &&
+      metadata.pid > 0
+    ) {
       return !isProcessAlive(metadata.pid);
     }
   } catch {
@@ -76,7 +83,11 @@ export function acquireBootstrapLock(storageDir: string): BootstrapLockHandle {
       break;
     } catch (error) {
       const code = (error as NodeJS.ErrnoException).code;
-      if (code === "EEXIST" && attempt === 0 && shouldRecoverStaleLock(lockPath)) {
+      if (
+        code === "EEXIST" &&
+        attempt === 0 &&
+        shouldRecoverStaleLock(lockPath)
+      ) {
         try {
           fs.unlinkSync(lockPath);
           continue;
@@ -155,7 +166,9 @@ export function captureStorageSnapshot(storageDir: string): StorageSnapshot {
     keyPath,
     sessionPath,
     keyBytes: fs.existsSync(keyPath) ? fs.readFileSync(keyPath) : null,
-    sessionBytes: fs.existsSync(sessionPath) ? fs.readFileSync(sessionPath) : null,
+    sessionBytes: fs.existsSync(sessionPath)
+      ? fs.readFileSync(sessionPath)
+      : null,
   };
 }
 
@@ -173,7 +186,9 @@ export function restoreStorageSnapshot(snapshot: StorageSnapshot): void {
       fs.unlinkSync(snapshot.sessionPath);
     }
   } else {
-    fs.writeFileSync(snapshot.sessionPath, snapshot.sessionBytes, { mode: 0o600 });
+    fs.writeFileSync(snapshot.sessionPath, snapshot.sessionBytes, {
+      mode: 0o600,
+    });
   }
 }
 
@@ -203,10 +218,17 @@ export function validateAppUrl(appUrl: string): void {
   }
 
   if (appOrigin.protocol !== "https:" && appOrigin.protocol !== "http:") {
-    throw new Error(`Invalid app URL protocol: ${appOrigin.protocol}. Expected http or https.`);
+    throw new Error(
+      `Invalid app URL protocol: ${appOrigin.protocol}. Expected http or https.`,
+    );
   }
-  if (appOrigin.protocol === "http:" && !isLoopbackHostname(appOrigin.hostname)) {
-    throw new Error(`Refusing insecure app URL over http for non-loopback host: ${appOrigin.hostname}.`);
+  if (
+    appOrigin.protocol === "http:" &&
+    !isLoopbackHostname(appOrigin.hostname)
+  ) {
+    throw new Error(
+      `Refusing insecure app URL over http for non-loopback host: ${appOrigin.hostname}.`,
+    );
   }
 }
 
@@ -217,7 +239,9 @@ export function assertBundleMatchesBootstrapRequest(input: {
   const { bundle, requestedChainId } = input;
 
   if (bundle.chainId !== requestedChainId) {
-    throw new Error(`Signer bundle chain id (${bundle.chainId}) does not match requested chain id (${requestedChainId}).`);
+    throw new Error(
+      `Signer bundle chain id (${bundle.chainId}) does not match requested chain id (${requestedChainId}).`,
+    );
   }
 }
 
@@ -278,12 +302,18 @@ export function assertRevokeBundleMatchesRequest(input: {
   const { bundle, requestedChainId, walletId, signerId } = input;
 
   if (bundle.chainId !== requestedChainId) {
-    throw new Error(`Revoke bundle chain id (${bundle.chainId}) does not match requested chain id (${requestedChainId}).`);
+    throw new Error(
+      `Revoke bundle chain id (${bundle.chainId}) does not match requested chain id (${requestedChainId}).`,
+    );
   }
   if (bundle.walletId !== walletId) {
-    throw new Error(`Revoke bundle wallet id (${bundle.walletId}) does not match requested wallet id (${walletId}).`);
+    throw new Error(
+      `Revoke bundle wallet id (${bundle.walletId}) does not match requested wallet id (${walletId}).`,
+    );
   }
   if (bundle.signerId !== signerId) {
-    throw new Error(`Revoke bundle signer id (${bundle.signerId}) does not match requested signer id (${signerId}).`);
+    throw new Error(
+      `Revoke bundle signer id (${bundle.signerId}) does not match requested signer id (${signerId}).`,
+    );
   }
 }

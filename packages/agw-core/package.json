@@ -12,7 +12,7 @@
     "dist/"
   ],
   "dependencies": {
-    "@abstract-foundation/agw-client": "1.10.0",
+    "@abstract-foundation/agw-client": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "open": "^10.1.0",
     "viem": "^2.46.2"

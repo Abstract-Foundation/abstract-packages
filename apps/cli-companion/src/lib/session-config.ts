@@ -1,6 +1,6 @@
-import type { SessionPolicyMeta } from './policy-types';
+import type { SessionPolicyMeta } from "./policy-types";
 
-export type SessionCallbackAction = 'init' | 'revoke';
+export type SessionCallbackAction = "init" | "revoke";
 
 export interface DelegatedCapabilitySummary {
   chainId: number;
@@ -13,12 +13,12 @@ export interface DelegatedCapabilitySummary {
 
 export interface PrivySignerInitBundle {
   version: 2;
-  action: 'init';
+  action: "init";
   accountAddress: string;
   underlyingSignerAddress: string;
   chainId: number;
   walletId: string;
-  signerType: 'device_authorization_key';
+  signerType: "device_authorization_key";
   signerId: string;
   policyIds: string[];
   signerFingerprint: string;
@@ -30,12 +30,12 @@ export interface PrivySignerInitBundle {
 
 export interface PrivySignerRevokeBundle {
   version: 2;
-  action: 'revoke';
+  action: "revoke";
   accountAddress: string;
   underlyingSignerAddress: string;
   chainId: number;
   walletId: string;
-  signerType: 'device_authorization_key';
+  signerType: "device_authorization_key";
   signerId: string;
   revokedAt: number;
 }
@@ -53,7 +53,7 @@ export interface ProvisionedSignerResult {
   walletId: string;
   agwAccountAddress: string;
   signerAddress: string;
-  signerType: 'device_authorization_key';
+  signerType: "device_authorization_key";
   signerId: string;
   provisionAttestation: string;
   policyIds: string[];

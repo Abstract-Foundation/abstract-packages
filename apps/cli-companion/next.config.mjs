@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
-import { dirname, relative } from 'path';
-import hash from 'string-hash';
-import { fileURLToPath } from 'url';
+import { dirname, relative } from "path";
+import hash from "string-hash";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,15 +11,15 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'abstract-portal-metadata-prod.s3.amazonaws.com',
+        protocol: "https",
+        hostname: "abstract-portal-metadata-prod.s3.amazonaws.com",
       },
     ],
   },
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
-      rule.test?.test?.('.svg'),
+      rule.test?.test?.(".svg"),
     );
 
     // SVG Rules.
@@ -40,7 +40,7 @@ const nextConfig = {
         // fileLoaderRule.issuer,
         resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] },
         use: ({ resource }) => ({
-          loader: '@svgr/webpack',
+          loader: "@svgr/webpack",
           options: {
             prettier: false,
             svgo: true,
@@ -48,16 +48,16 @@ const nextConfig = {
             svgoConfig: {
               plugins: [
                 {
-                  name: 'cleanupIds',
+                  name: "cleanupIds",
                   params: {
                     remove: true,
                     minify: true,
                   },
                 },
                 {
-                  name: 'prefixIds',
+                  name: "prefixIds",
                   params: {
-                    delim: '-',
+                    delim: "-",
                     prefixClassNames: true,
                     prefixIds: true,
                     prefix: () => `svg${hash(relative(context, resource))}`,

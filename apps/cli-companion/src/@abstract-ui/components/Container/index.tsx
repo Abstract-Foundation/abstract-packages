@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import clsx from 'clsx';
-import React, { forwardRef } from 'react';
+import clsx from "clsx";
+import type React from "react";
+import { forwardRef } from "react";
 
-import styles from './styles.module.scss';
+import styles from "./styles.module.scss";
 
 interface ContainerProps {
   children: React.ReactNode;
@@ -29,7 +30,7 @@ const Container = forwardRef<HTMLDivElement, ContainerProps>(
   },
 );
 
-Container.displayName = 'Container';
+Container.displayName = "Container";
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -62,6 +63,6 @@ export const ContainerInner = forwardRef<HTMLDivElement, WrapperProps>(
   },
 );
 
-ContainerInner.displayName = 'ContainerInner';
+ContainerInner.displayName = "ContainerInner";
 
 export default Container;

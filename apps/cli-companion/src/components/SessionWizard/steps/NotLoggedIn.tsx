@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { usePathname, useSearchParams } from 'next/navigation';
-import Button from '@/@abstract-ui/components/Button';
-import AbstractBadge from '@/components/AbstractBadge';
+import { usePathname, useSearchParams } from "next/navigation";
+import Button from "@/@abstract-ui/components/Button";
+import AbstractBadge from "@/components/AbstractBadge";
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import styles from '../styles.module.scss';
+} from "@/components/Card";
+import styles from "../styles.module.scss";
 
 export default function NotLoggedIn() {
   const pathname = usePathname();
@@ -31,8 +31,9 @@ export default function NotLoggedIn() {
         <CardContent className={styles.loginContent}>
           <CardTitle>AGW CLI Server Onboarding</CardTitle>
           <CardDescription>
-            Connect your wallet to authorize an AI agent for automated wallet actions on this
-            machine. This flow only configures MCP access for this device.
+            Connect your wallet to authorize an AI agent for automated wallet
+            actions on this machine. This flow only configures MCP access for
+            this device.
           </CardDescription>
         </CardContent>
         <CardFooter className={styles.footer}>

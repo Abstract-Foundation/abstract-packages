@@ -1,4 +1,4 @@
-import { isAddress, type Address, type Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 import { assertToolCapability } from "./capability-guard.js";
 import type { ToolHandler } from "./types.js";
 
@@ -34,13 +34,18 @@ function assertAddress(value: unknown, field: string): Address {
 
 export const signTransactionTool: ToolHandler = {
   name: "sign_transaction",
-  description: "Signs an EVM transaction through the AGW wallet and returns signed payload only (no broadcast).",
+  description:
+    "Signs an EVM transaction through the AGW wallet and returns signed payload only (no broadcast).",
   inputSchema: {
     type: "object",
     properties: {
       to: { type: "string", description: "Target contract or EOA" },
       data: { type: "string", description: "Hex calldata" },
-      value: { type: "string", description: "Wei value as decimal string", default: "0" },
+      value: {
+        type: "string",
+        description: "Wei value as decimal string",
+        default: "0",
+      },
     },
     required: ["to", "data"],
   },
@@ -63,7 +68,11 @@ export const signTransactionTool: ToolHandler = {
     }
 
     const abstractClient = await context.sessionManager.getAbstractClient();
-    const signedPayload = await abstractClient.signTransaction({ to, data, value });
+    const signedPayload = await abstractClient.signTransaction({
+      to,
+      data,
+      value,
+    });
 
     return {
       signedPayload,

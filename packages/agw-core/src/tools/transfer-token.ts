@@ -1,4 +1,4 @@
-import { erc20Abi, isAddress, zeroAddress, type Address } from "viem";
+import { type Address, erc20Abi, isAddress, zeroAddress } from "viem";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
@@ -33,19 +33,25 @@ function parseExecute(value: unknown): boolean {
 
 export const transferTokenTool: ToolHandler = {
   name: "transfer_token",
-  description: "Transfers native/ERC-20 tokens through the AGW wallet with optional execute mode.",
+  description:
+    "Transfers native/ERC-20 tokens through the AGW wallet with optional execute mode.",
   inputSchema: {
     type: "object",
     properties: {
       to: { type: "string", description: "Recipient address" },
-      amount: { type: "string", description: "Transfer amount in base units (decimal string)" },
+      amount: {
+        type: "string",
+        description: "Transfer amount in base units (decimal string)",
+      },
       tokenAddress: {
         type: "string",
-        description: "Token contract address (omit or use zero address for native transfer)",
+        description:
+          "Token contract address (omit or use zero address for native transfer)",
       },
       execute: {
         type: "boolean",
-        description: "Broadcast transaction when true; preview only when omitted/false",
+        description:
+          "Broadcast transaction when true; preview only when omitted/false",
         default: false,
       },
     },
@@ -57,7 +63,10 @@ export const transferTokenTool: ToolHandler = {
     const to = assertAddress(params.to, "to");
     const amountRaw = parseAmount(params.amount);
     const amount = BigInt(amountRaw);
-    const tokenAddress = params.tokenAddress === undefined ? zeroAddress : assertAddress(params.tokenAddress, "tokenAddress");
+    const tokenAddress =
+      params.tokenAddress === undefined
+        ? zeroAddress
+        : assertAddress(params.tokenAddress, "tokenAddress");
     const isNativeTransfer = tokenAddress.toLowerCase() === zeroAddress;
     const execute = parseExecute(params.execute);
 
@@ -99,7 +108,8 @@ export const transferTokenTool: ToolHandler = {
         } as never);
 
     const networkConfig = resolveToolNetworkConfig(context, session.chainId);
-    const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+    const explorerBase =
+      networkConfig.chain.blockExplorers?.default?.url ?? null;
 
     return {
       broadcast: true,

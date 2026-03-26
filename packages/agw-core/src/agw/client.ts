@@ -1,8 +1,8 @@
 import {
-  createAbstractClient,
   type AbstractClient,
+  createAbstractClient,
 } from "@abstract-foundation/agw-client";
-import { custom, http, type Address, type EIP1193RequestFn } from "viem";
+import { type Address, custom, type EIP1193RequestFn, http } from "viem";
 import type { ChainEIP712 } from "viem/chains";
 import type { PrivyWalletClient } from "../privy/client.js";
 
@@ -29,7 +29,10 @@ function createPrivyEip1193Provider(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
         });
-        const result = (await response.json()) as { error?: { message: string }; result?: unknown };
+        const result = (await response.json()) as {
+          error?: { message: string };
+          result?: unknown;
+        };
         if (result.error) {
           throw new Error(result.error.message);
         }

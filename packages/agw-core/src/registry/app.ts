@@ -1,6 +1,6 @@
 import {
-  booleanSchema,
   authNone,
+  booleanSchema,
   defineCommand,
   exposure,
   fieldsSchema,
@@ -21,7 +21,8 @@ export const appNamespaceDefinition: AgwCommandDefinition = defineCommand({
   id: "app",
   path: ["app"],
   kind: "namespace",
-  description: "Discover Abstract apps through a canonical AGW agent-facing surface.",
+  description:
+    "Discover Abstract apps through a canonical AGW agent-facing surface.",
   status: "planned",
   inputMode: "json",
   auth: authNone(),
@@ -33,7 +34,8 @@ export const appNamespaceDefinition: AgwCommandDefinition = defineCommand({
       id: "app.list",
       path: ["app", "list"],
       kind: "command",
-      description: "List live Portal apps merged with AGW curation and skill metadata.",
+      description:
+        "List live Portal apps merged with AGW curation and skill metadata.",
       status: "implemented",
       inputMode: "json",
       auth: authNone(),
@@ -47,7 +49,10 @@ export const appNamespaceDefinition: AgwCommandDefinition = defineCommand({
             id: idSchema("Shipped AGW app identifier."),
             name: stringSchema(),
             description: stringSchema(),
-            skillRefs: { type: "array", items: opaqueObjectSchema("Shipped skill reference metadata.") },
+            skillRefs: {
+              type: "array",
+              items: opaqueObjectSchema("Shipped skill reference metadata."),
+            },
           },
           { additionalProperties: true },
         ),
@@ -68,14 +73,20 @@ export const appNamespaceDefinition: AgwCommandDefinition = defineCommand({
       requestSchema: objectSchema(
         {
           appId: idSchema("Shipped AGW app identifier."),
-          offline: booleanSchema({ description: "Skip live Portal enrichment and use the shipped AGW catalog only." }),
+          offline: booleanSchema({
+            description:
+              "Skip live Portal enrichment and use the shipped AGW catalog only.",
+          }),
         },
         { required: ["appId"] },
       ),
       responseSchema: objectSchema(
         {
           app: opaqueObjectSchema("Shipped AGW app metadata."),
-          skillRefs: { type: "array", items: opaqueObjectSchema("Shipped skill reference metadata.") },
+          skillRefs: {
+            type: "array",
+            items: opaqueObjectSchema("Shipped skill reference metadata."),
+          },
           live: objectSchema(
             {
               app: opaqueObjectSchema("Live Portal app metadata."),
@@ -89,7 +100,10 @@ export const appNamespaceDefinition: AgwCommandDefinition = defineCommand({
               portalError: stringSchema(),
               offline: booleanSchema(),
             },
-            { required: ["portalStatus", "contractsSource"], additionalProperties: false },
+            {
+              required: ["portalStatus", "contractsSource"],
+              additionalProperties: false,
+            },
           ),
         },
         { required: ["app", "skillRefs", "meta"] },

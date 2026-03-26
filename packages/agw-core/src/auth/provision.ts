@@ -1,4 +1,7 @@
-import { computePublicKeyFingerprint, writeAuthKeyfile } from "../privy/auth.js";
+import {
+  computePublicKeyFingerprint,
+  writeAuthKeyfile,
+} from "../privy/auth.js";
 import { resolveDefaultStorageDir } from "../session/storage.js";
 import type { AgwSessionData } from "../session/types.js";
 import type { PrivySignerInitBundlePayload } from "./callback.js";
@@ -22,7 +25,10 @@ export function resolveStorageDir(homeDir?: string): string {
   return homeDir ?? resolveDefaultStorageDir();
 }
 
-export function writeAuthKey(privateKeyDer: Buffer, storageDir: string): string {
+export function writeAuthKey(
+  privateKeyDer: Buffer,
+  storageDir: string,
+): string {
   return writeAuthKeyfile(privateKeyDer, storageDir);
 }
 
@@ -35,7 +41,9 @@ export function materializeSessionFromBundle(
   options: MaterializeSessionFromBundleOptions,
 ): AgwSessionData {
   if (bundle.chainId !== options.chainId) {
-    throw new Error(`Signer bundle chain id (${bundle.chainId}) does not match requested chain id (${options.chainId}).`);
+    throw new Error(
+      `Signer bundle chain id (${bundle.chainId}) does not match requested chain id (${options.chainId}).`,
+    );
   }
 
   const now = options.nowUnixSeconds ?? Math.floor(Date.now() / 1000);

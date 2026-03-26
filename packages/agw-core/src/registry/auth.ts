@@ -20,7 +20,8 @@ export const authNamespaceDefinition: AgwCommandDefinition = defineCommand({
   id: "auth",
   path: ["auth"],
   kind: "namespace",
-  description: "Authenticate through the AGW companion flow and manage signer approval lifecycle.",
+  description:
+    "Authenticate through the AGW companion flow and manage signer approval lifecycle.",
   status: "planned",
   inputMode: "json",
   auth: authNone(),
@@ -32,14 +33,20 @@ export const authNamespaceDefinition: AgwCommandDefinition = defineCommand({
       id: "auth.init",
       path: ["auth", "init"],
       kind: "command",
-      description: "Start the browser-based AGW approval flow and provision local session state.",
+      description:
+        "Start the browser-based AGW approval flow and provision local session state.",
       status: "implemented",
       inputMode: "json",
       auth: authApproval(),
       requestSchema: objectSchema(
         {
-          chainId: integerSchema({ description: "Target chain id for onboarding." }),
-          execute: booleanSchema({ description: "Execute immediately when true. Preview by default.", default: false }),
+          chainId: integerSchema({
+            description: "Target chain id for onboarding.",
+          }),
+          execute: booleanSchema({
+            description: "Execute immediately when true. Preview by default.",
+            default: false,
+          }),
         },
         { required: ["chainId"] },
       ),
@@ -60,23 +67,36 @@ export const authNamespaceDefinition: AgwCommandDefinition = defineCommand({
       mutation: writeMutation(),
       output: jsonOutput(false, false),
       sanitization: sanitize(false),
-      exposure: exposure(true, false, ["confirm browser-based signer approval before opening the companion flow"]),
+      exposure: exposure(true, false, [
+        "confirm browser-based signer approval before opening the companion flow",
+      ]),
       config: config(
         { env: "AGW_APP_URL", description: "Companion onboarding app URL." },
-        { env: "AGW_HOME", description: "AGW home directory for local session state." },
-        { env: "AGW_CALLBACK_SIGNING_PUBLIC_KEY", description: "Companion callback signing public key for hosted onboarding." },
+        {
+          env: "AGW_HOME",
+          description: "AGW home directory for local session state.",
+        },
+        {
+          env: "AGW_CALLBACK_SIGNING_PUBLIC_KEY",
+          description:
+            "Companion callback signing public key for hosted onboarding.",
+        },
       ),
     }),
     defineCommand({
       id: "auth.revoke",
       path: ["auth", "revoke"],
       kind: "command",
-      description: "Revoke the current AGW signer through the companion web flow.",
+      description:
+        "Revoke the current AGW signer through the companion web flow.",
       status: "implemented",
       inputMode: "json",
       auth: authSession("active_required"),
       requestSchema: objectSchema({
-        execute: booleanSchema({ description: "Execute immediately when true. Preview by default.", default: false }),
+        execute: booleanSchema({
+          description: "Execute immediately when true. Preview by default.",
+          default: false,
+        }),
       }),
       responseSchema: objectSchema({
         preview: booleanSchema(),
@@ -90,8 +110,13 @@ export const authNamespaceDefinition: AgwCommandDefinition = defineCommand({
       mutation: writeMutation("destructive"),
       output: jsonOutput(false, false),
       sanitization: sanitize(false),
-      exposure: exposure(true, false, ["confirm signer revocation intent with the user before execution"]),
-      config: config({ env: "AGW_APP_URL", description: "Companion onboarding app URL." }),
+      exposure: exposure(true, false, [
+        "confirm signer revocation intent with the user before execution",
+      ]),
+      config: config({
+        env: "AGW_APP_URL",
+        description: "Companion onboarding app URL.",
+      }),
     }),
   ],
 });

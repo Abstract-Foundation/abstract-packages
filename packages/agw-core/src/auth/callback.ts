@@ -1,6 +1,10 @@
 import { isAddress } from "viem";
 import { parseSessionPolicyMeta } from "../policy/meta.js";
-import type { DelegatedCapabilitySummary, SessionPolicyMeta, SessionToolName } from "../session/types.js";
+import type {
+  DelegatedCapabilitySummary,
+  SessionPolicyMeta,
+  SessionToolName,
+} from "../session/types.js";
 
 const CALLBACK_PAYLOAD_QUERY_KEY = "session";
 
@@ -53,10 +57,14 @@ function parseNonEmptyString(value: unknown, fieldName: string): string {
 }
 
 function parseStringArray(value: unknown, fieldName: string): string[] {
-  if (!Array.isArray(value) || value.length === 0 || !value.every(entry => typeof entry === "string" && entry.trim() !== "")) {
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    !value.every((entry) => typeof entry === "string" && entry.trim() !== "")
+  ) {
     throw new Error(`Invalid ${fieldName}. Expected a non-empty string array.`);
   }
-  return value.map(entry => entry.trim());
+  return value.map((entry) => entry.trim());
 }
 
 function parseCapabilitySummary(value: unknown): DelegatedCapabilitySummary {
@@ -65,10 +73,22 @@ function parseCapabilitySummary(value: unknown): DelegatedCapabilitySummary {
   }
 
   const chainId = parsePositiveInt(value.chainId, "capabilitySummary.chainId");
-  const expiresAt = parsePositiveInt(value.expiresAt, "capabilitySummary.expiresAt");
-  const feeLimit = parseNonEmptyString(value.feeLimit, "capabilitySummary.feeLimit");
-  const maxValuePerUse = parseNonEmptyString(value.maxValuePerUse, "capabilitySummary.maxValuePerUse");
-  const enabledTools = parseStringArray(value.enabledTools, "capabilitySummary.enabledTools") as SessionToolName[];
+  const expiresAt = parsePositiveInt(
+    value.expiresAt,
+    "capabilitySummary.expiresAt",
+  );
+  const feeLimit = parseNonEmptyString(
+    value.feeLimit,
+    "capabilitySummary.feeLimit",
+  );
+  const maxValuePerUse = parseNonEmptyString(
+    value.maxValuePerUse,
+    "capabilitySummary.maxValuePerUse",
+  );
+  const enabledTools = parseStringArray(
+    value.enabledTools,
+    "capabilitySummary.enabledTools",
+  ) as SessionToolName[];
   const notes = parseStringArray(value.notes, "capabilitySummary.notes");
 
   return {
@@ -132,7 +152,9 @@ function parsePayloadObject(rawPayload: string): Record<string, unknown> {
   const payloadCandidates = [rawPayload];
 
   try {
-    const decodedBase64Url = Buffer.from(rawPayload, "base64url").toString("utf8").trim();
+    const decodedBase64Url = Buffer.from(rawPayload, "base64url")
+      .toString("utf8")
+      .trim();
     if (decodedBase64Url) {
       payloadCandidates.push(decodedBase64Url);
     }
@@ -151,19 +173,29 @@ function parsePayloadObject(rawPayload: string): Record<string, unknown> {
     }
   }
 
-  throw new Error("Invalid session bundle payload. Expected JSON or base64url-encoded JSON.");
+  throw new Error(
+    "Invalid session bundle payload. Expected JSON or base64url-encoded JSON.",
+  );
 }
 
-export function parseSignerBundlePayload(payload: Record<string, unknown>): PrivySignerBundlePayload {
+export function parseSignerBundlePayload(
+  payload: Record<string, unknown>,
+): PrivySignerBundlePayload {
   const state = parseNonEmptyString(payload.state, "state");
   const iss = parseNonEmptyString(payload.iss, "iss");
   const iat = parsePositiveInt(payload.iat, "iat");
   const exp = parsePositiveInt(payload.exp, "exp");
 
-  if (typeof payload.accountAddress !== "string" || !isAddress(payload.accountAddress)) {
+  if (
+    typeof payload.accountAddress !== "string" ||
+    !isAddress(payload.accountAddress)
+  ) {
     throw new Error("Invalid signer bundle accountAddress.");
   }
-  if (typeof payload.underlyingSignerAddress !== "string" || !isAddress(payload.underlyingSignerAddress)) {
+  if (
+    typeof payload.underlyingSignerAddress !== "string" ||
+    !isAddress(payload.underlyingSignerAddress)
+  ) {
     throw new Error("Invalid signer bundle underlyingSignerAddress.");
   }
 
@@ -177,7 +209,9 @@ export function parseSignerBundlePayload(payload: Record<string, unknown>): Priv
   const walletId = parseNonEmptyString(payload.walletId, "walletId");
   const signerType = parseNonEmptyString(payload.signerType, "signerType");
   if (signerType !== "device_authorization_key") {
-    throw new Error(`Invalid signerType. Expected "device_authorization_key", received "${signerType}".`);
+    throw new Error(
+      `Invalid signerType. Expected "device_authorization_key", received "${signerType}".`,
+    );
   }
   const signerId = parseNonEmptyString(payload.signerId, "signerId");
 
@@ -201,9 +235,15 @@ export function parseSignerBundlePayload(payload: Record<string, unknown>): Priv
       signerType,
       signerId,
       policyIds: parseStringArray(payload.policyIds, "policyIds"),
-      signerFingerprint: parseNonEmptyString(payload.signerFingerprint, "signerFingerprint"),
+      signerFingerprint: parseNonEmptyString(
+        payload.signerFingerprint,
+        "signerFingerprint",
+      ),
       signerLabel: parseNonEmptyString(payload.signerLabel, "signerLabel"),
-      signerCreatedAt: parsePositiveInt(payload.signerCreatedAt, "signerCreatedAt"),
+      signerCreatedAt: parsePositiveInt(
+        payload.signerCreatedAt,
+        "signerCreatedAt",
+      ),
       policyMeta,
       capabilitySummary: parseCapabilitySummary(payload.capabilitySummary),
     };
@@ -230,38 +270,58 @@ export function parseSignerBundlePayload(payload: Record<string, unknown>): Priv
   throw new Error(`Invalid signer bundle action "${action}".`);
 }
 
-export function parseSignerBundleInput(input: string): PrivySignerBundlePayload {
-  return parseSignerBundlePayload(parsePayloadObject(resolvePayloadCandidate(input)));
+export function parseSignerBundleInput(
+  input: string,
+): PrivySignerBundlePayload {
+  return parseSignerBundlePayload(
+    parsePayloadObject(resolvePayloadCandidate(input)),
+  );
 }
 
-export function parseInitSignerBundleInput(input: string): PrivySignerInitBundlePayload {
+export function parseInitSignerBundleInput(
+  input: string,
+): PrivySignerInitBundlePayload {
   const bundle = parseSignerBundleInput(input);
   if (bundle.action !== "init") {
-    throw new Error(`Invalid signer bundle action "${bundle.action}". Expected "init".`);
+    throw new Error(
+      `Invalid signer bundle action "${bundle.action}". Expected "init".`,
+    );
   }
   return bundle;
 }
 
-export function parseInitSignerBundlePayload(payload: Record<string, unknown>): PrivySignerInitBundlePayload {
+export function parseInitSignerBundlePayload(
+  payload: Record<string, unknown>,
+): PrivySignerInitBundlePayload {
   const bundle = parseSignerBundlePayload(payload);
   if (bundle.action !== "init") {
-    throw new Error(`Invalid signer bundle action "${bundle.action}". Expected "init".`);
+    throw new Error(
+      `Invalid signer bundle action "${bundle.action}". Expected "init".`,
+    );
   }
   return bundle;
 }
 
-export function parseRevokeSignerBundleInput(input: string): PrivySignerRevokeBundlePayload {
+export function parseRevokeSignerBundleInput(
+  input: string,
+): PrivySignerRevokeBundlePayload {
   const bundle = parseSignerBundleInput(input);
   if (bundle.action !== "revoke") {
-    throw new Error(`Invalid signer bundle action "${bundle.action}". Expected "revoke".`);
+    throw new Error(
+      `Invalid signer bundle action "${bundle.action}". Expected "revoke".`,
+    );
   }
   return bundle;
 }
 
-export function parseRevokeSignerBundlePayload(payload: Record<string, unknown>): PrivySignerRevokeBundlePayload {
+export function parseRevokeSignerBundlePayload(
+  payload: Record<string, unknown>,
+): PrivySignerRevokeBundlePayload {
   const bundle = parseSignerBundlePayload(payload);
   if (bundle.action !== "revoke") {
-    throw new Error(`Invalid signer bundle action "${bundle.action}". Expected "revoke".`);
+    throw new Error(
+      `Invalid signer bundle action "${bundle.action}". Expected "revoke".`,
+    );
   }
   return bundle;
 }

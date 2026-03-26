@@ -1,11 +1,21 @@
 import type { Address } from "viem";
 import { type AbstractClient, createAgwAbstractClient } from "../agw/client.js";
-import { PrivyWalletClient } from "../privy/client.js";
-import { DEFAULT_CHAIN_ID, resolveNetworkConfig, type ResolvedNetworkConfig } from "../config/network.js";
 import { resolveAppUrl } from "../auth/bootstrap-internals.js";
+import {
+  DEFAULT_CHAIN_ID,
+  type ResolvedNetworkConfig,
+  resolveNetworkConfig,
+} from "../config/network.js";
+import { PrivyWalletClient } from "../privy/client.js";
 import type { Logger } from "../utils/logger.js";
 import { SessionStorage } from "./storage.js";
-import { isWriteReadySession, resolveSessionReadiness, type AgwSessionData, type SessionReadiness, type SessionStatus } from "./types.js";
+import {
+  type AgwSessionData,
+  isWriteReadySession,
+  resolveSessionReadiness,
+  type SessionReadiness,
+  type SessionStatus,
+} from "./types.js";
 
 export type SessionManagerReadiness = SessionReadiness | "missing" | "revoked";
 
@@ -37,7 +47,9 @@ export class SessionManager {
   initialize(): void {
     const session = this.storage.load();
     if (!session) {
-      this.logger.warn("No AGW session found. Run the bootstrap flow before write operations.");
+      this.logger.warn(
+        "No AGW session found. Run the bootstrap flow before write operations.",
+      );
       this.session = null;
       return;
     }
@@ -80,7 +92,9 @@ export class SessionManager {
     this.storage.delete();
   }
 
-  markSessionRevoked(updatedAtUnixSeconds = Math.floor(Date.now() / 1000)): void {
+  markSessionRevoked(
+    updatedAtUnixSeconds = Math.floor(Date.now() / 1000),
+  ): void {
     if (!this.session) {
       throw new Error("session is missing");
     }

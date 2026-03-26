@@ -1,19 +1,28 @@
-import type { AgwAppCatalogEntry, AgwAppContractRef } from "../../app-catalog.js";
+import type {
+  AgwAppCatalogEntry,
+  AgwAppContractRef,
+} from "../../app-catalog.js";
 import { getAppCatalogEntry, listSkillRefs } from "../../app-catalog.js";
-import type { PortalAppListResponse, PortalAppSummary } from "../../integrations/portal/types.js";
+import { AgwCliError } from "../../errors.js";
+import type {
+  PortalAppContract,
+  PortalAppDetail,
+  PortalAppListResponse,
+  PortalAppSummary,
+} from "../../integrations/portal/types.js";
 import { portalGetAppTool } from "../../tools/portal-get-app.js";
 import { portalGetUserProfileTool } from "../../tools/portal-get-user-profile.js";
 import { portalListAppsTool } from "../../tools/portal-list-apps.js";
 import { portalListStreamsTool } from "../../tools/portal-list-streams.js";
-import type { PortalAppContract, PortalAppDetail } from "../../integrations/portal/types.js";
 import type { ToolContext } from "../../tools/types.js";
-import { AgwCliError } from "../../errors.js";
 import type { CommandHandler } from "../types.js";
 import { parseOptionalBoolean, parseOptionalString } from "../validation.js";
 
 const DEFAULT_APP_LIST_PAGE_SIZE = 20;
 
-function normalizePortalContracts(contracts: PortalAppContract[] | undefined): AgwAppContractRef[] {
+function normalizePortalContracts(
+  contracts: PortalAppContract[] | undefined,
+): AgwAppContractRef[] {
   if (!Array.isArray(contracts)) {
     return [];
   }
@@ -27,19 +36,24 @@ function normalizePortalContracts(contracts: PortalAppContract[] | undefined): A
         typeof contract.name === "string" &&
         contract.name.trim() !== "",
     )
-    .map(contract => ({
+    .map((contract) => ({
       address: contract.address,
       label: contract.name,
     }));
 }
 
-function mergeAppDetails(app: AgwAppCatalogEntry, liveApp: PortalAppDetail | null, contracts: AgwAppContractRef[]): Record<string, unknown> {
+function mergeAppDetails(
+  app: AgwAppCatalogEntry,
+  liveApp: PortalAppDetail | null,
+  contracts: AgwAppContractRef[],
+): Record<string, unknown> {
   return {
     ...liveApp,
     ...app,
     name: app.name || liveApp?.name,
     description: app.description || liveApp?.description,
-    categories: app.categories.length > 0 ? app.categories : liveApp?.categories,
+    categories:
+      app.categories.length > 0 ? app.categories : liveApp?.categories,
     docsUrl: app.docsUrl,
     contracts,
   };
@@ -62,9 +76,18 @@ function normalizePortalError(error: unknown): string {
 }
 
 function parseCursorOffset(cursor: unknown): number {
-  const offsetRaw = cursor === undefined ? 0 : typeof cursor === "string" ? Number.parseInt(cursor, 10) : Number.NaN;
+  const offsetRaw =
+    cursor === undefined
+      ? 0
+      : typeof cursor === "string"
+        ? Number.parseInt(cursor, 10)
+        : Number.NaN;
   if (!Number.isInteger(offsetRaw) || offsetRaw < 0) {
-    throw new AgwCliError("INVALID_INPUT", "cursor must be a non-negative integer string when provided", 2);
+    throw new AgwCliError(
+      "INVALID_INPUT",
+      "cursor must be a non-negative integer string when provided",
+      2,
+    );
   }
   return offsetRaw;
 }
@@ -73,19 +96,32 @@ function resolvePageSize(pageSize: unknown): number {
   if (pageSize === undefined) {
     return DEFAULT_APP_LIST_PAGE_SIZE;
   }
-  if (typeof pageSize !== "number" || !Number.isInteger(pageSize) || pageSize <= 0) {
-    throw new AgwCliError("INVALID_INPUT", "pageSize must be a positive integer when provided", 2);
+  if (
+    typeof pageSize !== "number" ||
+    !Number.isInteger(pageSize) ||
+    pageSize <= 0
+  ) {
+    throw new AgwCliError(
+      "INVALID_INPUT",
+      "pageSize must be a positive integer when provided",
+      2,
+    );
   }
   return pageSize;
 }
 
-function mergeListAppSummary(liveApp: PortalAppSummary): Record<string, unknown> {
+function mergeListAppSummary(
+  liveApp: PortalAppSummary,
+): Record<string, unknown> {
   const catalogApp = getAppCatalogEntry(liveApp.id);
   return {
     ...liveApp,
     ...(catalogApp
       ? {
-          categories: catalogApp.categories.length > 0 ? catalogApp.categories : liveApp.categories,
+          categories:
+            catalogApp.categories.length > 0
+              ? catalogApp.categories
+              : liveApp.categories,
           description: catalogApp.description || liveApp.description,
           docsUrl: catalogApp.docsUrl,
           spotlight: catalogApp.spotlight,
@@ -97,7 +133,7 @@ function mergeListAppSummary(liveApp: PortalAppSummary): Record<string, unknown>
 }
 
 export const portalAppHandlers: Record<string, CommandHandler> = {
-  "portal.streams.list": async input =>
+  "portal.streams.list": async (input) =>
     portalListStreamsTool.handler(
       {
         app: input.appId,
@@ -109,8 +145,11 @@ export const portalAppHandlers: Record<string, CommandHandler> = {
       {} as ToolContext,
     ),
   "portal.user-profile.get": async (input, context) =>
-    portalGetUserProfileTool.handler({ address: parseOptionalString(input.address, "address") }, context),
-  "app.list": async input => {
+    portalGetUserProfileTool.handler(
+      { address: parseOptionalString(input.address, "address") },
+      context,
+    ),
+  "app.list": async (input) => {
     const offset = parseCursorOffset(input.cursor);
     const pageSize = resolvePageSize(input.pageSize);
     const page = Math.floor(offset / pageSize) + 1;
@@ -122,16 +161,19 @@ export const portalAppHandlers: Record<string, CommandHandler> = {
       },
       {} as ToolContext,
     )) as PortalAppListResponse;
-    const items = livePage.items.slice(offsetWithinPage).map(mergeListAppSummary);
+    const items = livePage.items
+      .slice(offsetWithinPage)
+      .map(mergeListAppSummary);
     const nextOffset = offset + items.length;
 
     return {
       items,
-      nextCursor: nextOffset < livePage.pagination.totalItems ? String(nextOffset) : null,
+      nextCursor:
+        nextOffset < livePage.pagination.totalItems ? String(nextOffset) : null,
       totalItems: livePage.pagination.totalItems,
     };
   },
-  "app.show": async input => {
+  "app.show": async (input) => {
     const appId = parseOptionalString(input.appId, "appId");
     const offline = parseOptionalBoolean(input.offline, "offline") === true;
     if (!appId) {
@@ -140,7 +182,11 @@ export const portalAppHandlers: Record<string, CommandHandler> = {
 
     const app = getAppCatalogEntry(appId);
     if (!app) {
-      throw new AgwCliError("APP_NOT_FOUND", `app ${appId} is not in the shipped AGW app catalog`, 2);
+      throw new AgwCliError(
+        "APP_NOT_FOUND",
+        `app ${appId} is not in the shipped AGW app catalog`,
+        2,
+      );
     }
 
     const skillRefs = listSkillRefs(app.skillRefs);
@@ -178,7 +224,8 @@ export const portalAppHandlers: Record<string, CommandHandler> = {
         {} as ToolContext,
       )) as PortalAppDetail;
       const liveContracts = normalizePortalContracts(liveApp.contracts);
-      const contracts = liveContracts.length > 0 ? liveContracts : app.contracts;
+      const contracts =
+        liveContracts.length > 0 ? liveContracts : app.contracts;
 
       return {
         app: mergeAppDetails(app, liveApp, contracts),

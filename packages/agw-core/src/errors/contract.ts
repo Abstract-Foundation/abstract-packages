@@ -39,16 +39,26 @@ function deriveCodeFromMessage(message: string): string {
   if (normalized.includes("unsupported chain id")) {
     return "NETWORK_UNSUPPORTED";
   }
-  if (normalized.includes("must be a valid 0x-prefixed address") || normalized.includes("must be a hex string")) {
+  if (
+    normalized.includes("must be a valid 0x-prefixed address") ||
+    normalized.includes("must be a hex string")
+  ) {
     return "VALIDATION_ERROR";
   }
-  if (normalized.includes("policy") || normalized.includes("rejected") || normalized.includes("denied")) {
+  if (
+    normalized.includes("policy") ||
+    normalized.includes("rejected") ||
+    normalized.includes("denied")
+  ) {
     return "POLICY_DENIED";
   }
   if (normalized.includes("insufficient funds")) {
     return "AGW_INSUFFICIENT_FUNDS";
   }
-  if (normalized.includes("user rejected") || normalized.includes("user denied")) {
+  if (
+    normalized.includes("user rejected") ||
+    normalized.includes("user denied")
+  ) {
     return "USER_REJECTED";
   }
 
@@ -66,7 +76,10 @@ function toRaw(error: unknown): { name: string; message: string } | null {
   };
 }
 
-export function toMcpErrorContract(error: unknown, fallbackCode = "INTERNAL_ERROR"): McpErrorContract {
+export function toMcpErrorContract(
+  error: unknown,
+  fallbackCode = "INTERNAL_ERROR",
+): McpErrorContract {
   if (error instanceof McpToolError) {
     return {
       code: error.code,

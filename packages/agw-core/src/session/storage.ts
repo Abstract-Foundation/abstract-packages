@@ -3,7 +3,11 @@ import os from "node:os";
 import path from "node:path";
 import { resolveAgwHome } from "../config/runtime.js";
 import { isSessionPolicyMeta } from "../policy/meta.js";
-import { authKeyfileExists, deleteAuthKeyfile, formatAuthKeyfile } from "../privy/auth.js";
+import {
+  authKeyfileExists,
+  deleteAuthKeyfile,
+  formatAuthKeyfile,
+} from "../privy/auth.js";
 import type { AgwSessionData } from "./types.js";
 
 const LEGACY_STORAGE_DIRNAME = ".agw-mcp";
@@ -28,7 +32,9 @@ export class SessionStorage {
     this.dir = dir ?? resolveAgwHome();
     this.filePath = path.join(this.dir, "session.json");
     this.legacyDir = this.explicitDir ? null : resolveLegacyStorageDir();
-    this.legacyFilePath = this.legacyDir ? path.join(this.legacyDir, "session.json") : null;
+    this.legacyFilePath = this.legacyDir
+      ? path.join(this.legacyDir, "session.json")
+      : null;
   }
 
   get path(): string {
@@ -64,31 +70,36 @@ export class SessionStorage {
         return null;
       }
       const raw = fs.readFileSync(filePath, "utf8");
-      const parsed = this.normalizeSignerBinding(JSON.parse(raw) as Partial<AgwSessionData>);
+      const parsed = this.normalizeSignerBinding(
+        JSON.parse(raw) as Partial<AgwSessionData>,
+      );
       if (
         typeof parsed.accountAddress !== "string" ||
-        (parsed.underlyingSignerAddress !== undefined && typeof parsed.underlyingSignerAddress !== "string") ||
+        (parsed.underlyingSignerAddress !== undefined &&
+          typeof parsed.underlyingSignerAddress !== "string") ||
         typeof parsed.chainId !== "number" ||
         typeof parsed.createdAt !== "number" ||
         typeof parsed.updatedAt !== "number" ||
         typeof parsed.status !== "string" ||
-        (parsed.privyWalletId !== undefined && typeof parsed.privyWalletId !== "string") ||
-        (
-          parsed.privySignerBinding !== undefined &&
-          (
-            parsed.privySignerBinding.type !== "device_authorization_key" ||
+        (parsed.privyWalletId !== undefined &&
+          typeof parsed.privyWalletId !== "string") ||
+        (parsed.privySignerBinding !== undefined &&
+          (parsed.privySignerBinding.type !== "device_authorization_key" ||
             parsed.privySignerBinding.canonicalType !== "key_quorum" ||
             typeof parsed.privySignerBinding.id !== "string" ||
             !Array.isArray(parsed.privySignerBinding.policyIds) ||
-            !parsed.privySignerBinding.policyIds.every(entry => typeof entry === "string") ||
+            !parsed.privySignerBinding.policyIds.every(
+              (entry) => typeof entry === "string",
+            ) ||
             typeof parsed.privySignerBinding.fingerprint !== "string" ||
             typeof parsed.privySignerBinding.label !== "string" ||
-            typeof parsed.privySignerBinding.createdAt !== "number"
-          )
-        ) ||
-        (parsed.privyAuthKeyRef !== undefined && parsed.privyAuthKeyRef?.kind !== "keyfile") ||
-        (parsed.privyAuthKeyRef !== undefined && typeof parsed.privyAuthKeyRef?.value !== "string") ||
-        (parsed.policyMeta !== undefined && !isSessionPolicyMeta(parsed.policyMeta)) ||
+            typeof parsed.privySignerBinding.createdAt !== "number")) ||
+        (parsed.privyAuthKeyRef !== undefined &&
+          parsed.privyAuthKeyRef?.kind !== "keyfile") ||
+        (parsed.privyAuthKeyRef !== undefined &&
+          typeof parsed.privyAuthKeyRef?.value !== "string") ||
+        (parsed.policyMeta !== undefined &&
+          !isSessionPolicyMeta(parsed.policyMeta)) ||
         !this.hasValidCapabilitySummary(parsed as AgwSessionData)
       ) {
         return null;
@@ -99,14 +110,16 @@ export class SessionStorage {
     }
   }
 
-  private normalizeSignerBinding(parsed: Partial<AgwSessionData>): AgwSessionData {
+  private normalizeSignerBinding(
+    parsed: Partial<AgwSessionData>,
+  ): AgwSessionData {
     const next = { ...parsed } as AgwSessionData;
 
     if (
       !next.privySignerBinding &&
       typeof next.privySignerId === "string" &&
       Array.isArray(next.privyPolicyIds) &&
-      next.privyPolicyIds.every(entry => typeof entry === "string") &&
+      next.privyPolicyIds.every((entry) => typeof entry === "string") &&
       typeof next.privySignerFingerprint === "string" &&
       typeof next.privySignerLabel === "string" &&
       typeof next.privySignerCreatedAt === "number"
@@ -141,7 +154,9 @@ export class SessionStorage {
     return next;
   }
 
-  private resolveAuthKeyRefForRuntime(data: AgwSessionData): AgwSessionData | null {
+  private resolveAuthKeyRefForRuntime(
+    data: AgwSessionData,
+  ): AgwSessionData | null {
     if (!data.privyAuthKeyRef) {
       return data;
     }
@@ -176,21 +191,33 @@ export class SessionStorage {
       typeof summary.maxValuePerUse === "string" &&
       summary.maxValuePerUse.trim() !== "" &&
       Array.isArray(summary.enabledTools) &&
-      summary.enabledTools.every(entry => typeof entry === "string") &&
+      summary.enabledTools.every((entry) => typeof entry === "string") &&
       Array.isArray(summary.notes) &&
-      summary.notes.every(entry => typeof entry === "string")
+      summary.notes.every((entry) => typeof entry === "string")
     );
   }
 
   private migrateLegacySession(data: AgwSessionData): AgwSessionData {
-    if (this.explicitDir || !this.legacyDir || !this.legacyFilePath || fs.existsSync(this.filePath)) {
+    if (
+      this.explicitDir ||
+      !this.legacyDir ||
+      !this.legacyFilePath ||
+      fs.existsSync(this.filePath)
+    ) {
       return data;
     }
 
     const next: AgwSessionData = {
       ...data,
-      privySignerBinding: data.privySignerBinding ? { ...data.privySignerBinding, policyIds: [...data.privySignerBinding.policyIds] } : undefined,
-      privyPolicyIds: data.privyPolicyIds ? [...data.privyPolicyIds] : undefined,
+      privySignerBinding: data.privySignerBinding
+        ? {
+            ...data.privySignerBinding,
+            policyIds: [...data.privySignerBinding.policyIds],
+          }
+        : undefined,
+      privyPolicyIds: data.privyPolicyIds
+        ? [...data.privyPolicyIds]
+        : undefined,
       capabilitySummary: data.capabilitySummary
         ? {
             ...data.capabilitySummary,
@@ -203,14 +230,19 @@ export class SessionStorage {
             ...data.policyMeta,
             enabledTools: [...data.policyMeta.enabledTools],
             selectedAppIds: [...data.policyMeta.selectedAppIds],
-            selectedContractAddresses: [...data.policyMeta.selectedContractAddresses],
+            selectedContractAddresses: [
+              ...data.policyMeta.selectedContractAddresses,
+            ],
             unverifiedAppIds: [...data.policyMeta.unverifiedAppIds],
             warnings: [...data.policyMeta.warnings],
           }
         : undefined,
     };
 
-    if (data.privyAuthKeyRef?.kind === "keyfile" && fs.existsSync(data.privyAuthKeyRef.value)) {
+    if (
+      data.privyAuthKeyRef?.kind === "keyfile" &&
+      fs.existsSync(data.privyAuthKeyRef.value)
+    ) {
       this.ensureDir();
       const migratedKeyPath = path.join(this.dir, "privy-auth.key");
       if (data.privyAuthKeyRef.value !== migratedKeyPath) {
@@ -260,7 +292,9 @@ export class SessionStorage {
     const keyPath = path.join(this.dir, "privy-auth.key");
     const keyTempPath = `${keyPath}.${process.pid}.${Date.now()}.tmp`;
 
-    fs.writeFileSync(keyTempPath, formatAuthKeyfile(privateKeyDer), { mode: 0o600 });
+    fs.writeFileSync(keyTempPath, formatAuthKeyfile(privateKeyDer), {
+      mode: 0o600,
+    });
     fs.renameSync(keyTempPath, keyPath);
 
     try {

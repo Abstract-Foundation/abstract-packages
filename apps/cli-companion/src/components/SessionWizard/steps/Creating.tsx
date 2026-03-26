@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import type { Chain } from 'viem/chains';
-import Button from '@/@abstract-ui/components/Button';
+import { useEffect, useRef } from "react";
+import type { Chain } from "viem/chains";
+import Button from "@/@abstract-ui/components/Button";
 import {
   Card,
   CardContent,
@@ -10,10 +10,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import { useCreateAgentSigner } from '@/hooks/useCreateSession';
-import { useSessionWizardState } from '@/hooks/useSessionWizardState';
-import styles from '../styles.module.scss';
+} from "@/components/Card";
+import { useCreateAgentSigner } from "@/hooks/useCreateSession";
+import { useSessionWizardState } from "@/hooks/useSessionWizardState";
+import styles from "../styles.module.scss";
 
 export default function Creating({
   callbackUrl,
@@ -44,13 +44,13 @@ export default function Creating({
     const run = async () => {
       try {
         if (!agwAddress) {
-          throw new Error('AGW wallet is not connected.');
+          throw new Error("AGW wallet is not connected.");
         }
         if (!signerAddress) {
-          throw new Error('Underlying signer is not connected.');
+          throw new Error("Underlying signer is not connected.");
         }
         if (!policyPreview) {
-          throw new Error('Policy preview is missing.');
+          throw new Error("Policy preview is missing.");
         }
         const agwAccountAddress = agwAddress as `0x${string}`;
         const underlyingSignerAddress = signerAddress as `0x${string}`;
@@ -65,7 +65,9 @@ export default function Creating({
 
         markCreationSuccess({ redirectUrl, provisionedSigner });
       } catch (error) {
-        markCreationError(error instanceof Error ? error.message : String(error));
+        markCreationError(
+          error instanceof Error ? error.message : String(error),
+        );
       }
     };
 
@@ -87,17 +89,24 @@ export default function Creating({
       <Card>
         <CardHeader>
           <CardTitle>Setting Up Agent Access</CardTitle>
-          <CardDescription>Provisioning a new AGW CLI signer for this device.</CardDescription>
+          <CardDescription>
+            Provisioning a new AGW CLI signer for this device.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p className={styles.helper}>
             {isPending
-              ? 'Creating signer policy and attaching it to your wallet...'
-              : 'Preparing signer attachment request...'}
+              ? "Creating signer policy and attaching it to your wallet..."
+              : "Preparing signer attachment request..."}
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>
-          <Button className={styles.footerButton} height="40" variant="secondary" disabled>
+          <Button
+            className={styles.footerButton}
+            height="40"
+            variant="secondary"
+            disabled
+          >
             In Progress
           </Button>
         </CardFooter>

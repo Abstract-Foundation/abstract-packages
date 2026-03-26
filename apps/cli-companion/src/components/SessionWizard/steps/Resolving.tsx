@@ -1,5 +1,6 @@
-'use client';
+"use client";
 
+import AbstractBadge from "@/components/AbstractBadge";
 import {
   Card,
   CardContent,
@@ -7,9 +8,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import AbstractBadge from '@/components/AbstractBadge';
-import styles from '../styles.module.scss';
+} from "@/components/Card";
+import styles from "../styles.module.scss";
 
 export default function Resolving() {
   return (
@@ -23,7 +23,8 @@ export default function Resolving() {
         <CardContent className={styles.loginContent}>
           <CardTitle>Verifying Wallet</CardTitle>
           <CardDescription>
-            Checking your Abstract Global Wallet on-chain. This should only take a moment.
+            Checking your Abstract Global Wallet on-chain. This should only take
+            a moment.
           </CardDescription>
         </CardContent>
         <CardFooter className={styles.footer}>

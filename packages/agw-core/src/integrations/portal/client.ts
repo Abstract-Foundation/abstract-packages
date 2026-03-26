@@ -8,7 +8,10 @@ import type {
 const PORTAL_API_BASE_URL = "https://api.portal.abs.xyz";
 const DEFAULT_TIMEOUT_MS = 10_000;
 
-function normalizePositiveInteger(value: unknown, fieldName: string): number | undefined {
+function normalizePositiveInteger(
+  value: unknown,
+  fieldName: string,
+): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -30,7 +33,10 @@ function normalizeLimit(limit: number | undefined): number | undefined {
   return limit;
 }
 
-async function fetchJson<T>(path: string, query?: Record<string, string | number | undefined>): Promise<T> {
+async function fetchJson<T>(
+  path: string,
+  query?: Record<string, string | number | undefined>,
+): Promise<T> {
   const url = new URL(path, PORTAL_API_BASE_URL);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
@@ -54,13 +60,17 @@ async function fetchJson<T>(path: string, query?: Record<string, string | number
 
     if (!response.ok) {
       const text = await response.text().catch(() => response.statusText);
-      throw new Error(`Portal API request failed (${response.status}) for ${url.pathname}: ${text.slice(0, 200)}`);
+      throw new Error(
+        `Portal API request failed (${response.status}) for ${url.pathname}: ${text.slice(0, 200)}`,
+      );
     }
 
     return (await response.json()) as T;
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`Portal API request timed out after ${DEFAULT_TIMEOUT_MS}ms for ${url.pathname}`);
+      throw new Error(
+        `Portal API request timed out after ${DEFAULT_TIMEOUT_MS}ms for ${url.pathname}`,
+      );
     }
     throw error;
   } finally {
@@ -68,13 +78,19 @@ async function fetchJson<T>(path: string, query?: Record<string, string | number
   }
 }
 
-export async function listPortalApps(input: { page?: number; limit?: number }): Promise<PortalAppListResponse> {
+export async function listPortalApps(input: {
+  page?: number;
+  limit?: number;
+}): Promise<PortalAppListResponse> {
   const page = normalizePositiveInteger(input.page, "page");
   const limit = normalizeLimit(normalizePositiveInteger(input.limit, "limit"));
   return fetchJson<PortalAppListResponse>("/api/v1/app/", { page, limit });
 }
 
-export async function getPortalApp(input: { id: number; includeContracts?: boolean }): Promise<PortalAppDetail> {
+export async function getPortalApp(input: {
+  id: number;
+  includeContracts?: boolean;
+}): Promise<PortalAppDetail> {
   if (!Number.isInteger(input.id) || input.id <= 0) {
     throw new Error("id must be a positive integer.");
   }
@@ -115,10 +131,17 @@ export async function listPortalStreams(input: {
   const limit = normalizeLimit(normalizePositiveInteger(input.limit, "limit"));
 
   if (input.sortBy !== undefined && !VALID_STREAM_SORT.has(input.sortBy)) {
-    throw new Error("sortBy must be either \"latest\" or \"recommended\".");
+    throw new Error('sortBy must be either "latest" or "recommended".');
   }
 
-  if (input.language !== undefined && !VALID_STREAM_LANGUAGES.has(input.language as (typeof VALID_STREAM_LANGUAGES extends Set<infer T> ? T : never))) {
+  if (
+    input.language !== undefined &&
+    !VALID_STREAM_LANGUAGES.has(
+      input.language as typeof VALID_STREAM_LANGUAGES extends Set<infer T>
+        ? T
+        : never,
+    )
+  ) {
     throw new Error("language is not supported by Portal API.");
   }
 
@@ -130,7 +153,9 @@ export async function listPortalStreams(input: {
   });
 }
 
-export async function getPortalUserProfile(address: string): Promise<PortalUserProfile> {
+export async function getPortalUserProfile(
+  address: string,
+): Promise<PortalUserProfile> {
   const normalized = address.trim();
   if (!/^0x[0-9a-fA-F]{40}$/.test(normalized)) {
     throw new Error("address must be a 20-byte 0x-prefixed EVM address.");

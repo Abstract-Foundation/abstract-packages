@@ -1,7 +1,11 @@
 import { randomBytes } from "node:crypto";
 import http from "node:http";
 
-function textResponse(res: http.ServerResponse, statusCode: number, body: string): void {
+function textResponse(
+  res: http.ServerResponse,
+  statusCode: number,
+  body: string,
+): void {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.end(body);
@@ -23,12 +27,19 @@ export interface CallbackServer {
 
 const DEFAULT_CALLBACK_TIMEOUT_MS = 15 * 60 * 1000;
 
-export async function startCallbackServer(options: StartCallbackServerOptions = {}): Promise<CallbackServer> {
+export async function startCallbackServer(
+  options: StartCallbackServerOptions = {},
+): Promise<CallbackServer> {
   const host = options.host ?? "127.0.0.1";
   const port = options.port ?? 0;
-  const callbackPathRaw = options.path ?? `/callback/${randomBytes(8).toString("hex")}`;
-  const callbackPath = callbackPathRaw.startsWith("/") ? callbackPathRaw : `/${callbackPathRaw}`;
-  const expectedState = options.expectedState?.trim() ? options.expectedState.trim() : undefined;
+  const callbackPathRaw =
+    options.path ?? `/callback/${randomBytes(8).toString("hex")}`;
+  const callbackPath = callbackPathRaw.startsWith("/")
+    ? callbackPathRaw
+    : `/${callbackPathRaw}`;
+  const expectedState = options.expectedState?.trim()
+    ? options.expectedState.trim()
+    : undefined;
   const timeoutMs = options.timeoutMs ?? DEFAULT_CALLBACK_TIMEOUT_MS;
 
   let resolvePayload: ((value: string) => void) | undefined;
@@ -42,7 +53,10 @@ export async function startCallbackServer(options: StartCallbackServerOptions = 
   });
 
   const server = http.createServer((req, res) => {
-    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? `${host}:${port}`}`);
+    const url = new URL(
+      req.url ?? "/",
+      `http://${req.headers.host ?? `${host}:${port}`}`,
+    );
 
     if (url.pathname !== callbackPath) {
       textResponse(res, 404, "Not found");
@@ -95,7 +109,11 @@ export async function startCallbackServer(options: StartCallbackServerOptions = 
   const timeout = setTimeout(() => {
     if (!settled) {
       settled = true;
-      rejectPayload?.(new Error(`Session handoff timed out after ${Math.floor(timeoutMs / 1000)}s.`));
+      rejectPayload?.(
+        new Error(
+          `Session handoff timed out after ${Math.floor(timeoutMs / 1000)}s.`,
+        ),
+      );
     }
   }, timeoutMs);
 
@@ -107,7 +125,7 @@ export async function startCallbackServer(options: StartCallbackServerOptions = 
     close: async () => {
       clearTimeout(timeout);
       await new Promise<void>((resolve, reject) => {
-        server.close(error => {
+        server.close((error) => {
           if (error) {
             reject(error);
             return;

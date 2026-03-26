@@ -1,3 +1,4 @@
+import { AgwCliError } from "../../errors.js";
 import { assertToolAllowedByPolicyMeta } from "../../policy/meta.js";
 import { previewTransactionTool } from "../../tools/preview-transaction.js";
 import { sendCallsTool } from "../../tools/send-calls.js";
@@ -5,7 +6,7 @@ import { sendTransactionTool } from "../../tools/send-transaction.js";
 import { signMessageTool } from "../../tools/sign-message.js";
 import { signTransactionTool } from "../../tools/sign-transaction.js";
 import { transferTokenTool } from "../../tools/transfer-token.js";
-import { AgwCliError } from "../../errors.js";
+import { requireActiveSession } from "../context.js";
 import type { CommandHandler } from "../types.js";
 import {
   assertAddressString,
@@ -13,11 +14,13 @@ import {
   assertHexString,
   parseOptionalBoolean,
 } from "../validation.js";
-import { requireActiveSession } from "../context.js";
 
 export const txHandlers: Record<string, CommandHandler> = {
   "tx.preview": async (input, context) =>
-    previewTransactionTool.handler({ to: input.to, data: input.data, value: input.value }, context),
+    previewTransactionTool.handler(
+      { to: input.to, data: input.data, value: input.value },
+      context,
+    ),
   "tx.send": async (input, context) =>
     sendTransactionTool.handler(
       {
@@ -66,7 +69,10 @@ export const txHandlers: Record<string, CommandHandler> = {
     if (!execute) {
       const to = assertAddressString(input.to, "to");
       const data = assertHexString(input.data, "data");
-      const value = input.value === undefined ? "0" : assertDecimalString(input.value, "value");
+      const value =
+        input.value === undefined
+          ? "0"
+          : assertDecimalString(input.value, "value");
       return {
         preview: true,
         requiresExplicitExecute: true,
@@ -81,7 +87,10 @@ export const txHandlers: Record<string, CommandHandler> = {
       };
     }
 
-    return signTransactionTool.handler({ to: input.to, data: input.data, value: input.value }, context);
+    return signTransactionTool.handler(
+      { to: input.to, data: input.data, value: input.value },
+      context,
+    );
   },
   "tx.transfer-token": async (input, context) =>
     transferTokenTool.handler(

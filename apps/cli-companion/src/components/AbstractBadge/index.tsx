@@ -1,6 +1,6 @@
-import clsx from 'clsx';
-import Image from 'next/image';
-import styles from './styles.module.scss';
+import clsx from "clsx";
+import Image from "next/image";
+import styles from "./styles.module.scss";
 
 interface AbstractBadgeProps {
   className?: string;

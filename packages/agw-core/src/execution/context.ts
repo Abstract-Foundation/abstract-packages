@@ -3,10 +3,13 @@ import { SessionStorage } from "../session/storage.js";
 import type { AgwSessionData } from "../session/types.js";
 import type { ToolContext } from "../tools/types.js";
 import { Logger } from "../utils/logger.js";
-import { parseOptionalNumber } from "./validation.js";
 import type { CommandRuntimeOptions, JsonRecord } from "./types.js";
+import { parseOptionalNumber } from "./validation.js";
 
-export function createToolContext(input: JsonRecord, options: CommandRuntimeOptions = {}): ToolContext {
+export function createToolContext(
+  input: JsonRecord,
+  options: CommandRuntimeOptions = {},
+): ToolContext {
   const logger = new Logger("agw");
   const sessionManager = new SessionManager(logger, {
     homeDir: options.homeDir,
@@ -29,7 +32,10 @@ export function createToolContext(input: JsonRecord, options: CommandRuntimeOpti
   };
 }
 
-export function createSessionStorage(_input: JsonRecord, options: CommandRuntimeOptions = {}): SessionStorage {
+export function createSessionStorage(
+  _input: JsonRecord,
+  options: CommandRuntimeOptions = {},
+): SessionStorage {
   return new SessionStorage(options.homeDir);
 }
 

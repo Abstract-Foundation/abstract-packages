@@ -1,9 +1,9 @@
-import clsx from 'clsx';
-import * as React from 'react';
+import clsx from "clsx";
+import * as React from "react";
 
-import CardBG from '@/assets/card-bg.svg';
+import CardBG from "@/assets/card-bg.svg";
 
-import styles from './styles.module.scss';
+import styles from "./styles.module.scss";
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -11,7 +11,7 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={clsx(styles.card, className)} {...props} />
 ));
-Card.displayName = 'Card';
+Card.displayName = "Card";
 
 interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   gradient?: boolean;
@@ -32,7 +32,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
     </div>
   ),
 );
-CardHeader.displayName = 'CardHeader';
+CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<
   HTMLDivElement,
@@ -40,11 +40,11 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={clsx(styles.cardTitle, 'headline1', className)}
+    className={clsx(styles.cardTitle, "headline1", className)}
     {...props}
   />
 ));
-CardTitle.displayName = 'CardTitle';
+CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<
   HTMLDivElement,
@@ -52,11 +52,11 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={clsx(styles.cardDescription, 'b4', className)}
+    className={clsx(styles.cardDescription, "b4", className)}
     {...props}
   />
 ));
-CardDescription.displayName = 'CardDescription';
+CardDescription.displayName = "CardDescription";
 
 const CardContent = React.forwardRef<
   HTMLDivElement,
@@ -64,7 +64,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={clsx(styles.cardContent, className)} {...props} />
 ));
-CardContent.displayName = 'CardContent';
+CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<
   HTMLDivElement,
@@ -72,7 +72,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={clsx(styles.cardFooter, className)} {...props} />
 ));
-CardFooter.displayName = 'CardFooter';
+CardFooter.displayName = "CardFooter";
 
 export {
   Card,

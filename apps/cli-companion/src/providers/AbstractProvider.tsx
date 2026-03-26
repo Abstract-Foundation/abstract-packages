@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { PrivyProvider } from '@privy-io/react-auth';
-import type { Chain } from 'viem/chains';
-import { abstract } from 'viem/chains';
+import { PrivyProvider } from "@privy-io/react-auth";
+import type { Chain } from "viem/chains";
+import { abstract } from "viem/chains";
 
 export default function AbstractProvider({
   chain,

@@ -2,13 +2,16 @@ import { randomBytes } from "node:crypto";
 import type { AgwSessionData } from "../session/types.js";
 import type { Logger } from "../utils/logger.js";
 import {
+  resolveCallbackVerificationConfig,
+  verifySignedCallbackToken,
+} from "./attestation.js";
+import {
   assertRevokeBundleMatchesRequest,
   buildRevokeLaunchUrl,
   resolveAppUrl,
   validateAppUrl,
 } from "./bootstrap-internals.js";
 import { parseRevokeSignerBundlePayload } from "./callback.js";
-import { resolveCallbackVerificationConfig, verifySignedCallbackToken } from "./attestation.js";
 import { startCallbackServer } from "./handoff.js";
 
 export interface RemoteRevokeOptions {
@@ -28,7 +31,8 @@ export async function runRemoteRevokeFlow(
   validateAppUrl(appUrl);
 
   const callbackState = randomBytes(16).toString("hex");
-  const callbackVerificationConfig = await resolveCallbackVerificationConfig(appUrl);
+  const callbackVerificationConfig =
+    await resolveCallbackVerificationConfig(appUrl);
   const callbackServer = await startCallbackServer({
     expectedState: callbackState,
   });
@@ -51,12 +55,19 @@ export async function runRemoteRevokeFlow(
       const { default: open } = await import("open");
       await open(launchUrl.toString());
     } catch (error) {
-      logger.warn(`Could not auto-open browser: ${error instanceof Error ? error.message : String(error)}`);
+      logger.warn(
+        `Could not auto-open browser: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
-    logger.info("Waiting for hosted signer revocation approval in the browser (callback window: 15 minutes)...");
+    logger.info(
+      "Waiting for hosted signer revocation approval in the browser (callback window: 15 minutes)...",
+    );
     const payload = await callbackServer.waitForPayload();
-    const envelope = verifySignedCallbackToken<Record<string, unknown>>(payload, callbackVerificationConfig);
+    const envelope = verifySignedCallbackToken<Record<string, unknown>>(
+      payload,
+      callbackVerificationConfig,
+    );
     const bundle = parseRevokeSignerBundlePayload(envelope.payload);
     if (bundle.state !== callbackState) {
       throw new Error("Revoke bundle state does not match the revoke request.");
@@ -68,12 +79,18 @@ export async function runRemoteRevokeFlow(
       signerId: session.privySignerBinding.id,
     });
 
-    if (bundle.accountAddress.toLowerCase() !== session.accountAddress.toLowerCase()) {
-      throw new Error(`Revoke bundle account address (${bundle.accountAddress}) does not match the active session.`);
+    if (
+      bundle.accountAddress.toLowerCase() !==
+      session.accountAddress.toLowerCase()
+    ) {
+      throw new Error(
+        `Revoke bundle account address (${bundle.accountAddress}) does not match the active session.`,
+      );
     }
     if (
       session.underlyingSignerAddress &&
-      bundle.underlyingSignerAddress.toLowerCase() !== session.underlyingSignerAddress.toLowerCase()
+      bundle.underlyingSignerAddress.toLowerCase() !==
+        session.underlyingSignerAddress.toLowerCase()
     ) {
       throw new Error(
         `Revoke bundle underlying signer address (${bundle.underlyingSignerAddress}) does not match the active session.`,

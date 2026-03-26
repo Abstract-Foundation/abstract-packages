@@ -2,8 +2,8 @@ import {
   addressSchema,
   arraySchema,
   authSession,
-  decimalStringSchema,
   config,
+  decimalStringSchema,
   defineCommand,
   emptyObjectSchema,
   exposure,
@@ -52,40 +52,59 @@ export const walletNamespaceDefinition: AgwCommandDefinition = defineCommand({
       output: jsonOutput(true, false),
       sanitization: sanitize(false),
       exposure: exposure(true, true),
-      config: config({ env: "AGW_HOME", description: "AGW home directory for local session state." }),
+      config: config({
+        env: "AGW_HOME",
+        description: "AGW home directory for local session state.",
+      }),
     }),
     defineCommand({
       id: "wallet.balances",
       path: ["wallet", "balances"],
       kind: "command",
-      description: "Return the native balance and optional ERC-20 balances for the linked AGW account.",
+      description:
+        "Return the native balance and optional ERC-20 balances for the linked AGW account.",
       status: "implemented",
       inputMode: "json",
       auth: authSession("active_required"),
       requestSchema: objectSchema(
         {
-          tokenAddresses: arraySchema(addressSchema("ERC-20 token contract address to query."), {
-            description: "Optional ERC-20 token contract addresses to query alongside the native balance.",
-          }),
+          tokenAddresses: arraySchema(
+            addressSchema("ERC-20 token contract address to query."),
+            {
+              description:
+                "Optional ERC-20 token contract addresses to query alongside the native balance.",
+            },
+          ),
           fields: fieldsSchema(),
         },
         { additionalProperties: false },
       ),
       responseSchema: objectSchema(
         {
-          connected: { type: "boolean", description: "Whether an AGW session is currently connected." },
-          sessionStatus: stringSchema({ description: "Current local session status." }),
+          connected: {
+            type: "boolean",
+            description: "Whether an AGW session is currently connected.",
+          },
+          sessionStatus: stringSchema({
+            description: "Current local session status.",
+          }),
           accountAddress: addressSchema("Linked AGW account address."),
           chainId: integerSchema(),
-          explorer: opaqueObjectSchema("Explorer references for the active chain and account."),
+          explorer: opaqueObjectSchema(
+            "Explorer references for the active chain and account.",
+          ),
           nativeBalance: objectSchema(
             {
               symbol: stringSchema(),
               decimals: integerSchema(),
               amount: objectSchema(
                 {
-                  raw: decimalStringSchema("Raw native balance as a decimal string."),
-                  formatted: stringSchema({ description: "Human-formatted native balance." }),
+                  raw: decimalStringSchema(
+                    "Raw native balance as a decimal string.",
+                  ),
+                  formatted: stringSchema({
+                    description: "Human-formatted native balance.",
+                  }),
                 },
                 { required: ["raw", "formatted"] },
               ),
@@ -100,35 +119,73 @@ export const walletNamespaceDefinition: AgwCommandDefinition = defineCommand({
                 decimals: integerSchema(),
                 amount: objectSchema(
                   {
-                    raw: decimalStringSchema("Raw token balance as a decimal string."),
-                    formatted: stringSchema({ description: "Human-formatted token balance." }),
+                    raw: decimalStringSchema(
+                      "Raw token balance as a decimal string.",
+                    ),
+                    formatted: stringSchema({
+                      description: "Human-formatted token balance.",
+                    }),
                   },
                   { required: ["raw", "formatted"] },
                 ),
-                explorer: opaqueObjectSchema("Explorer references for the token and holder balance."),
+                explorer: opaqueObjectSchema(
+                  "Explorer references for the token and holder balance.",
+                ),
               },
-              { required: ["tokenAddress", "symbol", "decimals", "amount", "explorer"] },
+              {
+                required: [
+                  "tokenAddress",
+                  "symbol",
+                  "decimals",
+                  "amount",
+                  "explorer",
+                ],
+              },
             ),
-            { description: "ERC-20 balances for the requested token addresses." },
+            {
+              description: "ERC-20 balances for the requested token addresses.",
+            },
           ),
         },
-        { required: ["connected", "sessionStatus", "accountAddress", "chainId", "explorer", "nativeBalance", "tokenBalances"] },
+        {
+          required: [
+            "connected",
+            "sessionStatus",
+            "accountAddress",
+            "chainId",
+            "explorer",
+            "nativeBalance",
+            "tokenBalances",
+          ],
+        },
       ),
       mutation: readMutation(),
       output: jsonOutput(true, false),
       sanitization: sanitize(false),
-      exposure: exposure(true, true, ["add field selection to avoid returning unneeded balance fields"]),
+      exposure: exposure(true, true, [
+        "add field selection to avoid returning unneeded balance fields",
+      ]),
       config: config(
-        { env: "AGW_HOME", description: "AGW home directory for local session state." },
-        { env: "AGW_CHAIN_ID", description: "Default chain id for wallet reads." },
-        { env: "AGW_RPC_URL", description: "Optional RPC URL override for wallet reads." },
+        {
+          env: "AGW_HOME",
+          description: "AGW home directory for local session state.",
+        },
+        {
+          env: "AGW_CHAIN_ID",
+          description: "Default chain id for wallet reads.",
+        },
+        {
+          env: "AGW_RPC_URL",
+          description: "Optional RPC URL override for wallet reads.",
+        },
       ),
     }),
     defineCommand({
       id: "wallet.tokens",
       path: ["wallet", "tokens"],
       kind: "namespace",
-      description: "Read token inventory with response-shaping options for agent-safe reads.",
+      description:
+        "Read token inventory with response-shaping options for agent-safe reads.",
       status: "planned",
       inputMode: "json",
       auth: authSession("active_required"),
@@ -140,7 +197,8 @@ export const walletNamespaceDefinition: AgwCommandDefinition = defineCommand({
           id: "wallet.tokens.list",
           path: ["wallet", "tokens", "list"],
           kind: "command",
-          description: "Return token inventory with response-shaping options for agent-safe reads.",
+          description:
+            "Return token inventory with response-shaping options for agent-safe reads.",
           status: "implemented",
           inputMode: "json",
           auth: authSession("active_required"),
@@ -150,11 +208,18 @@ export const walletNamespaceDefinition: AgwCommandDefinition = defineCommand({
           }),
           responseSchema: objectSchema(
             {
-              connected: { type: "boolean", description: "Whether an AGW session is currently connected." },
-              sessionStatus: stringSchema({ description: "Current local session status." }),
+              connected: {
+                type: "boolean",
+                description: "Whether an AGW session is currently connected.",
+              },
+              sessionStatus: stringSchema({
+                description: "Current local session status.",
+              }),
               accountAddress: addressSchema("Linked AGW account address."),
               chainId: integerSchema(),
-              explorer: opaqueObjectSchema("Explorer references for the active chain and account."),
+              explorer: opaqueObjectSchema(
+                "Explorer references for the active chain and account.",
+              ),
               items: arraySchema(
                 objectSchema(
                   {
@@ -163,30 +228,68 @@ export const walletNamespaceDefinition: AgwCommandDefinition = defineCommand({
                     decimals: integerSchema(),
                     value: objectSchema(
                       {
-                        raw: decimalStringSchema("Raw token balance as a decimal string."),
-                        formatted: stringSchema({ description: "Human-formatted token balance." }),
+                        raw: decimalStringSchema(
+                          "Raw token balance as a decimal string.",
+                        ),
+                        formatted: stringSchema({
+                          description: "Human-formatted token balance.",
+                        }),
                       },
                       { required: ["raw", "formatted"] },
                     ),
-                    explorer: opaqueObjectSchema("Explorer references for the token and holder balance."),
+                    explorer: opaqueObjectSchema(
+                      "Explorer references for the token and holder balance.",
+                    ),
                   },
-                  { required: ["tokenAddress", "symbol", "decimals", "value", "explorer"] },
+                  {
+                    required: [
+                      "tokenAddress",
+                      "symbol",
+                      "decimals",
+                      "value",
+                      "explorer",
+                    ],
+                  },
                 ),
                 { description: "Page items." },
               ),
-              nextCursor: stringSchema({ description: "Cursor to request the next page." }),
-              totalItems: integerSchema({ description: "Total number of items available when known." }),
+              nextCursor: stringSchema({
+                description: "Cursor to request the next page.",
+              }),
+              totalItems: integerSchema({
+                description: "Total number of items available when known.",
+              }),
             },
-            { required: ["connected", "sessionStatus", "accountAddress", "chainId", "explorer", "items"] },
+            {
+              required: [
+                "connected",
+                "sessionStatus",
+                "accountAddress",
+                "chainId",
+                "explorer",
+                "items",
+              ],
+            },
           ),
           mutation: readMutation(),
           output: ndjsonOutput(true, true),
           sanitization: sanitize(false),
-          exposure: exposure(true, true, ["prefer NDJSON pagination for large token inventories"]),
+          exposure: exposure(true, true, [
+            "prefer NDJSON pagination for large token inventories",
+          ]),
           config: config(
-            { env: "AGW_HOME", description: "AGW home directory for local session state." },
-            { env: "AGW_CHAIN_ID", description: "Default chain id for wallet reads." },
-            { env: "AGW_RPC_URL", description: "Optional RPC URL override for wallet reads." },
+            {
+              env: "AGW_HOME",
+              description: "AGW home directory for local session state.",
+            },
+            {
+              env: "AGW_CHAIN_ID",
+              description: "Default chain id for wallet reads.",
+            },
+            {
+              env: "AGW_RPC_URL",
+              description: "Optional RPC URL override for wallet reads.",
+            },
           ),
         }),
       ],

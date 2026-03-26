@@ -1,4 +1,4 @@
-import { isAddress, type Address, type Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
@@ -55,8 +55,16 @@ export const sendTransactionTool: ToolHandler = {
     properties: {
       to: { type: "string", description: "Target contract or EOA" },
       data: { type: "string", description: "Hex calldata" },
-      value: { type: "string", description: "Wei value as decimal string", default: "0" },
-      execute: { type: "boolean", description: "Broadcast when true; preview only when omitted/false", default: false },
+      value: {
+        type: "string",
+        description: "Wei value as decimal string",
+        default: "0",
+      },
+      execute: {
+        type: "boolean",
+        description: "Broadcast when true; preview only when omitted/false",
+        default: false,
+      },
     },
     required: ["to", "data"],
   },
@@ -99,7 +107,8 @@ export const sendTransactionTool: ToolHandler = {
     const txHash = await abstractClient.sendTransaction({ to, data, value });
 
     const networkConfig = resolveToolNetworkConfig(context, session.chainId);
-    const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+    const explorerBase =
+      networkConfig.chain.blockExplorers?.default?.url ?? null;
 
     return {
       broadcast: true,

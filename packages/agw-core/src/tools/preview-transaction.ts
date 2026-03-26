@@ -1,4 +1,4 @@
-import { isAddress, type Address, type Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 import { assertToolCapability } from "./capability-guard.js";
 import type { ToolHandler } from "./types.js";
 
@@ -40,14 +40,27 @@ function resolveSelector(data: Hex): string | null {
   return data.slice(0, 10).toLowerCase();
 }
 
-function buildImpactSummary(to: Address, selector: string | null, valueRaw: string, value: bigint): string {
-  const callPart = selector ? `Calls selector ${selector} on ${to}` : `Calls ${to} with custom calldata`;
-  const valuePart = value > 0n ? `transfers ${valueRaw} wei` : "transfers no native value";
+function buildImpactSummary(
+  to: Address,
+  selector: string | null,
+  valueRaw: string,
+  value: bigint,
+): string {
+  const callPart = selector
+    ? `Calls selector ${selector} on ${to}`
+    : `Calls ${to} with custom calldata`;
+  const valuePart =
+    value > 0n ? `transfers ${valueRaw} wei` : "transfers no native value";
 
   return `${callPart} and ${valuePart}.`;
 }
 
-function buildImpactLabels(to: Address, selector: string | null, valueRaw: string, value: bigint): string[] {
+function buildImpactLabels(
+  to: Address,
+  selector: string | null,
+  valueRaw: string,
+  value: bigint,
+): string[] {
   const labels: string[] = [];
   if (selector) {
     labels.push(`Calls selector ${selector}`);
@@ -85,13 +98,18 @@ function buildRiskLabels(data: Hex, value: bigint): string[] {
 
 export const previewTransactionTool: ToolHandler = {
   name: "preview_transaction",
-  description: "Previews transaction impact and risk labels without signing or broadcasting.",
+  description:
+    "Previews transaction impact and risk labels without signing or broadcasting.",
   inputSchema: {
     type: "object",
     properties: {
       to: { type: "string", description: "Target contract or EOA" },
       data: { type: "string", description: "Hex calldata" },
-      value: { type: "string", description: "Wei value as decimal string", default: "0" },
+      value: {
+        type: "string",
+        description: "Wei value as decimal string",
+        default: "0",
+      },
     },
     required: ["to", "data"],
   },

@@ -24,5 +24,8 @@ export interface ToolHandler {
     properties: Record<string, unknown>;
     required?: string[];
   };
-  handler: (params: Record<string, unknown>, context: ToolContext) => Promise<unknown>;
+  handler: (
+    params: Record<string, unknown>,
+    context: ToolContext,
+  ) => Promise<unknown>;
 }

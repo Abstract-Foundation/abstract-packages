@@ -1,1 +1,5 @@
-export { getExposedMcpCommands, serveGeneratedMcp, type ServeGeneratedMcpOptions } from "../../agw-core/src/index.js";
+export {
+  getExposedMcpCommands,
+  type ServeGeneratedMcpOptions,
+  serveGeneratedMcp,
+} from "../../agw-core/src/index.js";

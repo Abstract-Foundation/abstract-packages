@@ -28,7 +28,7 @@ function redactSensitiveData(value: unknown, keyHint?: string): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map(item => redactSensitiveData(item));
+    return value.map((item) => redactSensitiveData(item));
   }
 
   if (isPlainObject(value)) {
@@ -80,7 +80,9 @@ export class Logger {
 
   private write(level: LogLevel, message: string): void {
     const timestamp = new Date().toISOString();
-    process.stderr.write(`[${timestamp}] [${level}] [${this.context}] ${sanitizeMessage(message)}\n`);
+    process.stderr.write(
+      `[${timestamp}] [${level}] [${this.context}] ${sanitizeMessage(message)}\n`,
+    );
   }
 
   info(message: string): void {

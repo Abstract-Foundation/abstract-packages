@@ -1,14 +1,14 @@
-import SessionFlowClient from '@/components/SessionFlowClient';
-import { parseOnboardingParams } from '@/lib/onboarding-params';
-import pageStyles from '@/app/styles.module.scss';
-import styles from '@/components/SessionWizard/styles.module.scss';
+import pageStyles from "@/app/styles.module.scss";
+import SessionFlowClient from "@/components/SessionFlowClient";
+import styles from "@/components/SessionWizard/styles.module.scss";
+import { parseOnboardingParams } from "@/lib/onboarding-params";
 
 function toSearchParams(
   params: Record<string, string | string[] | undefined>,
 ): URLSearchParams {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       searchParams.set(key, value);
       continue;
     }
@@ -32,7 +32,9 @@ export default async function NewSessionPage({
     return (
       <div className={pageStyles.container}>
         <div className={styles.wrapper}>
-          <p className={styles.error}>{result.error ?? 'Invalid onboarding parameters.'}</p>
+          <p className={styles.error}>
+            {result.error ?? "Invalid onboarding parameters."}
+          </p>
           <p className={styles.helper}>Use the agw CLI to start this flow.</p>
         </div>
       </div>

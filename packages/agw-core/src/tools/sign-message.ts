@@ -32,7 +32,9 @@ export const signMessageTool: ToolHandler = {
     }
 
     const abstractClient = await context.sessionManager.getAbstractClient();
-    const signature = await abstractClient.signMessage({ message: params.message });
+    const signature = await abstractClient.signMessage({
+      message: params.message,
+    });
 
     return {
       signature,

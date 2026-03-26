@@ -1,7 +1,10 @@
 import { listPortalApps } from "../integrations/portal/client.js";
 import type { ToolHandler } from "./types.js";
 
-function parseOptionalPositiveInt(value: unknown, fieldName: string): number | undefined {
+function parseOptionalPositiveInt(
+  value: unknown,
+  fieldName: string,
+): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -18,7 +21,10 @@ export const portalListAppsTool: ToolHandler = {
     type: "object",
     properties: {
       page: { type: "number", description: "Optional pagination page (>=1)." },
-      limit: { type: "number", description: "Optional pagination limit (1-100)." },
+      limit: {
+        type: "number",
+        description: "Optional pagination limit (1-100).",
+      },
     },
   },
   handler: async (params) => {

@@ -1,4 +1,10 @@
-import { createHash, createPrivateKey, createSign, generateKeyPairSync, type KeyObject } from "node:crypto";
+import {
+  createHash,
+  createPrivateKey,
+  createSign,
+  generateKeyPairSync,
+  type KeyObject,
+} from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -35,8 +41,13 @@ export function publicKeyToBase64(publicKeyDer: Buffer): string {
   return publicKeyDer.toString("base64");
 }
 
-export function computePublicKeyFingerprint(publicKey: Buffer | string): string {
-  const keyBuffer = typeof publicKey === "string" ? Buffer.from(publicKey, "base64") : publicKey;
+export function computePublicKeyFingerprint(
+  publicKey: Buffer | string,
+): string {
+  const keyBuffer =
+    typeof publicKey === "string"
+      ? Buffer.from(publicKey, "base64")
+      : publicKey;
   const digest = createHash("sha256").update(keyBuffer).digest("hex");
   return `${digest.slice(0, 12)}:${digest.slice(-12)}`;
 }
@@ -50,7 +61,10 @@ function ensurePrivateDir(dir: string): void {
   }
 }
 
-export function writeAuthKeyfile(privateKeyDer: Buffer, storageDir: string): string {
+export function writeAuthKeyfile(
+  privateKeyDer: Buffer,
+  storageDir: string,
+): string {
   ensurePrivateDir(storageDir);
   const filePath = path.join(storageDir, AUTH_KEY_FILENAME);
   fs.writeFileSync(filePath, formatAuthKeyfile(privateKeyDer), { mode: 0o600 });
@@ -68,7 +82,9 @@ export function formatAuthKeyfile(privateKeyDer: Buffer): string {
 
 export function readAuthKeyfile(keyfilePath: string): KeyObject {
   const raw = fs.readFileSync(keyfilePath, "utf8").trim();
-  const derBase64 = raw.startsWith(WALLET_AUTH_PREFIX) ? raw.slice(WALLET_AUTH_PREFIX.length) : raw;
+  const derBase64 = raw.startsWith(WALLET_AUTH_PREFIX)
+    ? raw.slice(WALLET_AUTH_PREFIX.length)
+    : raw;
   const derBuffer = Buffer.from(derBase64, "base64");
   return createPrivateKey({
     key: derBuffer,
@@ -116,13 +132,15 @@ function canonicalize(obj: unknown): string {
   }
   if (typeof obj === "object") {
     const sortedKeys = Object.keys(obj).sort();
-    const entries = sortedKeys.map(key => {
-      const value = (obj as Record<string, unknown>)[key];
-      if (value === undefined) {
-        return null;
-      }
-      return `${JSON.stringify(key)}:${canonicalize(value)}`;
-    }).filter(Boolean);
+    const entries = sortedKeys
+      .map((key) => {
+        const value = (obj as Record<string, unknown>)[key];
+        if (value === undefined) {
+          return null;
+        }
+        return `${JSON.stringify(key)}:${canonicalize(value)}`;
+      })
+      .filter(Boolean);
     return `{${entries.join(",")}}`;
   }
   return JSON.stringify(obj);

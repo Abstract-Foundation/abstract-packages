@@ -1,11 +1,18 @@
-import { APP_REGISTRY, getRegistryAppById, type AppRegistryEntry } from './app-registry';
-import { DEFAULT_POLICY_EXPIRY_SECONDS, DEFAULT_POLICY_FEE_LIMIT, DEFAULT_POLICY_MAX_VALUE_PER_USE } from './config';
 import {
+  APP_REGISTRY,
+  type AppRegistryEntry,
+  getRegistryAppById,
+} from "./app-registry";
+import {
+  DEFAULT_POLICY_EXPIRY_SECONDS,
+  DEFAULT_POLICY_FEE_LIMIT,
+  DEFAULT_POLICY_MAX_VALUE_PER_USE,
+} from "./config";
+import {
+  ALL_SESSION_TOOLS,
   BUILT_IN_POLICY_PRESETS,
   CUSTOM_PRESET,
-  ALL_SESSION_TOOLS,
-} from './policy-presets';
-import { DEFAULT_ENABLED_TOOLS } from './server/default-policy';
+} from "./policy-presets";
 import type {
   BuiltInSessionPolicyPresetId,
   GuidedSessionPolicyDraft,
@@ -14,9 +21,10 @@ import type {
   SessionPolicyConfig,
   SessionPolicyMeta,
   SessionPolicyPresetId,
-  SessionTransferPolicy,
   SessionToolName,
-} from './policy-types';
+  SessionTransferPolicy,
+} from "./policy-types";
+import { DEFAULT_ENABLED_TOOLS } from "./server/default-policy";
 
 interface CompileGuidedPolicyResult {
   presetId: SessionPolicyPresetId;
@@ -30,7 +38,7 @@ interface CompileGuidedPolicyResult {
 function dedupeCalls(calls: SessionCallPolicy[]): SessionCallPolicy[] {
   const deduped = new Map<string, SessionCallPolicy>();
   for (const call of calls) {
-    const key = `${call.target.toLowerCase()}:${(call.selector ?? '').toLowerCase()}`;
+    const key = `${call.target.toLowerCase()}:${(call.selector ?? "").toLowerCase()}`;
     if (!deduped.has(key)) {
       deduped.set(key, call);
     }
@@ -38,7 +46,9 @@ function dedupeCalls(calls: SessionCallPolicy[]): SessionCallPolicy[] {
   return Array.from(deduped.values());
 }
 
-function dedupeTransfers(transfers: SessionTransferPolicy[]): SessionTransferPolicy[] {
+function dedupeTransfers(
+  transfers: SessionTransferPolicy[],
+): SessionTransferPolicy[] {
   const deduped = new Map<string, SessionTransferPolicy>();
   for (const transfer of transfers) {
     const key = transfer.target.toLowerCase();
@@ -76,7 +86,7 @@ function buildCallPolicies(
   selectedApps: AppRegistryEntry[],
   warnings: string[],
 ): SessionCallPolicy[] {
-  if (presetId === 'payments') {
+  if (presetId === "payments") {
     return [];
   }
 
@@ -90,7 +100,9 @@ function buildCallPolicies(
     }
 
     for (const contract of app.contracts) {
-      const defaultSelectors = contract.selectors.filter(selector => selector.enabledByDefault);
+      const defaultSelectors = contract.selectors.filter(
+        (selector) => selector.enabledByDefault,
+      );
       if (defaultSelectors.length === 0) {
         warnings.push(
           `${app.name} / ${contract.label} has no mainnet-approved selectors. Skipped from call policies.`,
@@ -110,10 +122,12 @@ function buildCallPolicies(
   return dedupeCalls(calls);
 }
 
-function buildTransferPolicies(draft: GuidedSessionPolicyDraft): SessionTransferPolicy[] {
+function buildTransferPolicies(
+  draft: GuidedSessionPolicyDraft,
+): SessionTransferPolicy[] {
   const transfers: SessionTransferPolicy[] = [];
 
-  if (draft.presetId === 'payments') {
+  if (draft.presetId === "payments") {
     for (const transferTarget of draft.transferTargets) {
       transfers.push({
         target: transferTarget,
@@ -132,16 +146,25 @@ function buildWarnings(
 ): string[] {
   const warnings: string[] = [];
 
-  if (draft.presetId !== 'payments' && selectedApps.length === 0) {
-    warnings.push('No apps selected. This preset will not allow app-scoped contract calls.');
+  if (draft.presetId !== "payments" && selectedApps.length === 0) {
+    warnings.push(
+      "No apps selected. This preset will not allow app-scoped contract calls.",
+    );
   }
 
-  if (draft.presetId === 'payments' && draft.transferTargets.length === 0) {
-    warnings.push('No recipient allowlist configured. Add recipients in the payments step.');
+  if (draft.presetId === "payments" && draft.transferTargets.length === 0) {
+    warnings.push(
+      "No recipient allowlist configured. Add recipients in the payments step.",
+    );
   }
 
-  if (callPolicies.some(policy => !policy.selector) && draft.presetId !== 'full_app_control') {
-    warnings.push('One or more contracts are approved without selector scoping.');
+  if (
+    callPolicies.some((policy) => !policy.selector) &&
+    draft.presetId !== "full_app_control"
+  ) {
+    warnings.push(
+      "One or more contracts are approved without selector scoping.",
+    );
   }
 
   return warnings;
@@ -154,15 +177,19 @@ function inferEnabledTools(
   const preset = BUILT_IN_POLICY_PRESETS[presetId];
   const tools = [...preset.enabledTools];
 
-  if (selectedApps.length === 0 && presetId !== 'payments' && presetId !== 'signing') {
+  if (
+    selectedApps.length === 0 &&
+    presetId !== "payments" &&
+    presetId !== "signing"
+  ) {
     return dedupeArray(
       tools.filter(
-        tool =>
-          tool !== 'swap_tokens' &&
-          tool !== 'send_transaction' &&
-          tool !== 'send_calls' &&
-          tool !== 'write_contract' &&
-          tool !== 'deploy_contract',
+        (tool) =>
+          tool !== "swap_tokens" &&
+          tool !== "send_transaction" &&
+          tool !== "send_calls" &&
+          tool !== "write_contract" &&
+          tool !== "deploy_contract",
       ),
     );
   }
@@ -183,19 +210,25 @@ function buildPolicyMeta(
   const preset = BUILT_IN_POLICY_PRESETS[draft.presetId];
   return {
     version: 1,
-    mode: 'guided',
+    mode: "guided",
     presetId: preset.id,
     presetLabel: preset.label,
     enabledTools: inferEnabledTools(draft.presetId, selectedApps),
-    selectedAppIds: selectedApps.map(app => app.id),
-    selectedContractAddresses: dedupeArray(callPolicies.map(policy => policy.target)),
-    unverifiedAppIds: selectedApps.filter(app => !app.verified).map(app => app.id),
+    selectedAppIds: selectedApps.map((app) => app.id),
+    selectedContractAddresses: dedupeArray(
+      callPolicies.map((policy) => policy.target),
+    ),
+    unverifiedAppIds: selectedApps
+      .filter((app) => !app.verified)
+      .map((app) => app.id),
     warnings,
     generatedAt: Math.floor(Date.now() / 1000),
   };
 }
 
-export function compileGuidedPolicy(draft: GuidedSessionPolicyDraft): CompileGuidedPolicyResult {
+export function compileGuidedPolicy(
+  draft: GuidedSessionPolicyDraft,
+): CompileGuidedPolicyResult {
   const preset = BUILT_IN_POLICY_PRESETS[draft.presetId];
   if (!preset) {
     throw new Error(`Unknown preset id: ${draft.presetId}`);
@@ -203,7 +236,11 @@ export function compileGuidedPolicy(draft: GuidedSessionPolicyDraft): CompileGui
 
   const selectedApps = resolveApps(draft.selectedAppIds);
   const warnings: string[] = [];
-  const callPolicies = buildCallPolicies(draft.presetId, selectedApps, warnings);
+  const callPolicies = buildCallPolicies(
+    draft.presetId,
+    selectedApps,
+    warnings,
+  );
   const transferPolicies = buildTransferPolicies(draft);
   warnings.push(...buildWarnings(draft, selectedApps, callPolicies));
 
@@ -214,7 +251,12 @@ export function compileGuidedPolicy(draft: GuidedSessionPolicyDraft): CompileGui
     transferPolicies,
   };
 
-  const policyMeta = buildPolicyMeta(draft, selectedApps, callPolicies, warnings);
+  const policyMeta = buildPolicyMeta(
+    draft,
+    selectedApps,
+    callPolicies,
+    warnings,
+  );
 
   return {
     presetId: preset.id,
@@ -226,7 +268,9 @@ export function compileGuidedPolicy(draft: GuidedSessionPolicyDraft): CompileGui
   };
 }
 
-export function buildGuidedTemplateJson(draft: GuidedSessionPolicyDraft): string {
+export function buildGuidedTemplateJson(
+  draft: GuidedSessionPolicyDraft,
+): string {
   const compiled = compileGuidedPolicy(draft);
   return JSON.stringify(
     {
@@ -234,7 +278,7 @@ export function buildGuidedTemplateJson(draft: GuidedSessionPolicyDraft): string
       sessionConfig: compiled.sessionConfig,
       policyMeta: {
         ...compiled.policyMeta,
-        mode: 'advanced',
+        mode: "advanced",
       },
     },
     null,
@@ -247,14 +291,14 @@ export function buildDefaultCustomTemplateJson(): string {
     {
       expiresInSeconds: 3600,
       sessionConfig: {
-        feeLimit: '2000000000000000',
-        maxValuePerUse: '10000000000000000',
+        feeLimit: "2000000000000000",
+        maxValuePerUse: "10000000000000000",
         callPolicies: [],
         transferPolicies: [],
       },
       policyMeta: {
         version: 1,
-        mode: 'advanced',
+        mode: "advanced",
         presetId: CUSTOM_PRESET.id,
         presetLabel: CUSTOM_PRESET.label,
         enabledTools: ALL_SESSION_TOOLS,
@@ -286,7 +330,9 @@ export function toPolicyPreview(
   };
 }
 
-export function buildDefaultPolicyPreview(nowUnixSeconds = Math.floor(Date.now() / 1000)): PolicyPreview {
+export function buildDefaultPolicyPreview(
+  nowUnixSeconds = Math.floor(Date.now() / 1000),
+): PolicyPreview {
   const preset = BUILT_IN_POLICY_PRESETS.full_app_control;
 
   return {
@@ -303,16 +349,16 @@ export function buildDefaultPolicyPreview(nowUnixSeconds = Math.floor(Date.now()
       },
       policyMeta: {
         version: 1,
-        mode: 'guided',
+        mode: "guided",
         presetId: preset.id,
-        presetLabel: 'AGW CLI Default',
+        presetLabel: "AGW CLI Default",
         enabledTools: [...DEFAULT_ENABLED_TOOLS],
         selectedAppIds: [],
         selectedContractAddresses: [],
         unverifiedAppIds: [],
         warnings: [
-          'This signer can submit transactions and typed-data signatures within the remote spend and time limits.',
-          'Plain personal_sign requests are not enabled in the default policy.',
+          "This signer can submit transactions and typed-data signatures within the remote spend and time limits.",
+          "Plain personal_sign requests are not enabled in the default policy.",
         ],
         generatedAt: nowUnixSeconds,
       },

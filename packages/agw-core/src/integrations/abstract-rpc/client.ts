@@ -100,7 +100,9 @@ export async function callAbstractRpc(input: {
 
     if (!response.ok) {
       const text = await response.text().catch(() => response.statusText);
-      throw new Error(`RPC request failed (${response.status}): ${text.slice(0, 200)}`);
+      throw new Error(
+        `RPC request failed (${response.status}): ${text.slice(0, 200)}`,
+      );
     }
 
     const json = (await response.json()) as {
@@ -112,8 +114,11 @@ export async function callAbstractRpc(input: {
     };
 
     if (json.error) {
-      const code = typeof json.error.code === "number" ? ` code=${json.error.code}` : "";
-      throw new Error(`RPC error${code}: ${json.error.message ?? "unknown error"}`);
+      const code =
+        typeof json.error.code === "number" ? ` code=${json.error.code}` : "";
+      throw new Error(
+        `RPC error${code}: ${json.error.message ?? "unknown error"}`,
+      );
     }
 
     return { result: json.result };

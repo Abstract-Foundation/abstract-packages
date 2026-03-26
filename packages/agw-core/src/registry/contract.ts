@@ -1,17 +1,17 @@
 import {
+  addressSchema,
+  arraySchema,
   authSession,
+  booleanSchema,
+  decimalStringSchema,
   defineCommand,
   exposure,
   jsonOutput,
-  opaqueObjectSchema,
-  arraySchema,
-  stringSchema,
-  booleanSchema,
-  addressSchema,
-  decimalStringSchema,
-  writeMutation,
   objectSchema,
+  opaqueObjectSchema,
+  stringSchema,
   unknownSchema,
+  writeMutation,
 } from "./helpers.js";
 import type { AgwCommandDefinition } from "./types.js";
 
@@ -19,7 +19,8 @@ export const contractNamespaceDefinition: AgwCommandDefinition = defineCommand({
   id: "contract",
   path: ["contract"],
   kind: "namespace",
-  description: "Execute contract writes and deployment flows through AGW policies.",
+  description:
+    "Execute contract writes and deployment flows through AGW policies.",
   status: "planned",
   inputMode: "json",
   auth: authSession("write_ready_required"),
@@ -40,7 +41,9 @@ export const contractNamespaceDefinition: AgwCommandDefinition = defineCommand({
           address: addressSchema("Target contract address."),
           abi: arraySchema(opaqueObjectSchema("ABI entry.")),
           functionName: stringSchema(),
-          args: arraySchema(unknownSchema({ description: "Function argument payload." })),
+          args: arraySchema(
+            unknownSchema({ description: "Function argument payload." }),
+          ),
           value: decimalStringSchema("Wei value as a decimal string."),
           execute: booleanSchema({ default: false }),
         },
@@ -64,7 +67,8 @@ export const contractNamespaceDefinition: AgwCommandDefinition = defineCommand({
       id: "contract.deploy",
       path: ["contract", "deploy"],
       kind: "command",
-      description: "Preview or execute contract deployment through the AGW signer.",
+      description:
+        "Preview or execute contract deployment through the AGW signer.",
       status: "implemented",
       inputMode: "json",
       auth: authSession("write_ready_required"),

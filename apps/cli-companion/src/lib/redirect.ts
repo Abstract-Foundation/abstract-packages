@@ -1,9 +1,9 @@
-const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export function isLoopbackCallbackUrl(callbackUrl: string): boolean {
   try {
     const parsed = new URL(callbackUrl);
-    if (parsed.protocol !== 'http:') {
+    if (parsed.protocol !== "http:") {
       return false;
     }
     if (!LOOPBACK_HOSTS.has(parsed.hostname)) {
@@ -18,15 +18,20 @@ export function isLoopbackCallbackUrl(callbackUrl: string): boolean {
   }
 }
 
-export function buildRedirectUrl(callbackUrl: string, sessionToken: string): string {
+export function buildRedirectUrl(
+  callbackUrl: string,
+  sessionToken: string,
+): string {
   if (!isLoopbackCallbackUrl(callbackUrl)) {
-    throw new Error('Invalid callback_url. Only loopback http URLs are allowed.');
+    throw new Error(
+      "Invalid callback_url. Only loopback http URLs are allowed.",
+    );
   }
   if (!sessionToken.trim()) {
-    throw new Error('Invalid session token. Expected a non-empty string.');
+    throw new Error("Invalid session token. Expected a non-empty string.");
   }
 
   const url = new URL(callbackUrl);
-  url.searchParams.set('session', sessionToken);
+  url.searchParams.set("session", sessionToken);
   return url.toString();
 }

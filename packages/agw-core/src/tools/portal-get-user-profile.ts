@@ -9,7 +9,8 @@ export const portalGetUserProfileTool: ToolHandler = {
     properties: {
       address: {
         type: "string",
-        description: "Optional wallet address. Uses locally linked wallet address when omitted.",
+        description:
+          "Optional wallet address. Uses locally linked wallet address when omitted.",
       },
     },
   },
@@ -21,7 +22,9 @@ export const portalGetUserProfileTool: ToolHandler = {
         : sessionAddress;
 
     if (!targetAddress) {
-      throw new Error("address is required when no local wallet is linked. Run `agw auth init` or pass address explicitly.");
+      throw new Error(
+        "address is required when no local wallet is linked. Run `agw auth init` or pass address explicitly.",
+      );
     }
 
     const profile = await getPortalUserProfile(targetAddress);

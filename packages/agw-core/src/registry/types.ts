@@ -5,7 +5,12 @@ export type AgwCommandRisk = "read" | "state_change" | "destructive";
 export type AgwOutputMode = "json" | "ndjson";
 export type AgwCommandExecutionMode = "read" | "preview" | "execute";
 export type AgwSanitizeProfile = "off" | "strict";
-export type AgwSchemaFormat = "address" | "decimal-string" | "hex" | "resource-id" | "url";
+export type AgwSchemaFormat =
+  | "address"
+  | "decimal-string"
+  | "hex"
+  | "resource-id"
+  | "url";
 export type AgwCliFlagName =
   | "--app-url"
   | "--chain-id"

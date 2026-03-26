@@ -1,10 +1,10 @@
 import fs from "node:fs";
+import { AgwCliError } from "../../errors.js";
 import { authKeyfileExists } from "../../privy/auth.js";
 import { getSessionStatusTool } from "../../tools/get-session-status.js";
 import { revokeSessionTool } from "../../tools/revoke-session.js";
-import { AgwCliError } from "../../errors.js";
-import type { CommandHandler } from "../types.js";
 import { createSessionStorage } from "../context.js";
+import type { CommandHandler } from "../types.js";
 
 export const authSessionHandlers: Record<string, CommandHandler> = {
   "auth.init": async (input, context) => {
@@ -63,14 +63,25 @@ export const authSessionHandlers: Record<string, CommandHandler> = {
 
     return revokeSessionTool.handler({}, context);
   },
-  "session.status": async (_input, context) => getSessionStatusTool.handler({}, context),
+  "session.status": async (_input, context) =>
+    getSessionStatusTool.handler({}, context),
   "session.doctor": async (input, context) => {
-    const storage = createSessionStorage(input, { homeDir: context.runtime.homeDir });
+    const storage = createSessionStorage(input, {
+      homeDir: context.runtime.homeDir,
+    });
     const session = context.sessionManager.getSession();
     const readiness = context.sessionManager.getSessionReadiness();
     const checks = [
-      { name: "storage_dir", ok: fs.existsSync(storage.storageDir), detail: storage.storageDir },
-      { name: "session_file", ok: fs.existsSync(storage.path), detail: storage.path },
+      {
+        name: "storage_dir",
+        ok: fs.existsSync(storage.storageDir),
+        detail: storage.storageDir,
+      },
+      {
+        name: "session_file",
+        ok: fs.existsSync(storage.path),
+        detail: storage.path,
+      },
       {
         name: "session_loaded",
         ok: session !== null,
@@ -78,7 +89,9 @@ export const authSessionHandlers: Record<string, CommandHandler> = {
       },
       {
         name: "auth_keyfile",
-        ok: session?.privyAuthKeyRef ? authKeyfileExists(storage.storageDir) : true,
+        ok: session?.privyAuthKeyRef
+          ? authKeyfileExists(storage.storageDir)
+          : true,
         detail: session?.privyAuthKeyRef ? "required" : "not_required",
       },
       {
@@ -89,7 +102,7 @@ export const authSessionHandlers: Record<string, CommandHandler> = {
     ];
 
     return {
-      ok: checks.every(check => check.ok),
+      ok: checks.every((check) => check.ok),
       checks,
       status: context.sessionManager.getSessionStatus(),
       readiness,

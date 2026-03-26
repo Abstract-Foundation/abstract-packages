@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { buildGuidedTemplateJson } from '@/lib/policy-compiler';
-import { getPolicyPreview } from '@/lib/policy-validation';
-import { assessPolicyRisk } from '@/lib/risk-assessment';
+import { useMemo } from "react";
+import { buildGuidedTemplateJson } from "@/lib/policy-compiler";
 import type {
   GuidedSessionPolicyDraft,
   PolicyMode,
   PolicyPreview,
   SecurityAssessment,
   SessionPolicyPresetId,
-} from '@/lib/policy-types';
+} from "@/lib/policy-types";
+import { getPolicyPreview } from "@/lib/policy-validation";
+import { assessPolicyRisk } from "@/lib/risk-assessment";
 
 export interface PolicyPreviewState {
   preview: PolicyPreview | null;
@@ -19,25 +19,24 @@ export interface PolicyPreviewState {
   guidedTemplateJson: string;
 }
 
-export function usePolicyPreview(
-  input: {
-    selectedPreset: SessionPolicyPresetId;
-    policyMode: PolicyMode;
-    customPolicyJson: string;
-    guidedDraft: Partial<GuidedSessionPolicyDraft>;
-  },
-): PolicyPreviewState {
+export function usePolicyPreview(input: {
+  selectedPreset: SessionPolicyPresetId;
+  policyMode: PolicyMode;
+  customPolicyJson: string;
+  guidedDraft: Partial<GuidedSessionPolicyDraft>;
+}): PolicyPreviewState {
   return useMemo(() => {
-    let guidedTemplateJson = '';
+    let guidedTemplateJson = "";
 
     try {
-      if (input.selectedPreset !== 'custom') {
+      if (input.selectedPreset !== "custom") {
         const draftPresetId = input.selectedPreset;
         const draft: GuidedSessionPolicyDraft = {
           presetId: draftPresetId,
           expiresInSeconds: input.guidedDraft.expiresInSeconds ?? 3600,
-          feeLimit: input.guidedDraft.feeLimit ?? '2000000000000000',
-          maxValuePerUse: input.guidedDraft.maxValuePerUse ?? '10000000000000000',
+          feeLimit: input.guidedDraft.feeLimit ?? "2000000000000000",
+          maxValuePerUse:
+            input.guidedDraft.maxValuePerUse ?? "10000000000000000",
           selectedAppIds: input.guidedDraft.selectedAppIds ?? [],
           transferTargets: input.guidedDraft.transferTargets ?? [],
         };

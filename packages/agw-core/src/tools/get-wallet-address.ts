@@ -2,7 +2,8 @@ import type { ToolHandler } from "./types.js";
 
 export const getWalletAddressTool: ToolHandler = {
   name: "get_wallet_address",
-  description: "Returns the AGW account address currently loaded in local session storage.",
+  description:
+    "Returns the AGW account address currently loaded in local session storage.",
   inputSchema: {
     type: "object",
     properties: {},

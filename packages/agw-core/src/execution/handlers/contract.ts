@@ -3,9 +3,13 @@ import { AgwCliError } from "../../errors.js";
 import { assertToolAllowedByPolicyMeta } from "../../policy/meta.js";
 import { deployContractTool } from "../../tools/deploy-contract.js";
 import { writeContractTool } from "../../tools/write-contract.js";
-import type { CommandHandler } from "../types.js";
 import { requireActiveSession } from "../context.js";
-import { assertAddressString, assertDecimalString, parseOptionalBoolean } from "../validation.js";
+import type { CommandHandler } from "../types.js";
+import {
+  assertAddressString,
+  assertDecimalString,
+  parseOptionalBoolean,
+} from "../validation.js";
 
 export const contractHandlers: Record<string, CommandHandler> = {
   "contract.write": async (input, context) => {
@@ -16,15 +20,26 @@ export const contractHandlers: Record<string, CommandHandler> = {
     if (!execute) {
       const address = assertAddressString(input.address, "address");
       if (typeof input.functionName !== "string") {
-        throw new AgwCliError("INVALID_INPUT", "functionName must be a string", 2);
+        throw new AgwCliError(
+          "INVALID_INPUT",
+          "functionName must be a string",
+          2,
+        );
       }
       if (!Array.isArray(input.abi)) {
         throw new AgwCliError("INVALID_INPUT", "abi must be an array", 2);
       }
       if (input.args !== undefined && !Array.isArray(input.args)) {
-        throw new AgwCliError("INVALID_INPUT", "args must be an array when provided", 2);
+        throw new AgwCliError(
+          "INVALID_INPUT",
+          "args must be an array when provided",
+          2,
+        );
       }
-      const value = input.value === undefined ? "0" : assertDecimalString(input.value, "value");
+      const value =
+        input.value === undefined
+          ? "0"
+          : assertDecimalString(input.value, "value");
 
       try {
         encodeFunctionData({
@@ -33,7 +48,11 @@ export const contractHandlers: Record<string, CommandHandler> = {
           args: Array.isArray(input.args) ? input.args : undefined,
         } as never);
       } catch {
-        throw new AgwCliError("INVALID_INPUT", "invalid abi/functionName/args payload", 2);
+        throw new AgwCliError(
+          "INVALID_INPUT",
+          "invalid abi/functionName/args payload",
+          2,
+        );
       }
 
       return {

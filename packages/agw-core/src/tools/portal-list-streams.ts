@@ -1,7 +1,10 @@
 import { listPortalStreams } from "../integrations/portal/client.js";
 import type { ToolHandler } from "./types.js";
 
-function parseOptionalPositiveInt(value: unknown, fieldName: string): number | undefined {
+function parseOptionalPositiveInt(
+  value: unknown,
+  fieldName: string,
+): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -26,9 +29,18 @@ export const portalListStreamsTool: ToolHandler = {
     properties: {
       app: { type: "number", description: "Portal app id." },
       page: { type: "number", description: "Optional pagination page (>=1)." },
-      limit: { type: "number", description: "Optional pagination limit (1-100)." },
-      sortBy: { type: "string", description: "Optional sort mode: latest or recommended." },
-      language: { type: "string", description: "Optional stream language filter." },
+      limit: {
+        type: "number",
+        description: "Optional pagination limit (1-100).",
+      },
+      sortBy: {
+        type: "string",
+        description: "Optional sort mode: latest or recommended.",
+      },
+      language: {
+        type: "string",
+        description: "Optional stream language filter.",
+      },
     },
     required: ["app"],
   },
@@ -39,7 +51,9 @@ export const portalListStreamsTool: ToolHandler = {
         : params.sortBy === "latest" || params.sortBy === "recommended"
           ? params.sortBy
           : (() => {
-              throw new Error('sortBy must be either "latest" or "recommended".');
+              throw new Error(
+                'sortBy must be either "latest" or "recommended".',
+              );
             })();
 
     const language =

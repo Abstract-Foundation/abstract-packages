@@ -1,4 +1,12 @@
-import { createPublicClient, encodeFunctionData, http, isAddress, type Abi, type AbiFunction, type Address } from "viem";
+import {
+  type Abi,
+  type AbiFunction,
+  type Address,
+  createPublicClient,
+  encodeFunctionData,
+  http,
+  isAddress,
+} from "viem";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
@@ -70,7 +78,11 @@ export const writeContractTool: ToolHandler = {
       abi: { type: "array", description: "Contract ABI fragment" },
       functionName: { type: "string", description: "Function name" },
       args: { type: "array", description: "Function args array" },
-      value: { type: "string", description: "Wei value as decimal string", default: "0" },
+      value: {
+        type: "string",
+        description: "Wei value as decimal string",
+        default: "0",
+      },
     },
     required: ["address", "abi", "functionName"],
   },
@@ -141,7 +153,8 @@ export const writeContractTool: ToolHandler = {
       value,
     } as never);
 
-    const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+    const explorerBase =
+      networkConfig.chain.blockExplorers?.default?.url ?? null;
 
     return {
       txHash,

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuthorizationSignature, usePrivy } from '@privy-io/react-auth';
-import Button from '@/@abstract-ui/components/Button';
+import { useAuthorizationSignature, usePrivy } from "@privy-io/react-auth";
+import { useEffect, useState } from "react";
+import Button from "@/@abstract-ui/components/Button";
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import styles from '@/components/SessionWizard/styles.module.scss';
+} from "@/components/Card";
+import styles from "@/components/SessionWizard/styles.module.scss";
 
 interface RevokePrepareResponse {
   walletId: string;
@@ -43,8 +43,12 @@ export default function RevokeSignerFlow({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
-  const [preparedSignerLabel, setPreparedSignerLabel] = useState<string | null>(signerLabel ?? null);
-  const [preparedSignerFingerprint, setPreparedSignerFingerprint] = useState<string | null>(signerFingerprint ?? null);
+  const [preparedSignerLabel, setPreparedSignerLabel] = useState<string | null>(
+    signerLabel ?? null,
+  );
+  const [preparedSignerFingerprint, setPreparedSignerFingerprint] = useState<
+    string | null
+  >(signerFingerprint ?? null);
 
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
@@ -56,17 +60,26 @@ export default function RevokeSignerFlow({
         const prepareResponse = await fetch(
           `/api/session/revoke?wallet_id=${encodeURIComponent(walletId)}&signer_id=${encodeURIComponent(signerId)}`,
         );
-        const prepared = (await prepareResponse.json()) as RevokePrepareResponse & { error?: string };
+        const prepared =
+          (await prepareResponse.json()) as RevokePrepareResponse & {
+            error?: string;
+          };
         if (!prepareResponse.ok) {
-          throw new Error(prepared.error ?? 'Failed to prepare revoke request.');
+          throw new Error(
+            prepared.error ?? "Failed to prepare revoke request.",
+          );
         }
         if (!cancelled) {
           setPreparedSignerLabel(prepared.signerLabel ?? signerLabel ?? null);
-          setPreparedSignerFingerprint(prepared.signerFingerprint ?? signerFingerprint ?? null);
+          setPreparedSignerFingerprint(
+            prepared.signerFingerprint ?? signerFingerprint ?? null,
+          );
         }
       } catch (loadError) {
         if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : String(loadError));
+          setError(
+            loadError instanceof Error ? loadError.message : String(loadError),
+          );
         }
       }
     };
@@ -80,11 +93,11 @@ export default function RevokeSignerFlow({
 
   const handleRevoke = async () => {
     if (!ready || !authenticated) {
-      setError('Log in to AGW before revoking this signer.');
+      setError("Log in to AGW before revoking this signer.");
       return;
     }
     if (!appId) {
-      setError('Missing NEXT_PUBLIC_PRIVY_APP_ID.');
+      setError("Missing NEXT_PUBLIC_PRIVY_APP_ID.");
       return;
     }
 
@@ -95,26 +108,30 @@ export default function RevokeSignerFlow({
       const prepareResponse = await fetch(
         `/api/session/revoke?wallet_id=${encodeURIComponent(walletId)}&signer_id=${encodeURIComponent(signerId)}`,
       );
-      const prepared = (await prepareResponse.json()) as RevokePrepareResponse & { error?: string };
+      const prepared =
+        (await prepareResponse.json()) as RevokePrepareResponse & {
+          error?: string;
+        };
       if (!prepareResponse.ok) {
-        throw new Error(prepared.error ?? 'Failed to prepare revoke request.');
+        throw new Error(prepared.error ?? "Failed to prepare revoke request.");
       }
 
       const signaturePayload = {
         version: 1 as const,
-        method: 'PATCH' as const,
+        method: "PATCH" as const,
         url: `https://api.privy.io/api/v1/wallets/${walletId}`,
         body: prepared.patchBody,
         headers: {
-          'privy-app-id': appId,
+          "privy-app-id": appId,
         },
       };
-      const { signature } = await generateAuthorizationSignature(signaturePayload);
+      const { signature } =
+        await generateAuthorizationSignature(signaturePayload);
 
-      const commitResponse = await fetch('/api/session/revoke', {
-        method: 'POST',
+      const commitResponse = await fetch("/api/session/revoke", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           accountAddress,
@@ -125,13 +142,18 @@ export default function RevokeSignerFlow({
           authorizationSignature: signature,
         }),
       });
-      const committed = (await commitResponse.json()) as { redirectUrl?: string; error?: string };
+      const committed = (await commitResponse.json()) as {
+        redirectUrl?: string;
+        error?: string;
+      };
       if (!commitResponse.ok || !committed.redirectUrl) {
-        throw new Error(committed.error ?? 'Failed to revoke signer.');
+        throw new Error(committed.error ?? "Failed to revoke signer.");
       }
       setRedirectUrl(committed.redirectUrl);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : String(nextError));
+      setError(
+        nextError instanceof Error ? nextError.message : String(nextError),
+      );
     } finally {
       setIsPending(false);
     }
@@ -142,7 +164,10 @@ export default function RevokeSignerFlow({
       <Card>
         <CardHeader>
           <CardTitle>Revoke AGW CLI Signer</CardTitle>
-          <CardDescription>Remove this device signer from your wallet, then hand the result back to the CLI.</CardDescription>
+          <CardDescription>
+            Remove this device signer from your wallet, then hand the result
+            back to the CLI.
+          </CardDescription>
         </CardHeader>
         <CardContent className={styles.content}>
           {preparedSignerLabel ? (
@@ -156,13 +181,19 @@ export default function RevokeSignerFlow({
             </p>
           ) : null}
           <p className={styles.helper}>
-            This only removes the selected AGW CLI signer. Other AGW CLI signers on this wallet are left unchanged.
+            This only removes the selected AGW CLI signer. Other AGW CLI signers
+            on this wallet are left unchanged.
           </p>
           {error ? <p className={styles.error}>{error}</p> : null}
         </CardContent>
         <CardFooter className={styles.footer}>
           {redirectUrl ? (
-            <Button className={styles.footerButton} height="40" variant="primary" href={redirectUrl}>
+            <Button
+              className={styles.footerButton}
+              height="40"
+              variant="primary"
+              href={redirectUrl}
+            >
               Return to CLI
             </Button>
           ) : (
@@ -173,7 +204,7 @@ export default function RevokeSignerFlow({
               onClick={handleRevoke}
               disabled={isPending}
             >
-          {isPending ? 'Revoking…' : 'Revoke Signer'}
+              {isPending ? "Revoking…" : "Revoke Signer"}
             </Button>
           )}
         </CardFooter>

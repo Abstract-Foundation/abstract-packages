@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import clsx from 'clsx';
 import {
   useLogin,
   useLoginWithEmail,
   useLoginWithOAuth,
   useLoginWithPasskey,
   usePrivy,
-} from '@privy-io/react-auth';
-import Button from '@/@abstract-ui/components/Button';
-import IconArrowRight from '@/assets/icons/icon-back.svg';
-import IconPointerRight from '@/assets/icons/icon-pointer-right.svg';
-import IconGoogle from '@/assets/icons/google.svg';
-import IconWallet from '@/assets/icons/icon-wallet-small.svg';
-import IconDottedBorder from '@/assets/icons/icon-login-or-line.svg';
-import LoginLogo from '@/assets/login/login-logo.png';
-import LoginPattern from '@/assets/login/login-pattern.png';
-import styles from './EmbeddedLoginCard.module.scss';
+} from "@privy-io/react-auth";
+import clsx from "clsx";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Button from "@/@abstract-ui/components/Button";
+import IconGoogle from "@/assets/icons/google.svg";
+import IconArrowRight from "@/assets/icons/icon-back.svg";
+import IconDottedBorder from "@/assets/icons/icon-login-or-line.svg";
+import IconPointerRight from "@/assets/icons/icon-pointer-right.svg";
+import IconWallet from "@/assets/icons/icon-wallet-small.svg";
+import LoginLogo from "@/assets/login/login-logo.png";
+import LoginPattern from "@/assets/login/login-pattern.png";
+import styles from "./EmbeddedLoginCard.module.scss";
 
-type LoginPhase = 'email' | 'code';
+type LoginPhase = "email" | "code";
 
 function resolveRedirectPath(candidate: string | null): string {
   if (!candidate) {
-    return '/';
+    return "/";
   }
-  if (!candidate.startsWith('/') || candidate.startsWith('//')) {
-    return '/';
+  if (!candidate.startsWith("/") || candidate.startsWith("//")) {
+    return "/";
   }
   return candidate;
 }
@@ -44,18 +44,18 @@ export default function EmbeddedLoginCard() {
   const gradientInputRef = useRef<HTMLInputElement>(null);
 
   const privyWallet = user?.linkedAccounts
-    .filter(account => account.type === 'wallet')
-    .find(account => account.walletClientType === 'privy');
+    .filter((account) => account.type === "wallet")
+    .find((account) => account.walletClientType === "privy");
   const walletReady = Boolean(privyWallet?.address);
 
   const redirectPath = useMemo(
-    () => resolveRedirectPath(searchParams.get('redirect')),
+    () => resolveRedirectPath(searchParams.get("redirect")),
     [searchParams],
   );
 
-  const [phase, setPhase] = useState<LoginPhase>('email');
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [phase, setPhase] = useState<LoginPhase>("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +69,7 @@ export default function EmbeddedLoginCard() {
     async (event?: React.FormEvent) => {
       event?.preventDefault();
       if (!email.trim()) {
-        setError('Email is required.');
+        setError("Email is required.");
         return;
       }
 
@@ -78,9 +78,9 @@ export default function EmbeddedLoginCard() {
 
       try {
         await sendCode({ email: email.trim() });
-        setPhase('code');
+        setPhase("code");
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not send code.');
+        setError(err instanceof Error ? err.message : "Could not send code.");
       } finally {
         setIsProcessing(false);
       }
@@ -92,7 +92,7 @@ export default function EmbeddedLoginCard() {
     async (event?: React.FormEvent) => {
       event?.preventDefault();
       if (!code.trim()) {
-        setError('Verification code is required.');
+        setError("Verification code is required.");
         return;
       }
 
@@ -102,7 +102,7 @@ export default function EmbeddedLoginCard() {
       try {
         await loginWithCode({ code: code.trim() });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not verify code.');
+        setError(err instanceof Error ? err.message : "Could not verify code.");
       } finally {
         setIsProcessing(false);
       }
@@ -115,9 +115,9 @@ export default function EmbeddedLoginCard() {
     setError(null);
 
     try {
-      await initOAuth({ provider: 'google' });
+      await initOAuth({ provider: "google" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google login failed.');
+      setError(err instanceof Error ? err.message : "Google login failed.");
       setIsProcessing(false);
     }
   }, [initOAuth]);
@@ -127,9 +127,9 @@ export default function EmbeddedLoginCard() {
     setError(null);
 
     try {
-      await login({ loginMethods: ['wallet'] });
+      await login({ loginMethods: ["wallet"] });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wallet login failed.');
+      setError(err instanceof Error ? err.message : "Wallet login failed.");
       setIsProcessing(false);
     }
   }, [login]);
@@ -141,16 +141,17 @@ export default function EmbeddedLoginCard() {
     try {
       await loginWithPasskey();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Passkey login failed.');
+      setError(err instanceof Error ? err.message : "Passkey login failed.");
       setIsProcessing(false);
     }
   }, [loginWithPasskey]);
 
-  const showLoading = !ready || isProcessing || oauthLoading || (authenticated && !walletReady);
+  const showLoading =
+    !ready || isProcessing || oauthLoading || (authenticated && !walletReady);
 
   const handleEmailKeyPress = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         handleSendCode();
       }
     },
@@ -159,7 +160,7 @@ export default function EmbeddedLoginCard() {
 
   const handleCodeKeyPress = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         handleVerifyCode();
       }
     },
@@ -168,18 +169,18 @@ export default function EmbeddedLoginCard() {
 
   const handleGradientFocus = useCallback(() => {
     const wrap = gradientInputRef.current?.parentElement;
-    if (wrap) wrap.style.setProperty('--gradient-opacity', '1');
+    if (wrap) wrap.style.setProperty("--gradient-opacity", "1");
   }, []);
 
   const handleGradientBlur = useCallback(() => {
     const wrap = gradientInputRef.current?.parentElement;
-    if (wrap) wrap.style.setProperty('--gradient-opacity', '0');
+    if (wrap) wrap.style.setProperty("--gradient-opacity", "0");
   }, []);
 
   const handleBack = useCallback(() => {
-    if (phase === 'code') {
-      setPhase('email');
-      setCode('');
+    if (phase === "code") {
+      setPhase("email");
+      setCode("");
       setError(null);
     } else {
       router.push(redirectPath);
@@ -222,14 +223,22 @@ export default function EmbeddedLoginCard() {
             </figure>
           </header>
 
-          {phase === 'email' ? (
+          {phase === "email" ? (
             <div className={clsx(styles.forms, showLoading && styles.disabled)}>
               <div className={styles.text}>
-                <h1 className={clsx(styles.heading, 'h2', 'font-medium')}>
+                <h1 className={clsx(styles.heading, "h2", "font-medium")}>
                   Welcome
                 </h1>
-                <p className={clsx(styles.subheading, 'b1', 'font-medium', 'grey')}>
-                  Welcome to Abstract. Sign in with your email or connect a Web3 wallet to get started.
+                <p
+                  className={clsx(
+                    styles.subheading,
+                    "b1",
+                    "font-medium",
+                    "grey",
+                  )}
+                >
+                  Welcome to Abstract. Sign in with your email or connect a Web3
+                  wallet to get started.
                 </p>
               </div>
 
@@ -239,7 +248,7 @@ export default function EmbeddedLoginCard() {
                     ref={gradientInputRef}
                     className={styles.emailInput}
                     disabled={showLoading}
-                    onChange={event => setEmail(event.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                     onFocus={handleGradientFocus}
                     onBlur={handleGradientBlur}
                     onKeyDown={handleEmailKeyPress}
@@ -272,7 +281,7 @@ export default function EmbeddedLoginCard() {
                 disabled={showLoading}
                 onClick={handleGoogleLogin}
                 className={styles.loginButton}
-                style={{ animationDelay: '500ms' }}
+                style={{ animationDelay: "500ms" }}
               >
                 <div className={styles.buttonInner}>
                   <div className={styles.buttonIconFlex}>
@@ -289,7 +298,7 @@ export default function EmbeddedLoginCard() {
                 disabled={showLoading}
                 onClick={handleWalletLogin}
                 className={styles.loginButton}
-                style={{ animationDelay: '600ms' }}
+                style={{ animationDelay: "600ms" }}
               >
                 <div className={styles.buttonInner}>
                   <div className={styles.buttonIconFlex}>
@@ -306,7 +315,7 @@ export default function EmbeddedLoginCard() {
                 disabled={showLoading}
                 onClick={handlePasskeyLogin}
                 className={styles.loginButton}
-                style={{ animationDelay: '700ms' }}
+                style={{ animationDelay: "700ms" }}
               >
                 <div className={styles.buttonInner}>
                   <div className={styles.buttonIconFlex}>
@@ -320,11 +329,19 @@ export default function EmbeddedLoginCard() {
           ) : (
             <div className={clsx(styles.forms, showLoading && styles.disabled)}>
               <div className={styles.text}>
-                <h1 className={clsx(styles.heading, 'h2', 'font-medium')}>
+                <h1 className={clsx(styles.heading, "h2", "font-medium")}>
                   Enter Your Code
                 </h1>
-                <p className={clsx(styles.subheading, 'b1', 'font-medium', 'grey')}>
-                  We sent a verification code to your email. Enter it below to continue.
+                <p
+                  className={clsx(
+                    styles.subheading,
+                    "b1",
+                    "font-medium",
+                    "grey",
+                  )}
+                >
+                  We sent a verification code to your email. Enter it below to
+                  continue.
                 </p>
               </div>
 
@@ -333,7 +350,7 @@ export default function EmbeddedLoginCard() {
                   <input
                     className={styles.emailInput}
                     disabled={showLoading}
-                    onChange={event => setCode(event.target.value)}
+                    onChange={(event) => setCode(event.target.value)}
                     onKeyDown={handleCodeKeyPress}
                     placeholder="Verification code"
                     value={code}
@@ -356,8 +373,8 @@ export default function EmbeddedLoginCard() {
                 disabled={showLoading}
                 height="40"
                 onClick={() => {
-                  setPhase('email');
-                  setCode('');
+                  setPhase("email");
+                  setCode("");
                   setError(null);
                 }}
                 variant="secondary"
@@ -367,7 +384,7 @@ export default function EmbeddedLoginCard() {
             </div>
           )}
 
-          {error && <p className={clsx(styles.error, 'b4')}>{error}</p>}
+          {error && <p className={clsx(styles.error, "b4")}>{error}</p>}
         </div>
 
         <footer className={styles.footer}>

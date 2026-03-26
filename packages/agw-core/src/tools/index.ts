@@ -41,7 +41,7 @@ export const tools: ToolHandler[] = [
 
 export const publicTools = tools;
 
-const toolMap = new Map(tools.map(tool => [tool.name, tool]));
+const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
 
 export function getTool(name: string): ToolHandler | undefined {
   return toolMap.get(name);

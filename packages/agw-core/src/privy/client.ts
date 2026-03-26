@@ -23,7 +23,10 @@ export class PrivyWalletClient {
   private readonly appUrl: string;
   private authKey: KeyObject | null = null;
   private readonly authKeyRef: string;
-  private runtimeConfigPromise: Promise<{ appId: string; mode: "proxy" | "direct" }> | null = null;
+  private runtimeConfigPromise: Promise<{
+    appId: string;
+    mode: "proxy" | "direct";
+  }> | null = null;
 
   constructor(config: PrivyWalletClientConfig) {
     this.appId = config.appId;
@@ -44,9 +47,10 @@ export class PrivyWalletClient {
     return Buffer.from(`${appId}:${appSecret}`).toString("base64");
   }
 
-
-
-  private async resolveRuntimeConfig(): Promise<{ appId: string; mode: "proxy" | "direct" }> {
+  private async resolveRuntimeConfig(): Promise<{
+    appId: string;
+    mode: "proxy" | "direct";
+  }> {
     if (this.runtimeConfigPromise) {
       return this.runtimeConfigPromise;
     }
@@ -67,15 +71,20 @@ export class PrivyWalletClient {
         };
       }
 
-      const response = await fetch(new URL("/api/session/callback-key", this.appUrl), {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          ...AGW_HTTP_HEADERS,
+      const response = await fetch(
+        new URL("/api/session/callback-key", this.appUrl),
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            ...AGW_HTTP_HEADERS,
+          },
         },
-      });
+      );
       if (!response.ok) {
-        throw new Error(`Failed to fetch hosted runtime config (${response.status} ${response.statusText}).`);
+        throw new Error(
+          `Failed to fetch hosted runtime config (${response.status} ${response.statusText}).`,
+        );
       }
       const body = (await response.json()) as { privyAppId?: unknown };
       if (typeof body.privyAppId !== "string" || !body.privyAppId.trim()) {
@@ -112,31 +121,32 @@ export class PrivyWalletClient {
       appId: runtimeConfig.appId,
     });
 
-    const response = runtimeConfig.mode === "direct"
-      ? await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${this.buildBasicAuth(runtimeConfig.appId, this.appSecret!)}`,
-            "privy-app-id": runtimeConfig.appId,
-            "privy-authorization-signature": signature,
-          },
-          body: JSON.stringify(privyBody),
-        })
-      : await fetch(new URL("/api/session/rpc", this.appUrl), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...AGW_HTTP_HEADERS,
-          },
-          body: JSON.stringify({
-            walletId: this.walletId,
-            method,
-            caip2,
-            params,
-            authorizationSignature: signature,
-          }),
-        });
+    const response =
+      runtimeConfig.mode === "direct"
+        ? await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${this.buildBasicAuth(runtimeConfig.appId, this.appSecret!)}`,
+              "privy-app-id": runtimeConfig.appId,
+              "privy-authorization-signature": signature,
+            },
+            body: JSON.stringify(privyBody),
+          })
+        : await fetch(new URL("/api/session/rpc", this.appUrl), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...AGW_HTTP_HEADERS,
+            },
+            body: JSON.stringify({
+              walletId: this.walletId,
+              method,
+              caip2,
+              params,
+              authorizationSignature: signature,
+            }),
+          });
 
     if (!response.ok) {
       let errorDetail: string;
@@ -145,21 +155,30 @@ export class PrivyWalletClient {
         const nested = errorBody.error;
         if (typeof nested === "string") {
           errorDetail = nested;
-        } else if (nested && typeof nested === "object" && "message" in nested) {
-          errorDetail = (nested as PrivyWalletRpcErrorResponse["error"]).message;
+        } else if (
+          nested &&
+          typeof nested === "object" &&
+          "message" in nested
+        ) {
+          errorDetail = (nested as PrivyWalletRpcErrorResponse["error"])
+            .message;
         } else {
           errorDetail = JSON.stringify(errorBody);
         }
       } catch {
         errorDetail = response.statusText;
       }
-      throw new Error(`Privy wallet RPC failed (${response.status}): ${errorDetail}`);
+      throw new Error(
+        `Privy wallet RPC failed (${response.status}): ${errorDetail}`,
+      );
     }
 
     const result = (await response.json()) as Record<string, unknown>;
     const data = result.data as Record<string, unknown> | undefined;
     if (!data) {
-      throw new Error(`Privy RPC ${method}: unexpected response shape: ${JSON.stringify(result)}`);
+      throw new Error(
+        `Privy RPC ${method}: unexpected response shape: ${JSON.stringify(result)}`,
+      );
     }
     const value =
       (data.signature as string | undefined) ??
@@ -173,8 +192,13 @@ export class PrivyWalletClient {
     return value;
   }
 
-  async sendTransaction(chainId: number, transaction: PrivyTransactionRequest): Promise<string> {
-    return this.rpc("eth_sendTransaction", `eip155:${chainId}`, { transaction });
+  async sendTransaction(
+    chainId: number,
+    transaction: PrivyTransactionRequest,
+  ): Promise<string> {
+    return this.rpc("eth_sendTransaction", `eip155:${chainId}`, {
+      transaction,
+    });
   }
 
   async signMessage(chainId: number, message: string): Promise<string> {
@@ -184,8 +208,12 @@ export class PrivyWalletClient {
     });
   }
 
-  async signTypedData(chainId: number, typedData: string | Record<string, unknown>): Promise<string> {
-    const parsed = typeof typedData === "string" ? JSON.parse(typedData) : typedData;
+  async signTypedData(
+    chainId: number,
+    typedData: string | Record<string, unknown>,
+  ): Promise<string> {
+    const parsed =
+      typeof typedData === "string" ? JSON.parse(typedData) : typedData;
     if (parsed.primaryType && !parsed.primary_type) {
       parsed.primary_type = parsed.primaryType;
       delete parsed.primaryType;
@@ -195,8 +223,13 @@ export class PrivyWalletClient {
     });
   }
 
-  async signTransaction(chainId: number, transaction: PrivyTransactionRequest): Promise<string> {
-    return this.rpc("eth_signTransaction", `eip155:${chainId}`, { transaction });
+  async signTransaction(
+    chainId: number,
+    transaction: PrivyTransactionRequest,
+  ): Promise<string> {
+    return this.rpc("eth_signTransaction", `eip155:${chainId}`, {
+      transaction,
+    });
   }
 
   getWalletId(): string {
@@ -204,7 +237,10 @@ export class PrivyWalletClient {
   }
 }
 
-export function resolvePrivyAppCredentials(): { appId: string; appSecret: string } {
+export function resolvePrivyAppCredentials(): {
+  appId: string;
+  appSecret: string;
+} {
   const appId = process.env.PRIVY_APP_ID?.trim();
   const appSecret = process.env.PRIVY_APP_SECRET?.trim();
 

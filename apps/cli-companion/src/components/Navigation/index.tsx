@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePrivy } from '@privy-io/react-auth';
-import Button from '@/@abstract-ui/components/Button';
-import Wordmark from '@/assets/wordmark.svg';
-import styles from './styles.module.scss';
+import { usePrivy } from "@privy-io/react-auth";
+import Link from "next/link";
+import Button from "@/@abstract-ui/components/Button";
+import Wordmark from "@/assets/wordmark.svg";
+import styles from "./styles.module.scss";
 
-const abstractHome = 'https://abs.xyz';
+const abstractHome = "https://abs.xyz";
 
 export default function Navigation() {
   const { user, authenticated, logout } = usePrivy();

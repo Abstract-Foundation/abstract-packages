@@ -1,4 +1,7 @@
-import { callAbstractRpc, getAllowedMethods } from "../integrations/abstract-rpc/client.js";
+import {
+  callAbstractRpc,
+  getAllowedMethods,
+} from "../integrations/abstract-rpc/client.js";
 import { resolveToolNetworkConfig } from "./network.js";
 import type { ToolHandler } from "./types.js";
 
@@ -15,7 +18,10 @@ export const abstractRpcCallTool: ToolHandler = {
     required: ["method"],
   },
   handler: async (params, context) => {
-    if (typeof params.method !== "string" || params.method.trim().length === 0) {
+    if (
+      typeof params.method !== "string" ||
+      params.method.trim().length === 0
+    ) {
       throw new Error("method is required.");
     }
 
@@ -23,7 +29,10 @@ export const abstractRpcCallTool: ToolHandler = {
       throw new Error("params must be an array when provided.");
     }
 
-    const networkConfig = resolveToolNetworkConfig(context, context.sessionManager.getChainId());
+    const networkConfig = resolveToolNetworkConfig(
+      context,
+      context.sessionManager.getChainId(),
+    );
     if (!networkConfig.rpcUrl) {
       throw new Error("No RPC URL is configured for the selected chain.");
     }

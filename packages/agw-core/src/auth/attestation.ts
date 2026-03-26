@@ -1,4 +1,8 @@
-import { createPublicKey, type KeyObject, verify as verifySignature } from "node:crypto";
+import {
+  createPublicKey,
+  type KeyObject,
+  verify as verifySignature,
+} from "node:crypto";
 import { AGW_HTTP_HEADERS } from "../config/runtime.js";
 
 const DEFAULT_CALLBACK_ISSUER = "agw";
@@ -10,7 +14,9 @@ export interface CallbackVerificationConfig {
   publicKey: KeyObject;
 }
 
-export interface SignedCallbackTokenEnvelope<TPayload extends Record<string, unknown>> {
+export interface SignedCallbackTokenEnvelope<
+  TPayload extends Record<string, unknown>,
+> {
   header: Record<string, unknown>;
   payload: TPayload;
 }
@@ -19,7 +25,10 @@ function decodeBase64Url(input: string): string {
   return Buffer.from(input, "base64url").toString("utf8");
 }
 
-function parseRecordJson(input: string, label: string): Record<string, unknown> {
+function parseRecordJson(
+  input: string,
+  label: string,
+): Record<string, unknown> {
   try {
     const parsed = JSON.parse(input) as unknown;
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -39,9 +48,12 @@ function parsePublicKeyBase64(value: string): KeyObject {
   });
 }
 
-export async function resolveCallbackVerificationConfig(appUrl: string): Promise<CallbackVerificationConfig> {
+export async function resolveCallbackVerificationConfig(
+  appUrl: string,
+): Promise<CallbackVerificationConfig> {
   const explicitPublicKey = process.env.AGW_CALLBACK_SIGNING_PUBLIC_KEY?.trim();
-  const explicitIssuer = process.env.AGW_CALLBACK_SIGNING_ISSUER?.trim() || DEFAULT_CALLBACK_ISSUER;
+  const explicitIssuer =
+    process.env.AGW_CALLBACK_SIGNING_ISSUER?.trim() || DEFAULT_CALLBACK_ISSUER;
   if (explicitPublicKey) {
     return {
       issuer: explicitIssuer,
@@ -59,7 +71,9 @@ export async function resolveCallbackVerificationConfig(appUrl: string): Promise
     },
   });
   if (!response.ok) {
-    throw new Error(`Failed to fetch callback signing key (${response.status} ${response.statusText}).`);
+    throw new Error(
+      `Failed to fetch callback signing key (${response.status} ${response.statusText}).`,
+    );
   }
 
   const body = (await response.json()) as {
@@ -69,9 +83,10 @@ export async function resolveCallbackVerificationConfig(appUrl: string): Promise
   if (typeof body.publicKey !== "string" || !body.publicKey.trim()) {
     throw new Error("Callback signing key response is missing `publicKey`.");
   }
-  const issuer = typeof body.issuer === "string" && body.issuer.trim()
-    ? body.issuer.trim()
-    : DEFAULT_CALLBACK_ISSUER;
+  const issuer =
+    typeof body.issuer === "string" && body.issuer.trim()
+      ? body.issuer.trim()
+      : DEFAULT_CALLBACK_ISSUER;
 
   return {
     issuer,
@@ -80,7 +95,9 @@ export async function resolveCallbackVerificationConfig(appUrl: string): Promise
   };
 }
 
-export function verifySignedCallbackToken<TPayload extends Record<string, unknown>>(
+export function verifySignedCallbackToken<
+  TPayload extends Record<string, unknown>,
+>(
   token: string,
   config: CallbackVerificationConfig,
 ): SignedCallbackTokenEnvelope<TPayload> {
@@ -90,8 +107,14 @@ export function verifySignedCallbackToken<TPayload extends Record<string, unknow
   }
 
   const [encodedHeader, encodedPayload, encodedSignature] = parts;
-  const header = parseRecordJson(decodeBase64Url(encodedHeader), "callback header");
-  const payload = parseRecordJson(decodeBase64Url(encodedPayload), "callback payload") as TPayload;
+  const header = parseRecordJson(
+    decodeBase64Url(encodedHeader),
+    "callback header",
+  );
+  const payload = parseRecordJson(
+    decodeBase64Url(encodedPayload),
+    "callback payload",
+  ) as TPayload;
   const signature = Buffer.from(encodedSignature, "base64url");
   const message = Buffer.from(`${encodedHeader}.${encodedPayload}`, "utf8");
 
@@ -101,7 +124,9 @@ export function verifySignedCallbackToken<TPayload extends Record<string, unknow
   }
 
   if (header.alg !== "EdDSA") {
-    throw new Error(`Unsupported callback signing algorithm (${String(header.alg)}).`);
+    throw new Error(
+      `Unsupported callback signing algorithm (${String(header.alg)}).`,
+    );
   }
   if (header.typ !== "AGW-MCP-CALLBACK") {
     throw new Error(`Unsupported callback token type (${String(header.typ)}).`);
@@ -113,8 +138,14 @@ export function verifySignedCallbackToken<TPayload extends Record<string, unknow
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const iat = typeof payload.iat === "number" && Number.isInteger(payload.iat) ? payload.iat : null;
-  const exp = typeof payload.exp === "number" && Number.isInteger(payload.exp) ? payload.exp : null;
+  const iat =
+    typeof payload.iat === "number" && Number.isInteger(payload.iat)
+      ? payload.iat
+      : null;
+  const exp =
+    typeof payload.exp === "number" && Number.isInteger(payload.exp)
+      ? payload.exp
+      : null;
   if (!iat || !exp) {
     throw new Error("Callback payload is missing freshness metadata.");
   }

@@ -6,11 +6,20 @@ export interface BuildMcpConfigSnippetInput {
   chainId?: string;
 }
 
-export function buildMcpConfigSnippet(input: BuildMcpConfigSnippetInput = {}): Record<string, unknown> {
+export function buildMcpConfigSnippet(
+  input: BuildMcpConfigSnippetInput = {},
+): Record<string, unknown> {
   const serverName = input.serverName ?? "agw-cli";
 
   if (input.npx) {
-    const args = ["-y", "@abstract-foundation/agw-cli", "mcp", "serve", "--sanitize", "strict"];
+    const args = [
+      "-y",
+      "@abstract-foundation/agw-cli",
+      "mcp",
+      "serve",
+      "--sanitize",
+      "strict",
+    ];
     if (input.chainId) {
       args.push("--chain-id", input.chainId);
     }

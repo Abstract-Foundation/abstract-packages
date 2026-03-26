@@ -1,25 +1,29 @@
-import '@/app/globals.scss';
-import '@/app/fonts.scss';
+import "@/app/globals.scss";
+import "@/app/fonts.scss";
 
-import type { Viewport } from 'next';
-import Navigation from '@/components/Navigation';
-import AbstractProvider from '@/providers/AbstractProvider';
+import type { Viewport } from "next";
+import Navigation from "@/components/Navigation";
+import AbstractProvider from "@/providers/AbstractProvider";
 
-import styles from './styles.module.scss';
+import styles from "./styles.module.scss";
 
 export const metadata = {
-  title: 'AGW CLI Onboarding',
-  description: 'Hosted onboarding flow for AGW CLI wallet linking.',
-  applicationName: 'AGW CLI',
+  title: "AGW CLI Onboarding",
+  description: "Hosted onboarding flow for AGW CLI wallet linking.",
+  applicationName: "AGW CLI",
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
-  themeColor: '#ffffff',
+  themeColor: "#ffffff",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html className={styles.html} lang="en">
       <body className={styles.body}>

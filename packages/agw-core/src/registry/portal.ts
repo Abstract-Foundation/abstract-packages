@@ -1,4 +1,5 @@
 import {
+  addressSchema,
   authSession,
   defineCommand,
   exposure,
@@ -12,7 +13,6 @@ import {
   paginationRequestSchema,
   readMutation,
   sanitize,
-  addressSchema,
 } from "./helpers.js";
 import type { AgwCommandDefinition } from "./types.js";
 
@@ -20,7 +20,8 @@ export const portalNamespaceDefinition: AgwCommandDefinition = defineCommand({
   id: "portal",
   path: ["portal"],
   kind: "namespace",
-  description: "Read Portal API data related to apps, streams, and user profiles.",
+  description:
+    "Read Portal API data related to apps, streams, and user profiles.",
   status: "planned",
   inputMode: "json",
   auth: authSession("active_required"),
@@ -56,7 +57,9 @@ export const portalNamespaceDefinition: AgwCommandDefinition = defineCommand({
             },
             { required: ["appId"] },
           ),
-          responseSchema: listResponseSchema(opaqueObjectSchema("Portal stream record.")),
+          responseSchema: listResponseSchema(
+            opaqueObjectSchema("Portal stream record."),
+          ),
           mutation: readMutation(),
           output: ndjsonOutput(true, true),
           sanitization: sanitize(true, "strict"),
@@ -93,7 +96,9 @@ export const portalNamespaceDefinition: AgwCommandDefinition = defineCommand({
           ),
           responseSchema: objectSchema(
             {
-              profile: opaqueObjectSchema("Opaque Portal user profile payload."),
+              profile: opaqueObjectSchema(
+                "Opaque Portal user profile payload.",
+              ),
             },
             { required: ["profile"] },
           ),

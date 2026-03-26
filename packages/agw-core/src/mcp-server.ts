@@ -1,19 +1,28 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema, type CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { listCommands, type AgwExecutableCommandDefinition } from "./command-registry.js";
+import {
+  type CallToolRequest,
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+import {
+  type AgwExecutableCommandDefinition,
+  listCommands,
+} from "./command-registry.js";
 import { toErrorEnvelope } from "./errors.js";
-import { executeCommand, type JsonRecord } from "./executor.js";
 import type { CommandRuntimeOptions } from "./execution/types.js";
+import { executeCommand, type JsonRecord } from "./executor.js";
 
 export interface ServeGeneratedMcpOptions {
   services?: string[];
   runtime?: CommandRuntimeOptions;
 }
 
-export function getExposedMcpCommands(services: string[] | undefined): AgwExecutableCommandDefinition[] {
+export function getExposedMcpCommands(
+  services: string[] | undefined,
+): AgwExecutableCommandDefinition[] {
   const serviceSet = services && services.length > 0 ? new Set(services) : null;
-  return listCommands().filter(command => {
+  return listCommands().filter((command) => {
     if (!command.exposure.mcp || command.status !== "implemented") {
       return false;
     }
@@ -29,7 +38,7 @@ export function listGeneratedMcpTools(services: string[] | undefined): Array<{
   inputSchema: AgwExecutableCommandDefinition["requestSchema"];
   name: string;
 }> {
-  return getExposedMcpCommands(services).map(command => ({
+  return getExposedMcpCommands(services).map((command) => ({
     description: command.description,
     inputSchema: command.requestSchema,
     name: command.id,
@@ -40,8 +49,13 @@ export async function invokeGeneratedMcpTool(
   name: string,
   args: JsonRecord = {},
   options: ServeGeneratedMcpOptions = {},
-): Promise<{ content: Array<{ text: string; type: "text" }>; isError?: boolean }> {
-  const command = getExposedMcpCommands(options.services).find(entry => entry.id === name);
+): Promise<{
+  content: Array<{ text: string; type: "text" }>;
+  isError?: boolean;
+}> {
+  const command = getExposedMcpCommands(options.services).find(
+    (entry) => entry.id === name,
+  );
   if (!command) {
     return {
       content: [
@@ -77,7 +91,9 @@ export async function invokeGeneratedMcpTool(
   }
 }
 
-export async function serveGeneratedMcp(options: ServeGeneratedMcpOptions = {}): Promise<void> {
+export async function serveGeneratedMcp(
+  options: ServeGeneratedMcpOptions = {},
+): Promise<void> {
   const tools = listGeneratedMcpTools(options.services);
   const runtime = options.runtime ?? {};
   const server = new Server(
@@ -96,12 +112,19 @@ export async function serveGeneratedMcp(options: ServeGeneratedMcpOptions = {}):
     };
   });
 
-  server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
-    return invokeGeneratedMcpTool(request.params.name, (request.params.arguments ?? {}) as JsonRecord, {
-      runtime,
-      services: options.services,
-    });
-  });
+  server.setRequestHandler(
+    CallToolRequestSchema,
+    async (request: CallToolRequest) => {
+      return invokeGeneratedMcpTool(
+        request.params.name,
+        (request.params.arguments ?? {}) as JsonRecord,
+        {
+          runtime,
+          services: options.services,
+        },
+      );
+    },
+  );
 
   await server.connect(new StdioServerTransport());
 }

@@ -45,7 +45,16 @@ export interface PrivyWalletRpcErrorResponse {
 
 export interface PrivyPolicyRuleCondition {
   field: string;
-  operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "not_in" | "in_condition_set";
+  operator:
+    | "eq"
+    | "neq"
+    | "gt"
+    | "gte"
+    | "lt"
+    | "lte"
+    | "in"
+    | "not_in"
+    | "in_condition_set";
   value: string | number | string[];
 }
 

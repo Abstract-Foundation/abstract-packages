@@ -1,20 +1,20 @@
 export type SessionToolName =
-  | 'get_wallet_address'
-  | 'get_balances'
-  | 'get_token_list'
-  | 'get_session_status'
-  | 'sign_message'
-  | 'sign_transaction'
-  | 'transfer_token'
-  | 'swap_tokens'
-  | 'preview_transaction'
-  | 'revoke_session'
-  | 'send_transaction'
-  | 'send_calls'
-  | 'write_contract'
-  | 'deploy_contract';
+  | "get_wallet_address"
+  | "get_balances"
+  | "get_token_list"
+  | "get_session_status"
+  | "sign_message"
+  | "sign_transaction"
+  | "transfer_token"
+  | "swap_tokens"
+  | "preview_transaction"
+  | "revoke_session"
+  | "send_transaction"
+  | "send_calls"
+  | "write_contract"
+  | "deploy_contract";
 
-export type PolicyMode = 'guided' | 'advanced';
+export type PolicyMode = "guided" | "advanced";
 
 export interface SessionCallPolicy {
   target: string;
@@ -47,14 +47,14 @@ export interface SessionPolicyMeta {
 }
 
 export type BuiltInSessionPolicyPresetId =
-  | 'payments'
-  | 'trading'
-  | 'gaming'
-  | 'contract_write'
-  | 'deploy'
-  | 'signing'
-  | 'full_app_control';
-export type SessionPolicyPresetId = BuiltInSessionPolicyPresetId | 'custom';
+  | "payments"
+  | "trading"
+  | "gaming"
+  | "contract_write"
+  | "deploy"
+  | "signing"
+  | "full_app_control";
+export type SessionPolicyPresetId = BuiltInSessionPolicyPresetId | "custom";
 
 export interface SessionPolicyLimitInputs {
   expiresInSeconds: number;
@@ -73,14 +73,14 @@ export interface SessionPolicyPresetTemplate {
   label: string;
   description: string;
   customMode: false;
-  riskHint: 'low' | 'medium' | 'high' | 'critical';
+  riskHint: "low" | "medium" | "high" | "critical";
   requiresDangerAcknowledgement: boolean;
   defaultLimits: SessionPolicyLimitInputs;
   enabledTools: SessionToolName[];
 }
 
 export interface CustomPolicyPresetDescriptor {
-  id: 'custom';
+  id: "custom";
   label: string;
   description: string;
   customMode: true;
@@ -98,7 +98,7 @@ export interface PolicyPreview {
 }
 
 export interface SecurityAssessment {
-  level: 'low' | 'medium' | 'high' | 'critical';
+  level: "low" | "medium" | "high" | "critical";
   requiresConfirmation: boolean;
   reasons: string[];
 }

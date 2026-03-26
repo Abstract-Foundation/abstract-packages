@@ -1,13 +1,13 @@
 import {
+  type Address,
   createPublicClient,
   erc20Abi,
   formatUnits,
   getAddress,
   http,
   isAddress,
-  parseAbiItem,
-  type Address,
   type PublicClient,
+  parseAbiItem,
 } from "viem";
 import { resolveNetworkConfig } from "../config/network.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
@@ -25,7 +25,9 @@ export interface TokenMetadata {
 }
 
 export interface TokenListReader {
-  getTokenBalances: (accountAddress: Address) => Promise<Record<string, string>>;
+  getTokenBalances: (
+    accountAddress: Address,
+  ) => Promise<Record<string, string>>;
   getTokenMetadata: (tokenAddress: Address) => Promise<TokenMetadata>;
 }
 
@@ -38,7 +40,9 @@ interface TokenBalanceEntry {
   rawValue: bigint;
 }
 
-const ERC20_TRANSFER_EVENT = parseAbiItem("event Transfer(address indexed from, address indexed to, uint256 value)");
+const ERC20_TRANSFER_EVENT = parseAbiItem(
+  "event Transfer(address indexed from, address indexed to, uint256 value)",
+);
 const LOG_SCAN_MIN_CHUNK_SIZE = 50_000n;
 const BALANCE_QUERY_CONCURRENCY = 8;
 const METADATA_QUERY_CONCURRENCY = 8;
@@ -60,7 +64,8 @@ function isRpcMethodUnavailableError(error: unknown): boolean {
   return (
     message.includes("rpc method is not whitelisted") ||
     message.includes("method not found") ||
-    (message.includes("code\":-32601") && message.includes("zks_getallaccountbalances"))
+    (message.includes('code":-32601') &&
+      message.includes("zks_getallaccountbalances"))
   );
 }
 
@@ -89,7 +94,10 @@ async function getTransferLogsWithAdaptiveChunking(
   let fromBlock = 0n;
 
   while (fromBlock <= latestBlock) {
-    const toBlock = fromBlock + chunkSize - 1n > latestBlock ? latestBlock : fromBlock + chunkSize - 1n;
+    const toBlock =
+      fromBlock + chunkSize - 1n > latestBlock
+        ? latestBlock
+        : fromBlock + chunkSize - 1n;
 
     try {
       const batch = await publicClient.getLogs({
@@ -140,13 +148,20 @@ async function mapWithConcurrency<T, TResult>(
   return results;
 }
 
-async function getTokenBalancesFromTransferLogs(publicClient: PublicClient, accountAddress: Address): Promise<Record<string, string>> {
+async function getTokenBalancesFromTransferLogs(
+  publicClient: PublicClient,
+  accountAddress: Address,
+): Promise<Record<string, string>> {
   const normalizedAccount = getAddress(accountAddress);
   const latestBlock = await publicClient.getBlockNumber();
 
   const [incomingLogs, outgoingLogs] = await Promise.all([
-    getTransferLogsWithAdaptiveChunking(publicClient, latestBlock, { to: normalizedAccount }),
-    getTransferLogsWithAdaptiveChunking(publicClient, latestBlock, { from: normalizedAccount }),
+    getTransferLogsWithAdaptiveChunking(publicClient, latestBlock, {
+      to: normalizedAccount,
+    }),
+    getTransferLogsWithAdaptiveChunking(publicClient, latestBlock, {
+      from: normalizedAccount,
+    }),
   ]);
 
   const tokenAddresses = new Map<string, Address>();
@@ -159,27 +174,31 @@ async function getTokenBalancesFromTransferLogs(publicClient: PublicClient, acco
   }
 
   const tokenAddressList = Array.from(tokenAddresses.values());
-  const balanceEntries = await mapWithConcurrency(tokenAddressList, BALANCE_QUERY_CONCURRENCY, async tokenAddress => {
-    try {
-      const rawBalance = await publicClient.readContract({
-        address: tokenAddress,
-        abi: erc20Abi,
-        functionName: "balanceOf",
-        args: [normalizedAccount],
-      });
+  const balanceEntries = await mapWithConcurrency(
+    tokenAddressList,
+    BALANCE_QUERY_CONCURRENCY,
+    async (tokenAddress) => {
+      try {
+        const rawBalance = await publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: "balanceOf",
+          args: [normalizedAccount],
+        });
 
-      if (typeof rawBalance !== "bigint" || rawBalance <= 0n) {
+        if (typeof rawBalance !== "bigint" || rawBalance <= 0n) {
+          return null;
+        }
+
+        return {
+          tokenAddress,
+          rawBalance,
+        };
+      } catch {
         return null;
       }
-
-      return {
-        tokenAddress,
-        rawBalance,
-      };
-    } catch {
-      return null;
-    }
-  });
+    },
+  );
 
   const balances: Record<string, string> = {};
   for (const entry of balanceEntries) {
@@ -200,7 +219,9 @@ function normalizeTokenBalances(value: unknown): TokenBalanceEntry[] {
 
   const entries: TokenBalanceEntry[] = [];
 
-  for (const [tokenAddress, rawValue] of Object.entries(value as Record<string, unknown>)) {
+  for (const [tokenAddress, rawValue] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
     if (!isAddress(tokenAddress, { strict: false })) {
       continue;
     }
@@ -213,7 +234,9 @@ function normalizeTokenBalances(value: unknown): TokenBalanceEntry[] {
     try {
       parsedRawValue = BigInt(rawValue);
     } catch {
-      throw new Error(`token balance for ${tokenAddress} is not a valid bigint string`);
+      throw new Error(
+        `token balance for ${tokenAddress} is not a valid bigint string`,
+      );
     }
 
     if (parsedRawValue < 0n) {
@@ -232,7 +255,9 @@ function normalizeTokenBalances(value: unknown): TokenBalanceEntry[] {
 
   entries.sort((left, right) => {
     if (left.rawValue === right.rawValue) {
-      return left.tokenAddress.toLowerCase().localeCompare(right.tokenAddress.toLowerCase());
+      return left.tokenAddress
+        .toLowerCase()
+        .localeCompare(right.tokenAddress.toLowerCase());
     }
 
     return left.rawValue > right.rawValue ? -1 : 1;
@@ -241,7 +266,9 @@ function normalizeTokenBalances(value: unknown): TokenBalanceEntry[] {
   return entries;
 }
 
-function createDefaultTokenListReader(input: CreateTokenListReaderInput): TokenListReader {
+function createDefaultTokenListReader(
+  input: CreateTokenListReaderInput,
+): TokenListReader {
   const networkConfig = resolveNetworkConfig({
     chainId: input.chainId,
     rpcUrl: input.rpcUrl,
@@ -252,22 +279,35 @@ function createDefaultTokenListReader(input: CreateTokenListReaderInput): TokenL
   });
 
   return {
-    getTokenBalances: async accountAddress => {
+    getTokenBalances: async (accountAddress) => {
       try {
-        const request = publicClient.request as unknown as (args: { method: string; params: unknown[] }) => Promise<unknown>;
+        const request = publicClient.request as unknown as (args: {
+          method: string;
+          params: unknown[];
+        }) => Promise<unknown>;
         const response = await request({
           method: "zks_getAllAccountBalances",
           params: [accountAddress],
         });
 
-        if (typeof response !== "object" || response === null || Array.isArray(response)) {
-          throw new Error("zks_getAllAccountBalances returned an invalid response payload");
+        if (
+          typeof response !== "object" ||
+          response === null ||
+          Array.isArray(response)
+        ) {
+          throw new Error(
+            "zks_getAllAccountBalances returned an invalid response payload",
+          );
         }
 
         const balances: Record<string, string> = {};
-        for (const [tokenAddress, rawValue] of Object.entries(response as Record<string, unknown>)) {
+        for (const [tokenAddress, rawValue] of Object.entries(
+          response as Record<string, unknown>,
+        )) {
           if (typeof rawValue !== "string") {
-            throw new Error(`token balance for ${tokenAddress} returned a non-string value`);
+            throw new Error(
+              `token balance for ${tokenAddress} returned a non-string value`,
+            );
           }
           balances[tokenAddress] = rawValue;
         }
@@ -281,7 +321,7 @@ function createDefaultTokenListReader(input: CreateTokenListReaderInput): TokenL
         return getTokenBalancesFromTransferLogs(publicClient, accountAddress);
       }
     },
-    getTokenMetadata: async tokenAddress => {
+    getTokenMetadata: async (tokenAddress) => {
       const [symbol, decimals] = await Promise.all([
         publicClient.readContract({
           address: tokenAddress,
@@ -296,10 +336,18 @@ function createDefaultTokenListReader(input: CreateTokenListReaderInput): TokenL
       ]);
 
       if (typeof symbol !== "string") {
-        throw new Error(`token ${tokenAddress} returned a non-string symbol value`);
+        throw new Error(
+          `token ${tokenAddress} returned a non-string symbol value`,
+        );
       }
-      if (typeof decimals !== "number" || !Number.isInteger(decimals) || decimals < 0) {
-        throw new Error(`token ${tokenAddress} returned an invalid decimals value`);
+      if (
+        typeof decimals !== "number" ||
+        !Number.isInteger(decimals) ||
+        decimals < 0
+      ) {
+        throw new Error(
+          `token ${tokenAddress} returned an invalid decimals value`,
+        );
       }
 
       return {
@@ -317,7 +365,8 @@ export function createGetTokenListTool(
 ): ToolHandler {
   return {
     name: "get_token_list",
-    description: "Returns AGW wallet ERC-20 token holdings with normalized value fields.",
+    description:
+      "Returns AGW wallet ERC-20 token holdings with normalized value fields.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -326,7 +375,8 @@ export function createGetTokenListTool(
       const session = context.sessionManager.getSession();
       const chainId = session?.chainId ?? context.sessionManager.getChainId();
       const networkConfig = resolveToolNetworkConfig(context, chainId);
-      const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+      const explorerBase =
+        networkConfig.chain.blockExplorers?.default?.url ?? null;
 
       if (!session) {
         return {
@@ -355,28 +405,39 @@ export function createGetTokenListTool(
       const normalizedTokenBalances = normalizeTokenBalances(rawTokenBalances);
 
       const tokenHoldings = (
-        await mapWithConcurrency(normalizedTokenBalances, METADATA_QUERY_CONCURRENCY, async ({ tokenAddress, rawValue }) => {
-          try {
-            const metadata = await reader.getTokenMetadata(tokenAddress);
-            return {
-              tokenAddress,
-              symbol: metadata.symbol,
-              decimals: metadata.decimals,
-              value: {
-                raw: rawValue.toString(),
-                formatted: formatUnits(rawValue, metadata.decimals),
-              },
-              explorer: {
-                token: buildExplorerUrl(explorerBase, `/token/${tokenAddress}`),
-                holder: buildExplorerUrl(explorerBase, `/token/${tokenAddress}?a=${accountAddress}`),
-              },
-            };
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            context.logger.warn(`Skipping token ${tokenAddress}: ${message}`);
-            return null;
-          }
-        })
+        await mapWithConcurrency(
+          normalizedTokenBalances,
+          METADATA_QUERY_CONCURRENCY,
+          async ({ tokenAddress, rawValue }) => {
+            try {
+              const metadata = await reader.getTokenMetadata(tokenAddress);
+              return {
+                tokenAddress,
+                symbol: metadata.symbol,
+                decimals: metadata.decimals,
+                value: {
+                  raw: rawValue.toString(),
+                  formatted: formatUnits(rawValue, metadata.decimals),
+                },
+                explorer: {
+                  token: buildExplorerUrl(
+                    explorerBase,
+                    `/token/${tokenAddress}`,
+                  ),
+                  holder: buildExplorerUrl(
+                    explorerBase,
+                    `/token/${tokenAddress}?a=${accountAddress}`,
+                  ),
+                },
+              };
+            } catch (error) {
+              const message =
+                error instanceof Error ? error.message : String(error);
+              context.logger.warn(`Skipping token ${tokenAddress}: ${message}`);
+              return null;
+            }
+          },
+        )
       ).filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
       return {

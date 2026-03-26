@@ -15,7 +15,10 @@ export const portalGetAppTool: ToolHandler = {
     type: "object",
     properties: {
       id: { type: "number", description: "Portal app id." },
-      includeContracts: { type: "boolean", description: "Include contracts metadata." },
+      includeContracts: {
+        type: "boolean",
+        description: "Include contracts metadata.",
+      },
     },
     required: ["id"],
   },

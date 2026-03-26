@@ -5,20 +5,39 @@ function isJsonRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function sliceItemsWithCursor<T>(items: T[], cursor: unknown, pageSize: unknown): { items: T[]; nextCursor: string | null } {
-  const offsetRaw = cursor === undefined ? 0 : typeof cursor === "string" ? Number.parseInt(cursor, 10) : Number.NaN;
+export function sliceItemsWithCursor<T>(
+  items: T[],
+  cursor: unknown,
+  pageSize: unknown,
+): { items: T[]; nextCursor: string | null } {
+  const offsetRaw =
+    cursor === undefined
+      ? 0
+      : typeof cursor === "string"
+        ? Number.parseInt(cursor, 10)
+        : Number.NaN;
   if (!Number.isInteger(offsetRaw) || offsetRaw < 0) {
-    throw new AgwCliError("INVALID_INPUT", "cursor must be a non-negative integer string when provided", 2);
+    throw new AgwCliError(
+      "INVALID_INPUT",
+      "cursor must be a non-negative integer string when provided",
+      2,
+    );
   }
 
   const size =
     pageSize === undefined
       ? items.length
-      : typeof pageSize === "number" && Number.isInteger(pageSize) && pageSize > 0
+      : typeof pageSize === "number" &&
+          Number.isInteger(pageSize) &&
+          pageSize > 0
         ? pageSize
         : Number.NaN;
   if (!Number.isInteger(size) || size <= 0) {
-    throw new AgwCliError("INVALID_INPUT", "pageSize must be a positive integer when provided", 2);
+    throw new AgwCliError(
+      "INVALID_INPUT",
+      "pageSize must be a positive integer when provided",
+      2,
+    );
   }
 
   const sliced = items.slice(offsetRaw, offsetRaw + size);
@@ -30,7 +49,11 @@ export function sliceItemsWithCursor<T>(items: T[], cursor: unknown, pageSize: u
   };
 }
 
-function mergeValue(target: unknown, segments: string[], source: unknown): unknown {
+function mergeValue(
+  target: unknown,
+  segments: string[],
+  source: unknown,
+): unknown {
   if (segments.length === 0) {
     return source;
   }
@@ -38,7 +61,9 @@ function mergeValue(target: unknown, segments: string[], source: unknown): unkno
   const [head, ...rest] = segments;
   if (Array.isArray(source)) {
     const existing = Array.isArray(target) ? target : [];
-    return source.map((entry, index) => mergeValue(existing[index], segments, entry));
+    return source.map((entry, index) =>
+      mergeValue(existing[index], segments, entry),
+    );
   }
 
   if (!isJsonRecord(source)) {
@@ -51,11 +76,15 @@ function mergeValue(target: unknown, segments: string[], source: unknown): unkno
   }
 
   const base = isJsonRecord(target) ? { ...target } : {};
-  base[head] = rest.length === 0 ? nextSource : mergeValue(base[head], rest, nextSource);
+  base[head] =
+    rest.length === 0 ? nextSource : mergeValue(base[head], rest, nextSource);
   return base;
 }
 
-export function applyFieldSelection(value: unknown, fields: string[] | undefined): unknown {
+export function applyFieldSelection(
+  value: unknown,
+  fields: string[] | undefined,
+): unknown {
   if (!fields || fields.length === 0) {
     return value;
   }
@@ -78,13 +107,16 @@ const PROMPT_INJECTION_PATTERNS = [
 ];
 
 function sanitizeString(value: string): string {
-  if (PROMPT_INJECTION_PATTERNS.some(pattern => pattern.test(value))) {
+  if (PROMPT_INJECTION_PATTERNS.some((pattern) => pattern.test(value))) {
     return "[SANITIZED: untrusted instruction-like content removed]";
   }
   return value;
 }
 
-export function sanitizeOutput(value: unknown, profile: AgwSanitizeProfile): unknown {
+export function sanitizeOutput(
+  value: unknown,
+  profile: AgwSanitizeProfile,
+): unknown {
   if (profile === "off") {
     return value;
   }
@@ -92,19 +124,27 @@ export function sanitizeOutput(value: unknown, profile: AgwSanitizeProfile): unk
     return sanitizeString(value);
   }
   if (Array.isArray(value)) {
-    return value.map(entry => sanitizeOutput(entry, profile));
+    return value.map((entry) => sanitizeOutput(entry, profile));
   }
   if (!isJsonRecord(value)) {
     return value;
   }
 
-  return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, sanitizeOutput(entry, profile)]));
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [
+      key,
+      sanitizeOutput(entry, profile),
+    ]),
+  );
 }
 
-export function formatCommandOutput(value: unknown, mode: "json" | "ndjson"): string {
+export function formatCommandOutput(
+  value: unknown,
+  mode: "json" | "ndjson",
+): string {
   if (mode === "ndjson") {
     if (Array.isArray(value)) {
-      return `${value.map(item => JSON.stringify(item)).join("\n")}\n`;
+      return `${value.map((item) => JSON.stringify(item)).join("\n")}\n`;
     }
     return `${JSON.stringify(value)}\n`;
   }

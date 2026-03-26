@@ -26,7 +26,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function shouldRedactKey(key: string): boolean {
-  return SENSITIVE_KEY_PATTERNS.some(pattern => pattern.test(key));
+  return SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
 }
 
 function redactValue(value: unknown): unknown {
@@ -63,7 +63,8 @@ export class AuditLog {
   private writeQueue: Promise<void> = Promise.resolve();
 
   constructor(options: string | AuditLogOptions = {}) {
-    const resolvedOptions = typeof options === "string" ? { storageDir: options } : options;
+    const resolvedOptions =
+      typeof options === "string" ? { storageDir: options } : options;
     const dir = resolvedOptions.storageDir ?? resolveDefaultStorageDir();
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
     this.logFilePath = path.join(dir, "audit.log.ndjson");

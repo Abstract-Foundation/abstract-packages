@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import type { PolicyPreview } from '@/lib/policy-types';
-import type { ExistingAgwMcpSignerSummary, ProvisionedSignerResult } from '@/lib/session-config';
+import { create } from "zustand";
+import type { PolicyPreview } from "@/lib/policy-types";
+import type {
+  ExistingAgwMcpSignerSummary,
+  ProvisionedSignerResult,
+} from "@/lib/session-config";
 
 export type SessionWizardStep =
-  | 'not_logged_in'
-  | 'resolving'
-  | 'select_policy'
-  | 'creating'
-  | 'success'
-  | 'error';
+  | "not_logged_in"
+  | "resolving"
+  | "select_policy"
+  | "creating"
+  | "success"
+  | "error";
 
 interface SessionWizardState {
   currentStep: SessionWizardStep;
@@ -26,18 +29,25 @@ interface SessionWizardState {
   existingSigners: ExistingAgwMcpSignerSummary[];
   setChainId: (chainId: number) => void;
   markResolving: () => void;
-  syncConnection: (input: { isConnected: boolean; agwAddress: string | null; signerAddress: string | null }) => void;
+  syncConnection: (input: {
+    isConnected: boolean;
+    agwAddress: string | null;
+    signerAddress: string | null;
+  }) => void;
   setDangerAcknowledged: (value: boolean) => void;
   setValidationError: (error: string | null) => void;
   proceedToCreating: (preview: PolicyPreview) => void;
   backToPolicySelection: () => void;
-  markCreationSuccess: (input: { redirectUrl: string; provisionedSigner: ProvisionedSignerResult }) => void;
+  markCreationSuccess: (input: {
+    redirectUrl: string;
+    provisionedSigner: ProvisionedSignerResult;
+  }) => void;
   markCreationError: (error: string) => void;
   retryResolution: () => void;
 }
 
-const useSessionWizardStore = create<SessionWizardState>(set => ({
-  currentStep: 'not_logged_in',
+const useSessionWizardStore = create<SessionWizardState>((set) => ({
+  currentStep: "not_logged_in",
   resolutionAttempt: 0,
   chainId: null,
   agwAddress: null,
@@ -48,42 +58,51 @@ const useSessionWizardStore = create<SessionWizardState>(set => ({
   redirectUrl: null,
   provisionedSigner: null,
   existingSigners: [],
-  setChainId: chainId => set({ chainId }),
+  setChainId: (chainId) => set({ chainId }),
   markResolving: () =>
-    set(state => {
-      if (state.currentStep === 'not_logged_in' || state.currentStep === 'error') {
-        return { currentStep: 'resolving', error: null };
+    set((state) => {
+      if (
+        state.currentStep === "not_logged_in" ||
+        state.currentStep === "error"
+      ) {
+        return { currentStep: "resolving", error: null };
       }
       return state;
     }),
   syncConnection: ({ isConnected, agwAddress, signerAddress }) =>
-    set(state => {
+    set((state) => {
       if (!isConnected || !agwAddress || !signerAddress) {
-        const terminalSteps: SessionWizardStep[] = ['creating', 'success'];
+        const terminalSteps: SessionWizardStep[] = ["creating", "success"];
         return {
           agwAddress: null,
           signerAddress: null,
-          currentStep: terminalSteps.includes(state.currentStep) ? state.currentStep : 'not_logged_in',
+          currentStep: terminalSteps.includes(state.currentStep)
+            ? state.currentStep
+            : "not_logged_in",
         };
       }
 
-      const promotableSteps: SessionWizardStep[] = ['not_logged_in', 'resolving', 'error'];
+      const promotableSteps: SessionWizardStep[] = [
+        "not_logged_in",
+        "resolving",
+        "error",
+      ];
       return {
         agwAddress,
         signerAddress,
         currentStep: promotableSteps.includes(state.currentStep)
-          ? 'select_policy'
+          ? "select_policy"
           : state.currentStep,
       };
     }),
-  setDangerAcknowledged: dangerAcknowledged =>
+  setDangerAcknowledged: (dangerAcknowledged) =>
     set({
       dangerAcknowledged,
     }),
-  setValidationError: error => set({ error }),
-  proceedToCreating: policyPreview =>
+  setValidationError: (error) => set({ error }),
+  proceedToCreating: (policyPreview) =>
     set({
-      currentStep: 'creating',
+      currentStep: "creating",
       policyPreview,
       error: null,
       redirectUrl: null,
@@ -91,7 +110,7 @@ const useSessionWizardStore = create<SessionWizardState>(set => ({
     }),
   backToPolicySelection: () =>
     set({
-      currentStep: 'select_policy',
+      currentStep: "select_policy",
       policyPreview: null,
       error: null,
       redirectUrl: null,
@@ -99,20 +118,20 @@ const useSessionWizardStore = create<SessionWizardState>(set => ({
     }),
   markCreationSuccess: ({ redirectUrl, provisionedSigner }) =>
     set({
-      currentStep: 'success',
+      currentStep: "success",
       redirectUrl,
       provisionedSigner,
       existingSigners: provisionedSigner.existingSigners,
       error: null,
     }),
-  markCreationError: error =>
+  markCreationError: (error) =>
     set({
-      currentStep: 'error',
+      currentStep: "error",
       error,
     }),
   retryResolution: () =>
-    set(state => ({
-      currentStep: 'not_logged_in',
+    set((state) => ({
+      currentStep: "not_logged_in",
       agwAddress: null,
       signerAddress: null,
       error: null,

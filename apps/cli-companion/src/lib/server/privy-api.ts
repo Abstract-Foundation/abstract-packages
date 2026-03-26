@@ -1,7 +1,7 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
-const PRIVY_API_BASE = 'https://api.privy.io';
-const SIGNER_LABEL_PREFIX = 'AGW CLI';
+const PRIVY_API_BASE = "https://api.privy.io";
+const SIGNER_LABEL_PREFIX = "AGW CLI";
 
 export interface PrivyAdminConfig {
   appId: string;
@@ -32,7 +32,9 @@ function resolvePrivyAdminConfig(): PrivyAdminConfig {
   const appSecret = process.env.PRIVY_APP_SECRET?.trim();
 
   if (!appId || !appSecret) {
-    throw new Error('Missing Privy server credentials. Set PRIVY_APP_ID and PRIVY_APP_SECRET.');
+    throw new Error(
+      "Missing Privy server credentials. Set PRIVY_APP_ID and PRIVY_APP_SECRET.",
+    );
   }
 
   return {
@@ -42,10 +44,13 @@ function resolvePrivyAdminConfig(): PrivyAdminConfig {
 }
 
 function buildBasicAuth(config: PrivyAdminConfig): string {
-  return Buffer.from(`${config.appId}:${config.appSecret}`).toString('base64');
+  return Buffer.from(`${config.appId}:${config.appSecret}`).toString("base64");
 }
 
-function buildHeaders(config: PrivyAdminConfig, initHeaders?: HeadersInit): Record<string, string> {
+function buildHeaders(
+  config: PrivyAdminConfig,
+  initHeaders?: HeadersInit,
+): Record<string, string> {
   const normalizedInitHeaders: Record<string, string> = {};
   if (initHeaders instanceof Headers) {
     for (const [key, value] of initHeaders.entries()) {
@@ -64,19 +69,19 @@ function buildHeaders(config: PrivyAdminConfig, initHeaders?: HeadersInit): Reco
   }
 
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     Authorization: `Basic ${buildBasicAuth(config)}`,
-    'privy-app-id': config.appId,
+    "privy-app-id": config.appId,
     ...normalizedInitHeaders,
   };
 }
 
 async function privyFetch<T>(path: string, init: RequestInit): Promise<T> {
   const config = resolvePrivyAdminConfig();
-  const candidates = path.startsWith('/api/v1/')
-    ? [path, path.replace('/api/v1/', '/v1/')]
-    : path.startsWith('/v1/')
-      ? [path, path.replace('/v1/', '/api/v1/')]
+  const candidates = path.startsWith("/api/v1/")
+    ? [path, path.replace("/api/v1/", "/v1/")]
+    : path.startsWith("/v1/")
+      ? [path, path.replace("/v1/", "/api/v1/")]
       : [path];
 
   let lastError: Error | null = null;
@@ -100,8 +105,8 @@ async function privyFetch<T>(path: string, init: RequestInit): Promise<T> {
       const body = (await response.json()) as Record<string, unknown>;
       const errorBody = body.error as Record<string, unknown> | undefined;
       detail =
-        (typeof errorBody?.message === 'string' && errorBody.message) ||
-        (typeof body.message === 'string' && body.message) ||
+        (typeof errorBody?.message === "string" && errorBody.message) ||
+        (typeof body.message === "string" && body.message) ||
         JSON.stringify(body);
     } catch {
       // Keep status text.
@@ -113,18 +118,18 @@ async function privyFetch<T>(path: string, init: RequestInit): Promise<T> {
     }
   }
 
-  throw lastError ?? new Error('Privy API request failed.');
+  throw lastError ?? new Error("Privy API request failed.");
 }
 
 function parsePositiveUnixSeconds(value: unknown): number {
-  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) {
     return value;
   }
-  if (typeof value === 'string' && /^\d+$/.test(value)) {
+  if (typeof value === "string" && /^\d+$/.test(value)) {
     return Number.parseInt(value, 10);
   }
 
-  const timestamp = typeof value === 'string' ? Date.parse(value) : Number.NaN;
+  const timestamp = typeof value === "string" ? Date.parse(value) : Number.NaN;
   if (!Number.isNaN(timestamp)) {
     return Math.floor(timestamp / 1000);
   }
@@ -132,33 +137,40 @@ function parsePositiveUnixSeconds(value: unknown): number {
   return Math.floor(Date.now() / 1000);
 }
 
-function normalizeWalletRecord(value: Record<string, unknown>): PrivyWalletRecord {
-  const id = typeof value.id === 'string' ? value.id : '';
-  const address = typeof value.address === 'string' ? value.address : '';
-  const chainType = typeof value.chain_type === 'string' ? value.chain_type : '';
+function normalizeWalletRecord(
+  value: Record<string, unknown>,
+): PrivyWalletRecord {
+  const id = typeof value.id === "string" ? value.id : "";
+  const address = typeof value.address === "string" ? value.address : "";
+  const chainType =
+    typeof value.chain_type === "string" ? value.chain_type : "";
   const additionalSigners = Array.isArray(value.additional_signers)
-    ? value.additional_signers.flatMap(entry => {
-        if (!entry || typeof entry !== 'object') {
+    ? value.additional_signers.flatMap((entry) => {
+        if (!entry || typeof entry !== "object") {
           return [];
         }
 
-        const signerId = typeof (entry as { signer_id?: unknown }).signer_id === 'string'
-          ? (entry as { signer_id: string }).signer_id
-          : '';
+        const signerId =
+          typeof (entry as { signer_id?: unknown }).signer_id === "string"
+            ? (entry as { signer_id: string }).signer_id
+            : "";
         if (!signerId) {
           return [];
         }
 
-        const overridePolicyIds = (entry as { override_policy_ids?: unknown }).override_policy_ids;
-        const policyIds = Array.isArray(overridePolicyIds) && overridePolicyIds.every(item => typeof item === 'string')
-          ? overridePolicyIds
-          : [];
+        const overridePolicyIds = (entry as { override_policy_ids?: unknown })
+          .override_policy_ids;
+        const policyIds =
+          Array.isArray(overridePolicyIds) &&
+          overridePolicyIds.every((item) => typeof item === "string")
+            ? overridePolicyIds
+            : [];
         return [{ signerId, policyIds }];
       })
     : [];
 
   if (!id || !address || !chainType) {
-    throw new Error('Privy returned an invalid wallet record.');
+    throw new Error("Privy returned an invalid wallet record.");
   }
 
   return {
@@ -169,23 +181,28 @@ function normalizeWalletRecord(value: Record<string, unknown>): PrivyWalletRecor
   };
 }
 
-function normalizeKeyQuorumRecord(value: Record<string, unknown>): PrivyKeyQuorumRecord {
-  const id = typeof value.id === 'string' ? value.id : '';
-  const displayName = typeof value.display_name === 'string' && value.display_name.trim()
-    ? value.display_name.trim()
-    : `${SIGNER_LABEL_PREFIX} signer`;
+function normalizeKeyQuorumRecord(
+  value: Record<string, unknown>,
+): PrivyKeyQuorumRecord {
+  const id = typeof value.id === "string" ? value.id : "";
+  const displayName =
+    typeof value.display_name === "string" && value.display_name.trim()
+      ? value.display_name.trim()
+      : `${SIGNER_LABEL_PREFIX} signer`;
   const publicKeys = Array.isArray(value.authorization_keys)
-    ? value.authorization_keys.flatMap(entry => {
-        if (!entry || typeof entry !== 'object') {
+    ? value.authorization_keys.flatMap((entry) => {
+        if (!entry || typeof entry !== "object") {
           return [];
         }
         const publicKey = (entry as { public_key?: unknown }).public_key;
-        return typeof publicKey === 'string' && publicKey.trim() ? [publicKey.trim()] : [];
+        return typeof publicKey === "string" && publicKey.trim()
+          ? [publicKey.trim()]
+          : [];
       })
     : [];
 
   if (!id || publicKeys.length === 0) {
-    throw new Error('Privy returned an invalid signer record.');
+    throw new Error("Privy returned an invalid signer record.");
   }
 
   return {
@@ -197,7 +214,9 @@ function normalizeKeyQuorumRecord(value: Record<string, unknown>): PrivyKeyQuoru
 }
 
 export function computeSignerFingerprint(publicKeyBase64: string): string {
-  const digest = createHash('sha256').update(Buffer.from(publicKeyBase64, 'base64')).digest('hex');
+  const digest = createHash("sha256")
+    .update(Buffer.from(publicKeyBase64, "base64"))
+    .digest("hex");
   return `${digest.slice(0, 12)}:${digest.slice(-12)}`;
 }
 
@@ -205,22 +224,29 @@ export function buildSignerLabel(fingerprint: string): string {
   return `${SIGNER_LABEL_PREFIX} ${fingerprint}`;
 }
 
-export async function findWalletByAddress(address: string): Promise<PrivyWalletRecord> {
-  const userResult = await privyFetch<{ id: string }>('/v1/users/wallet/address', {
-    method: 'POST',
-    body: JSON.stringify({ address }),
-  });
+export async function findWalletByAddress(
+  address: string,
+): Promise<PrivyWalletRecord> {
+  const userResult = await privyFetch<{ id: string }>(
+    "/v1/users/wallet/address",
+    {
+      method: "POST",
+      body: JSON.stringify({ address }),
+    },
+  );
 
-  const walletsResult = await privyFetch<{ data: Array<Record<string, unknown>> }>(
+  const walletsResult = await privyFetch<{
+    data: Array<Record<string, unknown>>;
+  }>(
     `/v1/wallets?user_id=${encodeURIComponent(userResult.id)}&chain_type=ethereum`,
     {
-      method: 'GET',
+      method: "GET",
     },
   );
 
   const wallet = walletsResult.data
     .map(normalizeWalletRecord)
-    .find(entry => entry.address.toLowerCase() === address.toLowerCase());
+    .find((entry) => entry.address.toLowerCase() === address.toLowerCase());
 
   if (!wallet) {
     throw new Error(`No Privy wallet found for address ${address}.`);
@@ -229,19 +255,26 @@ export async function findWalletByAddress(address: string): Promise<PrivyWalletR
   return wallet;
 }
 
-export async function getWalletById(walletId: string): Promise<PrivyWalletRecord> {
-  const wallet = await privyFetch<Record<string, unknown>>(`/api/v1/wallets/${encodeURIComponent(walletId)}`, {
-    method: 'GET',
-  });
+export async function getWalletById(
+  walletId: string,
+): Promise<PrivyWalletRecord> {
+  const wallet = await privyFetch<Record<string, unknown>>(
+    `/api/v1/wallets/${encodeURIComponent(walletId)}`,
+    {
+      method: "GET",
+    },
+  );
 
   return normalizeWalletRecord(wallet);
 }
 
-export async function getKeyQuorumById(signerId: string): Promise<PrivyKeyQuorumRecord> {
+export async function getKeyQuorumById(
+  signerId: string,
+): Promise<PrivyKeyQuorumRecord> {
   const keyQuorum = await privyFetch<Record<string, unknown>>(
     `/api/v1/key_quorums/${encodeURIComponent(signerId)}`,
     {
-      method: 'GET',
+      method: "GET",
     },
   );
 
@@ -252,18 +285,20 @@ export async function createKeyQuorum(params: {
   publicKey: string;
   displayName: string;
 }): Promise<PrivyKeyQuorumRecord> {
-  const keyQuorum = await privyFetch<Record<string, unknown>>('/api/v1/key_quorums', {
-    method: 'POST',
-    body: JSON.stringify({
-      authorization_threshold: 1,
-      display_name: params.displayName,
-      public_keys: [params.publicKey],
-    }),
-  });
+  const keyQuorum = await privyFetch<Record<string, unknown>>(
+    "/api/v1/key_quorums",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        authorization_threshold: 1,
+        display_name: params.displayName,
+        public_keys: [params.publicKey],
+      }),
+    },
+  );
 
   return normalizeKeyQuorumRecord(keyQuorum);
 }
-
 
 export async function updateWalletWithSignature(params: {
   walletId: string;
@@ -271,21 +306,26 @@ export async function updateWalletWithSignature(params: {
   authorizationSignature: string;
   idempotencyKey?: string;
 }): Promise<PrivyWalletRecord> {
-  const wallet = await privyFetch<Record<string, unknown>>(`/api/v1/wallets/${encodeURIComponent(params.walletId)}`, {
-    method: 'PATCH',
-    headers: {
-      'privy-authorization-signature': params.authorizationSignature,
-      ...(params.idempotencyKey ? { 'privy-idempotency-key': params.idempotencyKey } : {}),
+  const wallet = await privyFetch<Record<string, unknown>>(
+    `/api/v1/wallets/${encodeURIComponent(params.walletId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        "privy-authorization-signature": params.authorizationSignature,
+        ...(params.idempotencyKey
+          ? { "privy-idempotency-key": params.idempotencyKey }
+          : {}),
+      },
+      body: JSON.stringify(params.body),
     },
-    body: JSON.stringify(params.body),
-  });
+  );
 
   return normalizeWalletRecord(wallet);
 }
 
 export async function listExistingAgwMcpSigners(wallet: PrivyWalletRecord) {
   const signers = await Promise.all(
-    wallet.additionalSigners.map(async signer => {
+    wallet.additionalSigners.map(async (signer) => {
       try {
         const keyQuorum = await getKeyQuorumById(signer.signerId);
         if (!keyQuorum.displayName.startsWith(SIGNER_LABEL_PREFIX)) {
@@ -303,5 +343,7 @@ export async function listExistingAgwMcpSigners(wallet: PrivyWalletRecord) {
     }),
   );
 
-  return signers.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry));
+  return signers.filter((entry): entry is NonNullable<typeof entry> =>
+    Boolean(entry),
+  );
 }

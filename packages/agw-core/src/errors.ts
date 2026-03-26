@@ -11,7 +11,12 @@ export class AgwCliError extends Error {
   readonly details?: Record<string, unknown>;
   readonly exitCode: number;
 
-  constructor(code: string, message: string, exitCode = 1, details?: Record<string, unknown>) {
+  constructor(
+    code: string,
+    message: string,
+    exitCode = 1,
+    details?: Record<string, unknown>,
+  ) {
     super(message);
     this.code = code;
     this.details = details;
@@ -27,7 +32,11 @@ export function normalizeAgwError(error: unknown): AgwCliError {
   const message = error instanceof Error ? error.message : String(error);
   const normalized = message.toLowerCase();
 
-  if (normalized.includes("must be") || normalized.startsWith("invalid ") || normalized.includes("missing `")) {
+  if (
+    normalized.includes("must be") ||
+    normalized.startsWith("invalid ") ||
+    normalized.includes("missing `")
+  ) {
     return new AgwCliError("INVALID_INPUT", message, 2);
   }
   if (

@@ -1,4 +1,4 @@
-import { type Abi } from "viem";
+import type { Abi } from "viem";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { assertToolCapability } from "./capability-guard.js";
 import { resolveToolNetworkConfig } from "./network.js";
@@ -22,21 +22,35 @@ function assertAbi(value: unknown): Abi {
 }
 
 function assertBytecode(value: unknown): `0x${string}` {
-  if (typeof value !== "string" || !/^0x[0-9a-fA-F]+$/.test(value) || value.length % 2 !== 0) {
-    throw new Error("bytecode must be a 0x-prefixed hex string with even length");
+  if (
+    typeof value !== "string" ||
+    !/^0x[0-9a-fA-F]+$/.test(value) ||
+    value.length % 2 !== 0
+  ) {
+    throw new Error(
+      "bytecode must be a 0x-prefixed hex string with even length",
+    );
   }
   return value as `0x${string}`;
 }
 
 export const deployContractTool: ToolHandler = {
   name: "deploy_contract",
-  description: "Deploys a contract through the AGW wallet with ABI+bytecode validation.",
+  description:
+    "Deploys a contract through the AGW wallet with ABI+bytecode validation.",
   inputSchema: {
     type: "object",
     properties: {
       abi: { type: "array", description: "Constructor ABI fragment" },
-      bytecode: { type: "string", description: "Contract bytecode (0x-prefixed hex)" },
-      execute: { type: "boolean", description: "Broadcast deployment when true", default: false },
+      bytecode: {
+        type: "string",
+        description: "Contract bytecode (0x-prefixed hex)",
+      },
+      execute: {
+        type: "boolean",
+        description: "Broadcast deployment when true",
+        default: false,
+      },
     },
     required: ["abi", "bytecode"],
   },
@@ -80,7 +94,8 @@ export const deployContractTool: ToolHandler = {
     });
 
     const networkConfig = resolveToolNetworkConfig(context, session.chainId);
-    const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+    const explorerBase =
+      networkConfig.chain.blockExplorers?.default?.url ?? null;
     return {
       execute: true,
       txHash,

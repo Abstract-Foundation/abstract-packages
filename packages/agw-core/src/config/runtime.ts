@@ -21,12 +21,20 @@ function normalizeOptionalString(value: unknown): string | undefined {
   return normalized === "" ? undefined : normalized;
 }
 
-export function resolveAgwHome(options: { homeDir?: string; env?: NodeJS.ProcessEnv } = {}): string {
+export function resolveAgwHome(
+  options: { homeDir?: string; env?: NodeJS.ProcessEnv } = {},
+): string {
   const env = options.env ?? process.env;
-  return normalizeOptionalString(options.homeDir) ?? normalizeOptionalString(env[HOME_ENV_KEY]) ?? path.join(os.homedir(), DEFAULT_HOME_DIRNAME);
+  return (
+    normalizeOptionalString(options.homeDir) ??
+    normalizeOptionalString(env[HOME_ENV_KEY]) ??
+    path.join(os.homedir(), DEFAULT_HOME_DIRNAME)
+  );
 }
 
-export function resolveAppUrlFromEnv(env: NodeJS.ProcessEnv = process.env): string | undefined {
+export function resolveAppUrlFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
   return normalizeOptionalString(env[APP_URL_ENV_KEY]);
 }
 

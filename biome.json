@@ -61,7 +61,7 @@
       }
     },
     {
-      "includes": ["examples/**"],
+      "includes": ["examples/**", "apps/**"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -75,6 +75,19 @@
           "a11y": {
             "noStaticElementInteractions": "warn",
             "noSvgWithoutTitle": "warn"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/agw-core/**", "packages/agw-cli/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "useIterableCallbackReturn": "warn"
           }
         }
       }

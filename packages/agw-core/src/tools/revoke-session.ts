@@ -20,7 +20,9 @@ export const revokeSessionTool: ToolHandler = {
       throw new Error("session is missing");
     }
     if (!session.privySignerBinding || !session.privyWalletId) {
-      throw new Error("session does not have a remotely provisioned signer to revoke");
+      throw new Error(
+        "session does not have a remotely provisioned signer to revoke",
+      );
     }
 
     await runRemoteRevokeFlow(context.logger, session, {

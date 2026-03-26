@@ -107,7 +107,9 @@ export function isWriteReadySession(session: AgwSessionData | null): boolean {
   );
 }
 
-export function resolveSessionReadiness(session: AgwSessionData | null): SessionReadiness | null {
+export function resolveSessionReadiness(
+  session: AgwSessionData | null,
+): SessionReadiness | null {
   if (!session || session.status !== "active") {
     return null;
   }
@@ -128,5 +130,7 @@ export function resolveSessionReadiness(session: AgwSessionData | null): Session
       activeSession.privyAuthKeyRef,
   );
 
-  return hasAnySignerMetadata ? "incomplete_signer_session" : "legacy_read_only";
+  return hasAnySignerMetadata
+    ? "incomplete_signer_session"
+    : "legacy_read_only";
 }

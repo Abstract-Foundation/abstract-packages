@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Button from '@/@abstract-ui/components/Button';
+import Button from "@/@abstract-ui/components/Button";
 import {
   Card,
   CardContent,
@@ -8,19 +8,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/Card';
-import { useSessionWizardState } from '@/hooks/useSessionWizardState';
-import styles from '../styles.module.scss';
+} from "@/components/Card";
+import { useSessionWizardState } from "@/hooks/useSessionWizardState";
+import styles from "../styles.module.scss";
 
 export default function Success() {
-  const { redirectUrl, provisionedSigner, existingSigners } = useSessionWizardState();
+  const { redirectUrl, provisionedSigner, existingSigners } =
+    useSessionWizardState();
 
   return (
     <div className={styles.wrapper}>
       <Card>
         <CardHeader>
           <CardTitle>Agent Access Delegated</CardTitle>
-          <CardDescription>Return to your CLI callback to finish setup.</CardDescription>
+          <CardDescription>
+            Return to your CLI callback to finish setup.
+          </CardDescription>
         </CardHeader>
         <CardContent className={styles.content}>
           {redirectUrl ? (
@@ -30,8 +33,9 @@ export default function Success() {
           ) : null}
           {provisionedSigner ? (
             <p className={styles.helper}>
-              Signer <code>{provisionedSigner.signerLabel}</code> with fingerprint{' '}
-              <code>{provisionedSigner.signerFingerprint}</code> is now attached to your wallet.
+              Signer <code>{provisionedSigner.signerLabel}</code> with
+              fingerprint <code>{provisionedSigner.signerFingerprint}</code> is
+              now attached to your wallet.
             </p>
           ) : null}
           {existingSigners.length > 0 ? (
@@ -41,22 +45,35 @@ export default function Success() {
           ) : null}
           {redirectUrl ? (
             <p className={styles.helper}>
-              If you see <code>ERR_CONNECTION_REFUSED</code>, re-run{' '}
-              <code>{`agw auth init --json '{"chainId":2741,"execute":true}'`}</code> and keep that terminal open.
+              If you see <code>ERR_CONNECTION_REFUSED</code>, re-run{" "}
+              <code>{`agw auth init --json '{"chainId":2741,"execute":true}'`}</code>{" "}
+              and keep that terminal open.
             </p>
           ) : null}
           <p className={styles.helper}>
-            After returning to CLI, run <code>{`agw session status --json '{}'`}</code> to confirm and{' '}
-            <code>{`agw auth revoke --json '{"execute":true}'`}</code> when done.
+            After returning to CLI, run{" "}
+            <code>{`agw session status --json '{}'`}</code> to confirm and{" "}
+            <code>{`agw auth revoke --json '{"execute":true}'`}</code> when
+            done.
           </p>
         </CardContent>
         <CardFooter className={styles.footer}>
           {redirectUrl ? (
-            <Button className={styles.footerButton} height="40" variant="primary" href={redirectUrl}>
+            <Button
+              className={styles.footerButton}
+              height="40"
+              variant="primary"
+              href={redirectUrl}
+            >
               Return to CLI
             </Button>
           ) : (
-            <Button className={styles.footerButton} height="40" variant="secondary" disabled>
+            <Button
+              className={styles.footerButton}
+              height="40"
+              variant="secondary"
+              disabled
+            >
               Redirecting...
             </Button>
           )}

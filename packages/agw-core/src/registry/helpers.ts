@@ -1,48 +1,65 @@
 import type {
   AgwAuthRequirement,
   AgwCommandDefinition,
-  AgwConfigDependency,
   AgwCommandRisk,
+  AgwConfigDependency,
   AgwExposureContract,
-  AgwObjectSchema,
-  AgwSchema,
-  AgwSanitizationContract,
   AgwMutationContract,
+  AgwObjectSchema,
   AgwOutputContract,
+  AgwSanitizationContract,
+  AgwSchema,
 } from "./types.js";
 
-export function defineCommand(definition: AgwCommandDefinition): AgwCommandDefinition {
+export function defineCommand(
+  definition: AgwCommandDefinition,
+): AgwCommandDefinition {
   return {
     sanitization: sanitize(false),
     ...definition,
   };
 }
 
-export function stringSchema(options: Omit<Extract<AgwSchema, { type: "string" }>, "type"> = {}): AgwSchema {
+export function stringSchema(
+  options: Omit<Extract<AgwSchema, { type: "string" }>, "type"> = {},
+): AgwSchema {
   return { type: "string", ...options };
 }
 
-export function numberSchema(options: Omit<Extract<AgwSchema, { type: "number" }>, "type"> = {}): AgwSchema {
+export function numberSchema(
+  options: Omit<Extract<AgwSchema, { type: "number" }>, "type"> = {},
+): AgwSchema {
   return { type: "number", ...options };
 }
 
-export function integerSchema(options: Omit<Extract<AgwSchema, { type: "integer" }>, "type"> = {}): AgwSchema {
+export function integerSchema(
+  options: Omit<Extract<AgwSchema, { type: "integer" }>, "type"> = {},
+): AgwSchema {
   return { type: "integer", minimum: 0, ...options };
 }
 
-export function booleanSchema(options: Omit<Extract<AgwSchema, { type: "boolean" }>, "type"> = {}): AgwSchema {
+export function booleanSchema(
+  options: Omit<Extract<AgwSchema, { type: "boolean" }>, "type"> = {},
+): AgwSchema {
   return { type: "boolean", ...options };
 }
 
-export function nullSchema(options: Omit<Extract<AgwSchema, { type: "null" }>, "type"> = {}): AgwSchema {
+export function nullSchema(
+  options: Omit<Extract<AgwSchema, { type: "null" }>, "type"> = {},
+): AgwSchema {
   return { type: "null", ...options };
 }
 
-export function unknownSchema(options: Omit<Extract<AgwSchema, { type: "unknown" }>, "type"> = {}): AgwSchema {
+export function unknownSchema(
+  options: Omit<Extract<AgwSchema, { type: "unknown" }>, "type"> = {},
+): AgwSchema {
   return { type: "unknown", ...options };
 }
 
-export function arraySchema(items: AgwSchema, options: Omit<Extract<AgwSchema, { type: "array" }>, "type" | "items"> = {}): AgwSchema {
+export function arraySchema(
+  items: AgwSchema,
+  options: Omit<Extract<AgwSchema, { type: "array" }>, "type" | "items"> = {},
+): AgwSchema {
   return { type: "array", items, ...options };
 }
 
@@ -54,7 +71,15 @@ export function objectSchema(
 }
 
 export function opaqueObjectSchema(description: string): AgwObjectSchema {
-  return objectSchema({}, { additionalProperties: true, description, opaque: true, opaqueReason: "external_data" });
+  return objectSchema(
+    {},
+    {
+      additionalProperties: true,
+      description,
+      opaque: true,
+      opaqueReason: "external_data",
+    },
+  );
 }
 
 export const emptyObjectSchema = (): AgwObjectSchema => ({
@@ -64,7 +89,9 @@ export const emptyObjectSchema = (): AgwObjectSchema => ({
 
 export const authNone = (): AgwAuthRequirement => ({ kind: "none" });
 
-export const authSession = (readiness: AgwAuthRequirement["readiness"]): AgwAuthRequirement => ({
+export const authSession = (
+  readiness: AgwAuthRequirement["readiness"],
+): AgwAuthRequirement => ({
   kind: "local_session",
   readiness,
 });
@@ -82,7 +109,9 @@ export const readMutation = (): AgwMutationContract => ({
   supportsPreview: false,
 });
 
-export const writeMutation = (risk: AgwCommandRisk = "state_change"): AgwMutationContract => ({
+export const writeMutation = (
+  risk: AgwCommandRisk = "state_change",
+): AgwMutationContract => ({
   risk,
   defaultMode: "preview",
   requiresExplicitExecute: true,
@@ -91,7 +120,11 @@ export const writeMutation = (risk: AgwCommandRisk = "state_change"): AgwMutatio
   supportsPreview: true,
 });
 
-export const jsonOutput = (supportsFieldSelection: boolean, supportsPagination = false, supportsPageAll = false): AgwOutputContract => ({
+export const jsonOutput = (
+  supportsFieldSelection: boolean,
+  supportsPagination = false,
+  supportsPageAll = false,
+): AgwOutputContract => ({
   defaultMode: "json",
   supportsFieldSelection,
   supportsPagination,
@@ -109,24 +142,42 @@ export const ndjsonOutput = (
   supportsPageAll,
 });
 
-export const exposure = (cli: boolean, mcp: boolean, skillHints: string[] = []): AgwExposureContract => ({
+export const exposure = (
+  cli: boolean,
+  mcp: boolean,
+  skillHints: string[] = [],
+): AgwExposureContract => ({
   cli,
   mcp,
   skillHints,
 });
 
-export const sanitize = (supported: boolean, defaultProfile: AgwSanitizationContract["defaultProfile"] = "off"): AgwSanitizationContract => ({
+export const sanitize = (
+  supported: boolean,
+  defaultProfile: AgwSanitizationContract["defaultProfile"] = "off",
+): AgwSanitizationContract => ({
   supported,
   defaultProfile,
 });
 
-export const config = (...env: AgwConfigDependency[]): { env: AgwConfigDependency[] } => ({ env });
+export const config = (
+  ...env: AgwConfigDependency[]
+): { env: AgwConfigDependency[] } => ({ env });
 
 export const idSchema = (description: string): AgwSchema =>
-  stringSchema({ description, format: "resource-id", minLength: 1, pattern: "^[^?#%]+$" });
+  stringSchema({
+    description,
+    format: "resource-id",
+    minLength: 1,
+    pattern: "^[^?#%]+$",
+  });
 
 export const addressSchema = (description: string): AgwSchema =>
-  stringSchema({ description, format: "address", pattern: "^0x[a-fA-F0-9]{40}$" });
+  stringSchema({
+    description,
+    format: "address",
+    pattern: "^0x[a-fA-F0-9]{40}$",
+  });
 
 export const hexSchema = (description: string): AgwSchema =>
   stringSchema({ description, format: "hex", pattern: "^0x[0-9a-fA-F]*$" });
@@ -135,15 +186,24 @@ export const decimalStringSchema = (description: string): AgwSchema =>
   stringSchema({ description, format: "decimal-string", pattern: "^\\d+$" });
 
 export const fieldsSchema = (): AgwSchema =>
-  arraySchema(stringSchema({ description: "Response field path", minLength: 1 }), {
-    description: "Optional response field selection paths.",
-  });
+  arraySchema(
+    stringSchema({ description: "Response field path", minLength: 1 }),
+    {
+      description: "Optional response field selection paths.",
+    },
+  );
 
 export const paginationRequestSchema = (): AgwObjectSchema =>
   objectSchema({
     cursor: stringSchema({ description: "Opaque cursor for the next page." }),
-    pageSize: integerSchema({ description: "Maximum number of items to return per page.", minimum: 1 }),
-    pageAll: booleanSchema({ description: "When true, fetch all pages through the executor.", default: false }),
+    pageSize: integerSchema({
+      description: "Maximum number of items to return per page.",
+      minimum: 1,
+    }),
+    pageAll: booleanSchema({
+      description: "When true, fetch all pages through the executor.",
+      default: false,
+    }),
   });
 
 export const transactionRequestSchema: AgwObjectSchema = objectSchema(
@@ -151,7 +211,10 @@ export const transactionRequestSchema: AgwObjectSchema = objectSchema(
     to: addressSchema("Target contract or EOA address."),
     data: hexSchema("Hex calldata for the transaction."),
     value: decimalStringSchema("Wei value as a decimal string. Defaults to 0."),
-    execute: booleanSchema({ description: "Execute immediately when true. Preview by default.", default: false }),
+    execute: booleanSchema({
+      description: "Execute immediately when true. Preview by default.",
+      default: false,
+    }),
   },
   { required: ["to", "data"] },
 );
@@ -168,26 +231,38 @@ export const transactionPreviewSchema = objectSchema(
 export const explorerLinksSchema = objectSchema(
   {
     chain: stringSchema({ description: "Chain explorer base URL." }),
-    transaction: stringSchema({ description: "Explorer URL for the transaction." }),
+    transaction: stringSchema({
+      description: "Explorer URL for the transaction.",
+    }),
   },
   { additionalProperties: false },
 );
 
 export const transactionResponseSchema: AgwObjectSchema = objectSchema({
-  broadcast: booleanSchema({ description: "Whether the transaction was broadcast." }),
+  broadcast: booleanSchema({
+    description: "Whether the transaction was broadcast.",
+  }),
   preview: booleanSchema({ description: "Whether the response is a preview." }),
   txHash: stringSchema({ description: "Broadcast transaction hash." }),
-  requiresExplicitExecute: booleanSchema({ description: "Whether execute intent is required." }),
+  requiresExplicitExecute: booleanSchema({
+    description: "Whether execute intent is required.",
+  }),
   transaction: transactionPreviewSchema,
   explorer: explorerLinksSchema,
 });
 
-export function listResponseSchema(itemSchema: AgwSchema = opaqueObjectSchema("Opaque list item payload.")): AgwObjectSchema {
+export function listResponseSchema(
+  itemSchema: AgwSchema = opaqueObjectSchema("Opaque list item payload."),
+): AgwObjectSchema {
   return objectSchema(
     {
       items: arraySchema(itemSchema, { description: "Page items." }),
-      nextCursor: stringSchema({ description: "Cursor to request the next page." }),
-      totalItems: integerSchema({ description: "Total number of items available when known." }),
+      nextCursor: stringSchema({
+        description: "Cursor to request the next page.",
+      }),
+      totalItems: integerSchema({
+        description: "Total number of items available when known.",
+      }),
     },
     { required: ["items"] },
   );

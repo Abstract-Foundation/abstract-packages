@@ -9,8 +9,10 @@ function isJsonRecord(value: unknown): value is JsonRecord {
 }
 
 export const walletHandlers: Record<string, CommandHandler> = {
-  "wallet.address": async (_input, context) => getWalletAddressTool.handler({}, context),
-  "wallet.balances": async (input, context) => getBalancesTool.handler({ tokenAddresses: input.tokenAddresses }, context),
+  "wallet.address": async (_input, context) =>
+    getWalletAddressTool.handler({}, context),
+  "wallet.balances": async (input, context) =>
+    getBalancesTool.handler({ tokenAddresses: input.tokenAddresses }, context),
   "wallet.tokens.list": async (input, context) => {
     const result = await getTokenListTool.handler({}, context);
     if (!isJsonRecord(result) || !Array.isArray(result.tokenHoldings)) {
@@ -23,7 +25,11 @@ export const walletHandlers: Record<string, CommandHandler> = {
       accountAddress: result.accountAddress ?? null,
       chainId: result.chainId ?? null,
       explorer: result.explorer ?? null,
-      ...sliceItemsWithCursor(result.tokenHoldings, input.cursor, input.pageSize),
+      ...sliceItemsWithCursor(
+        result.tokenHoldings,
+        input.cursor,
+        input.pageSize,
+      ),
       totalItems: result.tokenHoldings.length,
     };
   },

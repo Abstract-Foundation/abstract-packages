@@ -1,4 +1,4 @@
-import { isAddress, type Address, type Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 import { assertToolCapability } from "./capability-guard.js";
 import type { ToolHandler } from "./types.js";
 
@@ -34,13 +34,21 @@ function parseCalls(value: unknown): ParsedCall[] {
     if (typeof record.to !== "string" || !isAddress(record.to)) {
       throw new Error(`calls[${index}].to must be a valid 0x-prefixed address`);
     }
-    if (typeof record.data !== "string" || !/^0x[0-9a-fA-F]*$/.test(record.data) || record.data.length % 2 !== 0) {
-      throw new Error(`calls[${index}].data must be a 0x-prefixed hex string with even length`);
+    if (
+      typeof record.data !== "string" ||
+      !/^0x[0-9a-fA-F]*$/.test(record.data) ||
+      record.data.length % 2 !== 0
+    ) {
+      throw new Error(
+        `calls[${index}].data must be a 0x-prefixed hex string with even length`,
+      );
     }
 
     const valueRaw = record.value === undefined ? "0" : String(record.value);
     if (!/^\d+$/.test(valueRaw)) {
-      throw new Error(`calls[${index}].value must be a non-negative integer string`);
+      throw new Error(
+        `calls[${index}].value must be a non-negative integer string`,
+      );
     }
 
     parsed.push({
@@ -56,7 +64,8 @@ function parseCalls(value: unknown): ParsedCall[] {
 
 export const sendCallsTool: ToolHandler = {
   name: "send_calls",
-  description: "Executes AGW sendCalls (EIP-5792 batch calls) through the AGW wallet.",
+  description:
+    "Executes AGW sendCalls (EIP-5792 batch calls) through the AGW wallet.",
   inputSchema: {
     type: "object",
     properties: {
@@ -94,7 +103,7 @@ export const sendCallsTool: ToolHandler = {
         execute: false,
         requiresExplicitExecute: true,
         callCount: calls.length,
-        calls: calls.map(call => ({
+        calls: calls.map((call) => ({
           to: call.to,
           data: call.data,
           value: call.valueRaw,
@@ -104,7 +113,7 @@ export const sendCallsTool: ToolHandler = {
 
     const abstractClient = await context.sessionManager.getAbstractClient();
     const txHash = await abstractClient.sendTransactionBatch({
-      calls: calls.map(call => ({
+      calls: calls.map((call) => ({
         to: call.to,
         data: call.data,
         value: call.value,
@@ -118,7 +127,7 @@ export const sendCallsTool: ToolHandler = {
       id: txHash,
       capabilities: {},
       callCount: calls.length,
-      calls: calls.map(call => ({
+      calls: calls.map((call) => ({
         to: call.to,
         data: call.data,
         value: call.valueRaw,

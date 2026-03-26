@@ -1,4 +1,11 @@
-import { createPublicClient, erc20Abi, formatUnits, http, isAddress, type Address } from "viem";
+import {
+  type Address,
+  createPublicClient,
+  erc20Abi,
+  formatUnits,
+  http,
+  isAddress,
+} from "viem";
 import { resolveNetworkConfig } from "../config/network.js";
 import { buildExplorerUrl } from "../utils/explorer.js";
 import { resolveToolNetworkConfig } from "./network.js";
@@ -11,7 +18,10 @@ export interface CreateBalanceReaderInput {
 
 export interface BalanceReader {
   getNativeBalance: (accountAddress: Address) => Promise<bigint>;
-  getTokenBalance: (tokenAddress: Address, accountAddress: Address) => Promise<bigint>;
+  getTokenBalance: (
+    tokenAddress: Address,
+    accountAddress: Address,
+  ) => Promise<bigint>;
   getTokenDecimals: (tokenAddress: Address) => Promise<number>;
   getTokenSymbol: (tokenAddress: Address) => Promise<string>;
 }
@@ -20,7 +30,9 @@ export interface GetBalancesToolDependencies {
   createBalanceReader: (input: CreateBalanceReaderInput) => BalanceReader;
 }
 
-function createDefaultBalanceReader(input: CreateBalanceReaderInput): BalanceReader {
+function createDefaultBalanceReader(
+  input: CreateBalanceReaderInput,
+): BalanceReader {
   const networkConfig = resolveNetworkConfig({
     chainId: input.chainId,
     rpcUrl: input.rpcUrl,
@@ -32,7 +44,8 @@ function createDefaultBalanceReader(input: CreateBalanceReaderInput): BalanceRea
   });
 
   return {
-    getNativeBalance: accountAddress => publicClient.getBalance({ address: accountAddress }),
+    getNativeBalance: (accountAddress) =>
+      publicClient.getBalance({ address: accountAddress }),
     getTokenBalance: async (tokenAddress, accountAddress) => {
       const balance = await publicClient.readContract({
         address: tokenAddress,
@@ -43,7 +56,7 @@ function createDefaultBalanceReader(input: CreateBalanceReaderInput): BalanceRea
 
       return balance as bigint;
     },
-    getTokenDecimals: async tokenAddress => {
+    getTokenDecimals: async (tokenAddress) => {
       const decimals = await publicClient.readContract({
         address: tokenAddress,
         abi: erc20Abi,
@@ -51,12 +64,14 @@ function createDefaultBalanceReader(input: CreateBalanceReaderInput): BalanceRea
       });
 
       if (typeof decimals !== "number") {
-        throw new Error(`token ${tokenAddress} returned a non-numeric decimals value`);
+        throw new Error(
+          `token ${tokenAddress} returned a non-numeric decimals value`,
+        );
       }
 
       return decimals;
     },
-    getTokenSymbol: async tokenAddress => {
+    getTokenSymbol: async (tokenAddress) => {
       const symbol = await publicClient.readContract({
         address: tokenAddress,
         abi: erc20Abi,
@@ -67,7 +82,9 @@ function createDefaultBalanceReader(input: CreateBalanceReaderInput): BalanceRea
         return symbol;
       }
 
-      throw new Error(`token ${tokenAddress} returned a non-string symbol value`);
+      throw new Error(
+        `token ${tokenAddress} returned a non-string symbol value`,
+      );
     },
   };
 }
@@ -78,7 +95,9 @@ function normalizeTokenAddresses(value: unknown): Address[] {
   }
 
   if (!Array.isArray(value)) {
-    throw new Error("tokenAddresses must be an array of token contract addresses");
+    throw new Error(
+      "tokenAddresses must be an array of token contract addresses",
+    );
   }
 
   const seen = new Set<string>();
@@ -86,7 +105,9 @@ function normalizeTokenAddresses(value: unknown): Address[] {
 
   for (const [index, entry] of value.entries()) {
     if (typeof entry !== "string" || !isAddress(entry, { strict: false })) {
-      throw new Error(`tokenAddresses[${index}] must be a valid 0x-prefixed address`);
+      throw new Error(
+        `tokenAddresses[${index}] must be a valid 0x-prefixed address`,
+      );
     }
 
     const dedupeKey = entry.toLowerCase();
@@ -108,13 +129,15 @@ export function createGetBalancesTool(
 ): ToolHandler {
   return {
     name: "get_balances",
-    description: "Returns normalized native and ERC-20 balances for the AGW account in local session storage.",
+    description:
+      "Returns normalized native and ERC-20 balances for the AGW account in local session storage.",
     inputSchema: {
       type: "object",
       properties: {
         tokenAddresses: {
           type: "array",
-          description: "Optional ERC-20 token contract addresses to query in addition to native balance.",
+          description:
+            "Optional ERC-20 token contract addresses to query in addition to native balance.",
           items: {
             type: "string",
           },
@@ -125,7 +148,8 @@ export function createGetBalancesTool(
       const session = context.sessionManager.getSession();
       const chainId = session?.chainId ?? context.sessionManager.getChainId();
       const networkConfig = resolveToolNetworkConfig(context, chainId);
-      const explorerBase = networkConfig.chain.blockExplorers?.default?.url ?? null;
+      const explorerBase =
+        networkConfig.chain.blockExplorers?.default?.url ?? null;
 
       if (!session) {
         return {
@@ -157,7 +181,7 @@ export function createGetBalancesTool(
       const nativeBalanceRaw = await reader.getNativeBalance(accountAddress);
 
       const tokenBalances = await Promise.all(
-        tokenAddresses.map(async tokenAddress => {
+        tokenAddresses.map(async (tokenAddress) => {
           const [rawBalance, decimals, symbol] = await Promise.all([
             reader.getTokenBalance(tokenAddress, accountAddress),
             reader.getTokenDecimals(tokenAddress),
@@ -174,7 +198,10 @@ export function createGetBalancesTool(
             },
             explorer: {
               token: buildExplorerUrl(explorerBase, `/token/${tokenAddress}`),
-              holder: buildExplorerUrl(explorerBase, `/token/${tokenAddress}?a=${accountAddress}`),
+              holder: buildExplorerUrl(
+                explorerBase,
+                `/token/${tokenAddress}?a=${accountAddress}`,
+              ),
             },
           };
         }),

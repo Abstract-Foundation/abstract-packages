@@ -1,9 +1,12 @@
-import type { ToolContext } from "../tools/types.js";
 import type { AgwOutputMode, AgwSanitizeProfile } from "../registry/types.js";
+import type { ToolContext } from "../tools/types.js";
 
 export type JsonRecord = Record<string, unknown>;
 
-export type CommandHandler = (input: JsonRecord, context: ToolContext) => Promise<unknown>;
+export type CommandHandler = (
+  input: JsonRecord,
+  context: ToolContext,
+) => Promise<unknown>;
 
 export interface CommandRuntimeOptions {
   appUrl?: string;
@@ -26,5 +29,7 @@ export function isJsonRecord(value: unknown): value is JsonRecord {
 }
 
 export function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every(entry => typeof entry === "string");
+  return (
+    Array.isArray(value) && value.every((entry) => typeof entry === "string")
+  );
 }
