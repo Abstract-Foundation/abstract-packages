@@ -1,5 +1,11 @@
 # @abstract-foundation/mpp
 
+## 0.1.4
+
+### Patch Changes
+
+- 2e8559e: Remove AI-generated separator comments and add JSDoc to all undocumented exports
+
 ## 0.1.3
 
 ### Patch Changes
