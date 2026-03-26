@@ -1,0 +1,21 @@
+name: Release Please
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release token preflight
+        run: |
+          if [ -z "${{ secrets.RELEASE_PLEASE_TOKEN }}" ]; then
+            echo "::warning::RELEASE_PLEASE_TOKEN is not set. Falling back to GITHUB_TOKEN. If this repository blocks GITHUB_TOKEN from creating pull requests, set RELEASE_PLEASE_TOKEN to a PAT with repo scope."
+          fi
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN != '' && secrets.RELEASE_PLEASE_TOKEN || github.token }}

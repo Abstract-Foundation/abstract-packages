@@ -1,0 +1,4 @@
+interface:
+  display_name: "Executing AGW Transactions"
+  short_description: "Preview-first AGW signing and writes"
+  default_prompt: "Use $executing-agw-transactions to preview or execute AGW signing and write actions with explicit confirmation."
