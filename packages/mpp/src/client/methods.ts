@@ -2,10 +2,8 @@
  * Abstract MPP method definitions (client + server share the same schema objects).
  */
 
-import { Method, z } from "mppx";
-import { parseUnits } from "viem";
-
-// ── Charge ────────────────────────────────────────────────────────────────
+import { Method, z } from 'mppx';
+import { parseUnits } from 'viem';
 
 /**
  * Abstract charge intent — one-time ERC-3009 transfer authorization.
@@ -14,12 +12,12 @@ import { parseUnits } from "viem";
  * server can call `transferWithAuthorization` on behalf of the payer.
  */
 export const abstractChargeMethods = Method.from({
-  name: "abstract",
-  intent: "charge",
+  name: 'abstract',
+  intent: 'charge',
   schema: {
     credential: {
       payload: z.object({
-        type: z.literal("authorization"),
+        type: z.literal('authorization'),
         signature: z.signature(),
         nonce: z.hash(),
         validAfter: z.amount(),
@@ -39,25 +37,25 @@ export const abstractChargeMethods = Method.from({
       z.transform(({ amount, decimals, chainId, ...rest }) => ({
         ...rest,
         amount: parseUnits(amount, decimals).toString(),
-        ...(chainId !== undefined ? { methodDetails: { chainId } } : {}),
+        ...(chainId !== undefined
+          ? { methodDetails: { chainId } }
+          : {}),
       })),
     ),
   },
 });
 
-// ── Session ───────────────────────────────────────────────────────────────
-
 /**
  * Abstract session intent — payment channels backed by AbstractStreamChannel.
  */
 export const abstractSessionMethods = Method.from({
-  name: "abstract",
-  intent: "session",
+  name: 'abstract',
+  intent: 'session',
   schema: {
     credential: {
-      payload: z.discriminatedUnion("action", [
+      payload: z.discriminatedUnion('action', [
         z.object({
-          action: z.literal("open"),
+          action: z.literal('open'),
           channelId: z.hash(),
           cumulativeAmount: z.amount(),
           signature: z.signature(),
@@ -65,19 +63,19 @@ export const abstractSessionMethods = Method.from({
           authorizedSigner: z.optional(z.string()),
         }),
         z.object({
-          action: z.literal("topUp"),
+          action: z.literal('topUp'),
           channelId: z.hash(),
           additionalDeposit: z.amount(),
           txHash: z.hash(),
         }),
         z.object({
-          action: z.literal("voucher"),
+          action: z.literal('voucher'),
           channelId: z.hash(),
           cumulativeAmount: z.amount(),
           signature: z.signature(),
         }),
         z.object({
-          action: z.literal("close"),
+          action: z.literal('close'),
           channelId: z.hash(),
           cumulativeAmount: z.amount(),
           signature: z.signature(),
