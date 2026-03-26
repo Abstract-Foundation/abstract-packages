@@ -20,7 +20,7 @@
 		"rules": {
 			"recommended": true
 		},
-    "includes": ["**", "!node_modules/**", "!packages/**/dist/**"]
+		"includes": ["**", "!node_modules/**", "!packages/**/dist/**", "!*.sol"]
 	},
 	"javascript": {
 		"formatter": {

@@ -1,19 +1,37 @@
 .DS_Store
-dist
-node_modules
-tsconfig.tsbuildinfo
-.turbo/
+node_modules/
+dist/
+.next/
+out/
 
-# local env files
+# Build artifacts
+*.tsbuildinfo
+.turbo/
+*.log
+*.tgz
+
+# Local env files
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .envrc
 
-# local packages
-*.tgz
+# Coverage
+**/coverage/
 
-# coverage
-**coverage/
+# Forge / Solidity
+zkout/
+packages/contracts/lib/
+packages/contracts/cache/
+packages/contracts/dependencies/
+
+# Vercel
+.vercel
+
+# Lock files from merged repos (root pnpm-lock.yaml is the single source)
+packages/**/pnpm-lock.yaml
+apps/**/pnpm-lock.yaml
+examples/**/pnpm-lock.yaml
