@@ -36,14 +36,14 @@
   },
   "devDependencies": {
     "tsdown": "^0.20.3",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   },
   "dependencies": {
     "@abstract-foundation/agw-client": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "catalog:",
     "commander": "^12.1.0",
-    "open": "^10.1.0",
-    "viem": "^2.46.2"
+    "open": "catalog:",
+    "viem": "catalog:"
   }
 }

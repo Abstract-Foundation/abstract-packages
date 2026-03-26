@@ -6,21 +6,36 @@ settings:
 
 catalogs:
   default:
+    '@modelcontextprotocol/sdk':
+      specifier: ^1.26.0
+      version: 1.28.0
+    '@types/node':
+      specifier: ^22.18.1
+      version: 22.19.15
+    '@vitest/coverage-v8':
+      specifier: ^3.2.4
+      version: 3.2.4
     mppx:
       specifier: ^0.4.9
       version: 0.4.9
+    open:
+      specifier: ^10.1.0
+      version: 10.1.1
     tsx:
       specifier: ^4.19.3
       version: 4.21.0
     typescript:
       specifier: ^5.8.2
       version: 5.9.3
+    vitest:
+      specifier: ^3.2.4
+      version: 3.2.4
     zod:
       specifier: ^4.3.6
       version: 4.3.6
 
 overrides:
-  viem: ^2.38.6
+  viem: ^2.46.2
   ajv: 6.14.0
   bn.js: 5.2.3
   minimatch: 10.2.1
@@ -68,10 +83,10 @@ importers:
         specifier: ^2.8.20
         version: 2.8.20
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^3.2.4
+        specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(sass@1.98.0)(tsx@4.21.0)(yaml@2.8.3)
 
   apps/cli-companion:
@@ -107,7 +122,7 @@ importers:
         specifier: ^1.1.3
         version: 1.1.3
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       wagmi:
         specifier: ^2.19.4
@@ -120,7 +135,7 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0(typescript@5.9.3)
       '@types/node':
-        specifier: ^22.18.1
+        specifier: 'catalog:'
         version: 22.19.15
       '@types/react':
         specifier: ^18.3.23
@@ -129,10 +144,10 @@ importers:
         specifier: ^18.3.7
         version: 18.3.7(@types/react@18.3.28)
       typescript:
-        specifier: ^5.9.2
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^3.2.4
+        specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.13)(@types/node@22.19.15)(jiti@2.6.1)(sass@1.98.0)(tsx@4.21.0)(yaml@2.8.3)
 
   examples/agent-client:
@@ -144,11 +159,11 @@ importers:
         specifier: 'catalog:'
         version: 0.4.9(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))(express@5.2.1)(hono@4.12.9)(openapi-types@12.1.3)(typescript@5.9.3)(viem@2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.19.15
       tsx:
         specifier: 'catalog:'
@@ -172,11 +187,11 @@ importers:
         specifier: 'catalog:'
         version: 0.4.9(@modelcontextprotocol/sdk@1.28.0(zod@4.3.6))(express@5.2.1)(hono@4.12.9)(openapi-types@12.1.3)(typescript@5.9.3)(viem@2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.19.15
       tsx:
         specifier: 'catalog:'
@@ -224,14 +239,14 @@ importers:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
       wagmi:
         specifier: ^2.16.0
         version: 2.19.5(@tanstack/query-core@5.95.2)(@tanstack/react-query@5.95.2(react@19.2.4))(@types/react@19.2.14)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(zod@4.3.6)
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.19.15
       '@types/react':
         specifier: ^19
@@ -258,26 +273,26 @@ importers:
         specifier: workspace:*
         version: link:../agw-client
       '@modelcontextprotocol/sdk':
-        specifier: ^1.26.0
+        specifier: 'catalog:'
         version: 1.28.0(zod@4.3.6)
       commander:
         specifier: ^12.1.0
         version: 12.1.0
       open:
-        specifier: ^10.1.0
+        specifier: 'catalog:'
         version: 10.1.1
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
     devDependencies:
       tsdown:
         specifier: ^0.20.3
         version: 0.20.3(publint@0.2.12)(typescript@5.9.3)
       tsx:
-        specifier: ^4.19.3
+        specifier: 'catalog:'
         version: 4.21.0
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/agw-client:
@@ -287,19 +302,19 @@ importers:
         version: 5.9.3
     devDependencies:
       '@types/node':
-        specifier: ^22.12.5
+        specifier: 'catalog:'
         version: 22.19.15
       '@vitest/coverage-v8':
-        specifier: ^3.2.4
+        specifier: 'catalog:'
         version: 3.2.4(vitest@3.2.4(@types/debug@4.1.13)(@types/node@22.19.15)(jiti@2.6.1)(sass@1.98.0)(tsx@4.21.0)(yaml@2.8.3))
       prool:
         specifier: ^0.0.23
         version: 0.0.23
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
       vitest:
-        specifier: ^3.2.4
+        specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.13)(@types/node@22.19.15)(jiti@2.6.1)(sass@1.98.0)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/agw-core:
@@ -308,20 +323,20 @@ importers:
         specifier: workspace:*
         version: link:../agw-client
       '@modelcontextprotocol/sdk':
-        specifier: ^1.26.0
+        specifier: 'catalog:'
         version: 1.28.0(zod@4.3.6)
       open:
-        specifier: ^10.1.0
+        specifier: 'catalog:'
         version: 10.1.1
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
     devDependencies:
       '@types/node':
-        specifier: ^22.18.1
+        specifier: 'catalog:'
         version: 22.19.15
       typescript:
-        specifier: ^5.8.2
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/agw-react:
@@ -376,7 +391,7 @@ importers:
         specifier: ^5.68.0
         version: 5.119.1(@hey-api/openapi-ts@0.94.5(magicast@0.3.5)(typescript@5.9.3))(@tanstack/query-core@5.95.2)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(bufferutil@4.1.0)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@18.3.1))(utf-8-validate@6.0.6)(ws@8.20.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.25.75)
 
   packages/agw-web:
@@ -389,7 +404,7 @@ importers:
         specifier: ^0.5.2
         version: 0.5.5(@wagmi/core@2.22.1(@tanstack/query-core@5.95.2)(@types/react@19.2.14)(react@19.2.4)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.4))(viem@2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)))(viem@2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
 
   packages/contracts: {}
@@ -406,7 +421,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
       zod:
         specifier: 'catalog:'
@@ -428,7 +443,7 @@ importers:
         specifier: ^5.80.3
         version: 5.95.2(react@19.2.4)
       '@types/node':
-        specifier: ^22.12.5
+        specifier: 'catalog:'
         version: 22.19.15
       '@web3-react/core':
         specifier: ^8.2.3
@@ -440,7 +455,7 @@ importers:
         specifier: ^18
         version: 18.3.1(react@19.2.4)
       viem:
-        specifier: ^2.38.6
+        specifier: ^2.46.2
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
       wagmi:
         specifier: ^2.17.5
@@ -1534,7 +1549,7 @@ packages:
   '@gemini-wallet/core@0.3.2':
     resolution: {integrity: sha512-Z4aHi3ECFf5oWYWM3F1rW83GJfB9OvhBYPTmb5q+VyK3uvzvS48lwo+jwh2eOoCRWEuT/crpb9Vwp2QaS5JqgQ==}
     peerDependencies:
-      viem: ^2.38.6
+      viem: ^2.46.2
 
   '@hcaptcha/loader@2.3.0':
     resolution: {integrity: sha512-i4lnNxKBe+COf3R1nFZEWaZoHIoJjvDgWqvcNrdZq8ehoSNMN6KVZ56dcQ02qKie2h3+BkbkwlJA9DOIuLlK/g==}
@@ -2237,7 +2252,7 @@ packages:
     peerDependencies:
       '@rainbow-me/rainbowkit': ^2.2.3
       '@wagmi/core': ^2.16.4
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       '@rainbow-me/rainbowkit':
         optional: true
@@ -2247,18 +2262,18 @@ packages:
   '@privy-io/ethereum@0.0.2':
     resolution: {integrity: sha512-FnJ1dzgg/tij4jLeKHLlZM9uNk4WN+iIOkc8CG0FZKUQxqXH60Fs/dMF6Xbndd5CQkUO8LUU7FLom/405VKXpQ==}
     peerDependencies:
-      viem: ^2.38.6
+      viem: ^2.46.2
 
   '@privy-io/ethereum@0.0.9':
     resolution: {integrity: sha512-iJN7yuXnT4d1/Rt5xFF2a869+JxKe8g5EEZzHM/xg0GyERCnDiHLgi2FgkVSAuXpllub+4LysI3iDQUgZd+/Ow==}
     peerDependencies:
-      viem: ^2.38.6
+      viem: ^2.46.2
 
   '@privy-io/js-sdk-core@0.55.0':
     resolution: {integrity: sha512-halUc0CS0fKQY5fX7YOBpL1piBz5eg140rL+tjyL7yeBCjNkgf5DX6J4BWzRdr5AplRdMWRBUb1/6+g+pcm4Iw==}
     peerDependencies:
       permissionless: ^0.2.47
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       permissionless:
         optional: true
@@ -2269,7 +2284,7 @@ packages:
     resolution: {integrity: sha512-PUXe1LJgAA5g0xf2xT9ATA4ngJG/mtfCpvvJsPYBfCF1vWldXZlE0fB0JYDabQRtdz/8TKiHk2N32YUqG7jBOQ==}
     peerDependencies:
       permissionless: ^0.2.47
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       permissionless:
         optional: true
@@ -4017,7 +4032,7 @@ packages:
     peerDependencies:
       '@wagmi/core': 2.22.1
       typescript: '>=5.0.4'
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -4027,7 +4042,7 @@ packages:
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
       typescript: '>=5.0.4'
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       '@tanstack/query-core':
         optional: true
@@ -5976,7 +5991,7 @@ packages:
       elysia: '>=1'
       express: '>=5'
       hono: '>=4.12.4'
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       '@modelcontextprotocol/sdk':
         optional: true
@@ -6412,7 +6427,7 @@ packages:
       react: '>=18'
       react-native: '>=0.81.4'
       typescript: '>=5.4.0'
-      viem: ^2.38.6
+      viem: ^2.46.2
       wagmi: '>=2.0.0'
     peerDependenciesMeta:
       '@tanstack/react-query':
@@ -7678,7 +7693,7 @@ packages:
       '@tanstack/react-query': '>=5.0.0'
       react: '>=18'
       typescript: '>=5.0.4'
-      viem: ^2.38.6
+      viem: ^2.46.2
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -14142,7 +14157,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.19.15
+      '@types/node': 25.5.0
 
   '@types/debug@4.1.13':
     dependencies:
@@ -14199,11 +14214,11 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 22.19.15
+      '@types/node': 25.5.0
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 22.19.15
+      '@types/node': 25.5.0
 
   '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.13)(@types/node@22.19.15)(jiti@2.6.1)(sass@1.98.0)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
