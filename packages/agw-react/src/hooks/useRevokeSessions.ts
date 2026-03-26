@@ -7,6 +7,7 @@ import {
 import type { WriteContractParameters } from "@wagmi/core";
 import type { Address, Hash, Hex } from "viem";
 import { useWriteContract } from "wagmi";
+import type { UseWriteContractReturnType } from "wagmi";
 
 export type RevokeSessionsArgs = {
   sessions: SessionConfig | Hash | (SessionConfig | Hash)[];
@@ -103,7 +104,13 @@ export type RevokeSessionsArgs = {
  * @see {@link SessionKeyValidatorAbi} - The ABI for the session validator contract
  * @see {@link getSessionHash} - Function to compute the hash of a session configuration
  */
-export const useRevokeSessions = () => {
+export const useRevokeSessions = (): Omit<
+  UseWriteContractReturnType,
+  "writeContract" | "writeContractAsync"
+> & {
+  revokeSessions: (params: RevokeSessionsArgs) => void;
+  revokeSessionsAsync: (params: RevokeSessionsArgs) => Promise<void>;
+} => {
   const { writeContract, writeContractAsync, ...writeContractRest } =
     useWriteContract();
   const getSessionHashes = (

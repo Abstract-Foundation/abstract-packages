@@ -43,7 +43,10 @@ export const usePrivyCrossAppProvider = ({
   transport = http(undefined, {
     batch: true,
   }),
-}: UsePrivyCrossAppEIP1193Props) => {
+}: UsePrivyCrossAppEIP1193Props): {
+  ready: boolean | null | undefined;
+  provider: EIP1193Provider;
+} => {
   const {
     loginWithCrossAppAccount,
     linkCrossAppAccount,
