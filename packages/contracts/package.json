@@ -1,0 +1,12 @@
+{
+  "name": "contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install": "node ./scripts/install.mjs",
+    "build": "forge build",
+    "build:zksync": "forge build --zksync",
+    "test": "forge test",
+    "test:zksync": "forge test --zksync"
+  }
+}
