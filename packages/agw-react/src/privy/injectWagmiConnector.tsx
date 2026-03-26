@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { Fragment, useEffect, useState } from "react";
 import type { Chain, EIP1193Provider, Transport } from "viem";
 import { useConfig, useReconnect } from "wagmi";
