@@ -1,0 +1,4 @@
+interface:
+  display_name: "Discovering Abstract Portal"
+  short_description: "Discover AGW apps, streams, and profiles"
+  default_prompt: "Use $discovering-abstract-portal to inspect app metadata, related skills, or Portal content safely."

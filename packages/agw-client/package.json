@@ -1,0 +1,92 @@
+{
+  "name": "@abstract-foundation/agw-client",
+  "description": "Abstract Global Wallet Client SDK",
+  "version": "1.11.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abstract-Foundation/agw-sdk.git",
+    "directory": "packages/agw-client"
+  },
+  "scripts": {
+    "test": "vitest -c ./test/vitest.config.ts --disable-console-intercept",
+    "coverage": "vitest run --coverage -c ./test/vitest.config.ts",
+    "build": "pnpm run clean && pnpm run build:esm+types && pnpm run build:cjs",
+    "build:esm+types": "tsc --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && printf '{\"type\":\"module\"}' > ./dist/esm/package.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && printf '{\"type\":\"commonjs\"}' > ./dist/cjs/package.json",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "debug": "tsc-watch --sourceMap true --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types",
+    "test:build": "publint && attw --pack --ignore-rules false-cjs"
+  },
+  "main": "./dist/cjs/exports/index.js",
+  "module": "./dist/esm/exports/index.js",
+  "types": "./dist/types/exports/index.d.ts",
+  "typings": "./dist/types/exports/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/exports/index.d.ts",
+      "import": "./dist/esm/exports/index.js",
+      "require": "./dist/cjs/exports/index.js"
+    },
+    "./actions": {
+      "types": "./dist/types/exports/actions.d.ts",
+      "import": "./dist/esm/exports/actions.js",
+      "require": "./dist/cjs/exports/actions.js"
+    },
+    "./constants": {
+      "types": "./dist/types/exports/constants.d.ts",
+      "import": "./dist/esm/exports/constants.js",
+      "require": "./dist/cjs/exports/constants.js"
+    },
+    "./sessions": {
+      "types": "./dist/types/exports/sessions.d.ts",
+      "import": "./dist/esm/exports/sessions.js",
+      "require": "./dist/cjs/exports/sessions.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "actions": [
+        "./dist/types/exports/actions.d.ts"
+      ],
+      "constants": [
+        "./dist/types/exports/constants.d.ts"
+      ],
+      "sessions": [
+        "./dist/types/exports/sessions.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "package.json"
+  ],
+  "peerDependencies": {
+    "typescript": ">=5.0.4",
+    "viem": "^2.37.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "prool": "^0.0.23",
+    "viem": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "eth",
+    "ethereum",
+    "smart-account",
+    "abstract",
+    "account-abstraction",
+    "global-wallet",
+    "wallet",
+    "web3"
+  ]
+}

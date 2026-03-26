@@ -1,19 +1,59 @@
 {
-  "name": "abstract-packages",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:build": "turbo run test:build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "lint:check": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "format:check": "biome format",
+    "dev": "turbo run dev",
+    "prepare": "husky",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.30.2",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,css,scss,md}": ["biome check --write"]
+  },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.16.4",
     "@biomejs/biome": "^2.4.9",
-    "@types/node": "^25.5.0",
+    "@changesets/cli": "^2.27.11",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "publint": "^0.2.12",
     "turbo": "^2.8.20",
-    "typescript": "^6.0.2"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "pnpm": {
+    "overrides": {
+      "viem": "^2.46.2",
+      "ajv": "6.14.0",
+      "bn.js": "5.2.3",
+      "minimatch": "10.2.1",
+      "hono": ">=4.12.4",
+      "@hono/node-server": ">=1.19.10",
+      "express-rate-limit": ">=8.2.2",
+      "socket.io-parser": ">=4.2.6",
+      "ws@>=7.0.0 <7.5.10": ">=7.5.10",
+      "elliptic@<=6.6.1": ">=6.6.1",
+      "@coinbase/wallet-sdk@>=4.0 <4.3.0": ">=4.3.0",
+      "esbuild@<=0.24.2": ">=0.25.0",
+      "elliptic@<=6.6.0": ">=6.6.1",
+      "@babel/runtime@<7.26.10": ">=7.26.10",
+      "base-x@<=3.0.10": ">=3.0.11",
+      "base-x@=4.0.0": ">=4.0.1",
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5",
+      "image-size@>=1.1.0 <1.2.1": ">=1.2.1",
+      "elliptic@<6.6.0": ">=6.6.0",
+      "on-headers@<1.1.0": ">=1.1.0",
+      "tmp@<=0.2.3": ">=0.2.4"
+    }
   }
 }

@@ -1,0 +1,58 @@
+{
+  "name": "@abstract-foundation/mpp",
+  "version": "0.1.3",
+  "license": "MIT",
+  "description": "MPP payment method plugin for Abstract chain — ERC-3009 charge + ERC-20 session escrow",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch",
+    "prepack": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abstract-Foundation/mpp-abstract.git",
+    "directory": "packages/mpp"
+  },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/mpp-abstract/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/mpp-abstract/tree/main/packages/mpp",
+  "peerDependencies": {
+    "mppx": "catalog:",
+    "viem": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "mppx": "catalog:",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "zod": "catalog:"
+  }
+}

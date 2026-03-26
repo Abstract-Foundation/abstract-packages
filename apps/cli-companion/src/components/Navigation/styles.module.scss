@@ -1,0 +1,38 @@
+@import '@/styles/mixins';
+
+.navigation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  padding: 12px 16px 0;
+
+  @include bp-1024 {
+    padding: 12px 36px 0;
+  }
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1440px;
+}
+
+.logo {
+  display: block;
+  width: 117px;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+}

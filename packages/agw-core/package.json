@@ -1,0 +1,28 @@
+{
+  "name": "@abstract-foundation/agw-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "dependencies": {
+    "@abstract-foundation/agw-client": "workspace:*",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "open": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check-types": "tsc -p tsconfig.json --noEmit"
+  }
+}

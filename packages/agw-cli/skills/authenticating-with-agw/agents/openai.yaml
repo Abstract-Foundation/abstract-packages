@@ -1,0 +1,4 @@
+interface:
+  display_name: "Authenticating with AGW"
+  short_description: "Bootstrap and inspect AGW session state"
+  default_prompt: "Use $authenticating-with-agw to check readiness, bootstrap a session, or revoke signer access safely."

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agw-cli": {
+      "type": "stdio",
+      "command": "agw-cli",
+      "args": ["mcp", "serve", "--sanitize", "strict"],
+      "env": {
+        "AGW_SANITIZE_PROFILE": "strict"
+      }
+    }
+  }
+}
