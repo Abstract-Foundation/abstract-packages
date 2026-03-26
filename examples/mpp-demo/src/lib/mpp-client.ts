@@ -1,11 +1,14 @@
-'use client'
+"use client";
 
-import { Mppx } from 'mppx/client'
-import { abstractCharge, abstractSession } from '@abstract-foundation/mpp/client'
-import type { Account, Transport, WalletClient } from 'viem'
-import type { ChainEIP712 } from 'viem/zksync'
+import {
+  abstractCharge,
+  abstractSession,
+} from "@abstract-foundation/mpp/client";
+import { Mppx } from "mppx/client";
+import type { Account, Transport, WalletClient } from "viem";
+import type { ChainEIP712 } from "viem/zksync";
 
-type AgwWalletClient = WalletClient<Transport, ChainEIP712, Account>
+type AgwWalletClient = WalletClient<Transport, ChainEIP712, Account>;
 
 export function createChargeClient(walletClient: AgwWalletClient) {
   return Mppx.create({
@@ -15,7 +18,7 @@ export function createChargeClient(walletClient: AgwWalletClient) {
         getClient: () => walletClient,
       }),
     ],
-  })
+  });
 }
 
 export function createSessionClient(
@@ -30,5 +33,5 @@ export function createSessionClient(
         onChannelOpened: options?.onChannelOpened,
       }),
     ],
-  })
+  });
 }

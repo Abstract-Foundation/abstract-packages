@@ -1,3 +1,3 @@
-import { sessionHandler } from '@/lib/mpp-server'
+import { sessionHandler } from "@/lib/mpp-server";
 
-export const GET = sessionHandler
+export const GET = sessionHandler;

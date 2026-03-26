@@ -1,168 +1,168 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
 interface Step {
-  from: number
-  to: number
-  label: string
-  sublabel?: string
-  tooltip: string
+  from: number;
+  to: number;
+  label: string;
+  sublabel?: string;
+  tooltip: string;
 }
 
 const CHARGE_STEPS: Step[] = [
   {
     from: 0,
     to: 1,
-    label: 'GET /api/charge',
+    label: "GET /api/charge",
     tooltip:
-      'Client sends a standard HTTP request to the paid endpoint — no special headers required.',
+      "Client sends a standard HTTP request to the paid endpoint — no special headers required.",
   },
   {
     from: 1,
     to: 0,
-    label: '402 Payment Required',
-    sublabel: 'WWW-Authenticate',
+    label: "402 Payment Required",
+    sublabel: "WWW-Authenticate",
     tooltip:
-      'Server responds with 402 and a WWW-Authenticate header containing the payment challenge: method, amount, currency, and recipient.',
+      "Server responds with 402 and a WWW-Authenticate header containing the payment challenge: method, amount, currency, and recipient.",
   },
   {
     from: 0,
     to: 0,
-    label: 'Sign ERC-3009',
-    sublabel: 'TransferWithAuthorization',
+    label: "Sign ERC-3009",
+    sublabel: "TransferWithAuthorization",
     tooltip:
-      'Client wallet signs an EIP-3009 TransferWithAuthorization message, authorizing the exact payment without sending a transaction.',
+      "Client wallet signs an EIP-3009 TransferWithAuthorization message, authorizing the exact payment without sending a transaction.",
   },
   {
     from: 0,
     to: 1,
-    label: 'Retry with credential',
-    sublabel: 'Authorization header',
+    label: "Retry with credential",
+    sublabel: "Authorization header",
     tooltip:
-      'Client retries the request with the signed credential in the Authorization header.',
+      "Client retries the request with the signed credential in the Authorization header.",
   },
   {
     from: 1,
     to: 2,
-    label: 'Settle on-chain',
-    sublabel: 'transferWithAuthorization tx',
+    label: "Settle on-chain",
+    sublabel: "transferWithAuthorization tx",
     tooltip:
-      'Server broadcasts the transferWithAuthorization call on-chain, executing the USDC.e transfer from the payer to the recipient.',
+      "Server broadcasts the transferWithAuthorization call on-chain, executing the USDC.e transfer from the payer to the recipient.",
   },
   {
     from: 1,
     to: 0,
-    label: '200 OK + data',
-    sublabel: 'Payment-Receipt',
+    label: "200 OK + data",
+    sublabel: "Payment-Receipt",
     tooltip:
-      'Server returns the paid content along with a Payment-Receipt header containing the settlement tx hash.',
+      "Server returns the paid content along with a Payment-Receipt header containing the settlement tx hash.",
   },
-]
+];
 
 const SESSION_FIRST_STEPS: Step[] = [
   {
     from: 0,
     to: 1,
-    label: 'GET /api/session',
-    tooltip: 'Client sends a request to the session-priced endpoint.',
+    label: "GET /api/session",
+    tooltip: "Client sends a request to the session-priced endpoint.",
   },
   {
     from: 1,
     to: 0,
-    label: '402 Payment Required',
-    sublabel: 'WWW-Authenticate',
+    label: "402 Payment Required",
+    sublabel: "WWW-Authenticate",
     tooltip:
-      'Server responds 402 with session payment details: escrow contract, per-request amount, and suggested deposit.',
+      "Server responds 402 with session payment details: escrow contract, per-request amount, and suggested deposit.",
   },
   {
     from: 0,
     to: 2,
-    label: 'Open channel',
-    sublabel: 'approve + open tx',
+    label: "Open channel",
+    sublabel: "approve + open tx",
     tooltip:
-      'Client approves the ERC-20 and calls open() on the escrow contract, depositing tokens into the payment channel.',
+      "Client approves the ERC-20 and calls open() on the escrow contract, depositing tokens into the payment channel.",
   },
   {
     from: 0,
     to: 0,
-    label: 'Sign voucher',
-    sublabel: 'EIP-712 cumulative amount',
+    label: "Sign voucher",
+    sublabel: "EIP-712 cumulative amount",
     tooltip:
-      'Client signs an EIP-712 voucher for the cumulative amount owed so far. No on-chain transaction — just a signature.',
+      "Client signs an EIP-712 voucher for the cumulative amount owed so far. No on-chain transaction — just a signature.",
   },
   {
     from: 0,
     to: 1,
-    label: 'Retry with voucher',
-    sublabel: 'Authorization header',
+    label: "Retry with voucher",
+    sublabel: "Authorization header",
     tooltip:
-      'Client retries with the signed voucher credential in the Authorization header.',
+      "Client retries with the signed voucher credential in the Authorization header.",
   },
   {
     from: 1,
     to: 0,
-    label: '200 OK + data',
-    sublabel: 'Payment-Receipt',
+    label: "200 OK + data",
+    sublabel: "Payment-Receipt",
     tooltip:
-      'Server verifies the voucher, stores the highest cumulative amount, and returns the content.',
+      "Server verifies the voucher, stores the highest cumulative amount, and returns the content.",
   },
-]
+];
 
 const SESSION_SUBSEQUENT_STEPS: Step[] = [
   {
     from: 0,
     to: 1,
-    label: 'GET /api/session',
-    tooltip: 'Client sends another request to the session endpoint.',
+    label: "GET /api/session",
+    tooltip: "Client sends another request to the session endpoint.",
   },
   {
     from: 1,
     to: 0,
-    label: '402 Payment Required',
-    sublabel: 'WWW-Authenticate',
-    tooltip: 'Server responds 402 with a fresh challenge.',
+    label: "402 Payment Required",
+    sublabel: "WWW-Authenticate",
+    tooltip: "Server responds 402 with a fresh challenge.",
   },
   {
     from: 0,
     to: 0,
-    label: 'Sign voucher',
-    sublabel: 'cumulative += amount',
+    label: "Sign voucher",
+    sublabel: "cumulative += amount",
     tooltip:
-      'Client increments the cumulative total and signs a new EIP-712 voucher. No on-chain tx — just off-chain signing.',
+      "Client increments the cumulative total and signs a new EIP-712 voucher. No on-chain tx — just off-chain signing.",
   },
   {
     from: 0,
     to: 1,
-    label: 'Retry with voucher',
-    sublabel: 'Authorization header',
-    tooltip: 'Client sends the new voucher in the Authorization header.',
+    label: "Retry with voucher",
+    sublabel: "Authorization header",
+    tooltip: "Client sends the new voucher in the Authorization header.",
   },
   {
     from: 1,
     to: 0,
-    label: '200 OK + data',
-    sublabel: 'Payment-Receipt',
+    label: "200 OK + data",
+    sublabel: "Payment-Receipt",
     tooltip:
-      'Server accepts the voucher (highest cumulative wins) and returns content.',
+      "Server accepts the voucher (highest cumulative wins) and returns content.",
   },
-]
+];
 
-const ACTORS = ['Client', 'Server', 'Blockchain']
-const COL_CENTER = [16.67, 50, 83.33]
+const ACTORS = ["Client", "Server", "Blockchain"];
+const COL_CENTER = [16.67, 50, 83.33];
 
-type FlowTab = 'charge' | 'session-first' | 'session-next'
+type FlowTab = "charge" | "session-first" | "session-next";
 
 export function FlowDiagram() {
-  const [activeTab, setActiveTab] = useState<FlowTab>('charge')
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+  const [activeTab, setActiveTab] = useState<FlowTab>("charge");
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const steps =
-    activeTab === 'charge'
+    activeTab === "charge"
       ? CHARGE_STEPS
-      : activeTab === 'session-first'
+      : activeTab === "session-first"
         ? SESSION_FIRST_STEPS
-        : SESSION_SUBSEQUENT_STEPS
+        : SESSION_SUBSEQUENT_STEPS;
 
   return (
     <div className="relative w-full lg:flex">
@@ -174,26 +174,26 @@ export function FlowDiagram() {
         {/* Flow tabs */}
         <div className="flex rounded-lg overflow-hidden border border-white/10 mb-5 text-[11px] font-mono">
           <TabButton
-            active={activeTab === 'charge'}
+            active={activeTab === "charge"}
             onClick={() => {
-              setActiveTab('charge')
-              setHoveredIdx(null)
+              setActiveTab("charge");
+              setHoveredIdx(null);
             }}
             label="Charge"
           />
           <TabButton
-            active={activeTab === 'session-first'}
+            active={activeTab === "session-first"}
             onClick={() => {
-              setActiveTab('session-first')
-              setHoveredIdx(null)
+              setActiveTab("session-first");
+              setHoveredIdx(null);
             }}
             label="Session (1st)"
           />
           <TabButton
-            active={activeTab === 'session-next'}
+            active={activeTab === "session-next"}
             onClick={() => {
-              setActiveTab('session-next')
-              setHoveredIdx(null)
+              setActiveTab("session-next");
+              setHoveredIdx(null);
             }}
             label="Session (2nd+)"
           />
@@ -228,20 +228,20 @@ export function FlowDiagram() {
         {/* Steps */}
         <div className="flex flex-col">
           {steps.map((step, i) => {
-            const isHovered = hoveredIdx === i
+            const isHovered = hoveredIdx === i;
 
-            const lineColor = isHovered ? 'bg-accent' : 'bg-white/10'
-            const textColor = isHovered ? 'text-accent' : 'text-gray-400'
-            const subColor = isHovered ? 'text-accent/60' : 'text-gray-600'
-            const numColor = isHovered ? 'text-accent' : 'text-gray-600'
-            const arrowColor = isHovered ? '#00ff00' : 'rgba(255,255,255,0.1)'
+            const lineColor = isHovered ? "bg-accent" : "bg-white/10";
+            const textColor = isHovered ? "text-accent" : "text-gray-400";
+            const subColor = isHovered ? "text-accent/60" : "text-gray-600";
+            const numColor = isHovered ? "text-accent" : "text-gray-600";
+            const arrowColor = isHovered ? "#00ff00" : "rgba(255,255,255,0.1)";
 
-            const isSelf = step.from === step.to
-            const fromPct = COL_CENTER[step.from]
-            const toPct = COL_CENTER[step.to]
-            const leftPct = Math.min(fromPct, toPct)
-            const rightPct = Math.max(fromPct, toPct)
-            const goesRight = step.to > step.from
+            const isSelf = step.from === step.to;
+            const fromPct = COL_CENTER[step.from];
+            const toPct = COL_CENTER[step.to];
+            const leftPct = Math.min(fromPct, toPct);
+            const rightPct = Math.max(fromPct, toPct);
+            const goesRight = step.to > step.from;
 
             return (
               <div
@@ -270,8 +270,8 @@ export function FlowDiagram() {
                       <div
                         className={`rounded px-2.5 py-1 border transition-colors duration-200 ${
                           isHovered
-                            ? 'bg-accent/10 border-accent/30'
-                            : 'bg-transparent border-white/5'
+                            ? "bg-accent/10 border-accent/30"
+                            : "bg-transparent border-white/5"
                         }`}
                       >
                         <span
@@ -310,10 +310,7 @@ export function FlowDiagram() {
                             viewBox="0 0 7 10"
                             className="shrink-0"
                           >
-                            <polygon
-                              points="7,0 0,5 7,10"
-                              fill={arrowColor}
-                            />
+                            <polygon points="7,0 0,5 7,10" fill={arrowColor} />
                           </svg>
                         )}
                         <div className={`h-px flex-1 ${lineColor}`} />
@@ -324,10 +321,7 @@ export function FlowDiagram() {
                             viewBox="0 0 7 10"
                             className="shrink-0"
                           >
-                            <polygon
-                              points="0,0 7,5 0,10"
-                              fill={arrowColor}
-                            />
+                            <polygon points="0,0 7,5 0,10" fill={arrowColor} />
                           </svg>
                         )}
                       </div>
@@ -343,7 +337,7 @@ export function FlowDiagram() {
                   )}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
@@ -364,7 +358,7 @@ export function FlowDiagram() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function TabButton({
@@ -372,21 +366,21 @@ function TabButton({
   onClick,
   label,
 }: {
-  active: boolean
-  onClick: () => void
-  label: string
+  active: boolean;
+  onClick: () => void;
+  label: string;
 }) {
   return (
     <button
       className={`flex-1 py-1.5 transition-colors ${
         active
-          ? 'bg-accent/20 text-accent'
-          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+          ? "bg-accent/20 text-accent"
+          : "bg-white/5 text-gray-400 hover:bg-white/10"
       }`}
       onClick={onClick}
       type="button"
     >
       {label}
     </button>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { AbstractWalletProvider } from '@abstract-foundation/agw-react'
-import { abstractTestnet } from 'viem/chains'
+import { AbstractWalletProvider } from "@abstract-foundation/agw-react";
+import { abstractTestnet } from "viem/chains";
 
 export default function WalletProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <AbstractWalletProvider chain={abstractTestnet}>
       {children}
     </AbstractWalletProvider>
-  )
+  );
 }

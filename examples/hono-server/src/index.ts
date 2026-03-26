@@ -12,14 +12,14 @@
  *   tsx src/index.ts
  */
 
-import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
+import { USDC_E_TESTNET } from "@abstract-foundation/mpp";
+import { abstract } from "@abstract-foundation/mpp/server";
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
 // Use Mppx from mppx/hono — it wraps the server Mppx and exposes .charge/.session
 // accessors that are compatible with payment() middleware
-import { Mppx, payment } from 'mppx/hono';
-import { USDC_E_TESTNET } from '@abstract-foundation/mpp';
-import { abstract } from '@abstract-foundation/mpp/server';
-import { privateKeyToAccount } from 'viem/accounts';
+import { Mppx, payment } from "mppx/hono";
+import { privateKeyToAccount } from "viem/accounts";
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
@@ -30,14 +30,14 @@ const SERVER_PRIVATE_KEY = process.env.SERVER_PRIVATE_KEY as
 const PAY_TO = process.env.PAY_TO as `0x${string}` | undefined;
 const PORT = Number(process.env.PORT ?? 3000);
 
-if (!SECRET_KEY) throw new Error('MPP_SECRET_KEY required');
-if (!SERVER_PRIVATE_KEY) throw new Error('SERVER_PRIVATE_KEY required');
-if (!PAY_TO) throw new Error('PAY_TO required');
+if (!SECRET_KEY) throw new Error("MPP_SECRET_KEY required");
+if (!SERVER_PRIVATE_KEY) throw new Error("SERVER_PRIVATE_KEY required");
+if (!PAY_TO) throw new Error("PAY_TO required");
 
 // ── Account ────────────────────────────────────────────────────────────────
 
 const serverAccount = privateKeyToAccount(SERVER_PRIVATE_KEY);
-console.log('Server account:', serverAccount.address);
+console.log("Server account:", serverAccount.address);
 
 // ── MPP setup ──────────────────────────────────────────────────────────────
 
@@ -46,7 +46,7 @@ const chargeMethods = [
     account: serverAccount,
     recipient: PAY_TO,
     currency: USDC_E_TESTNET,
-    amount: '0.01',
+    amount: "0.01",
     decimals: 6,
     testnet: true,
     // Optionally sponsor gas with an Abstract paymaster contract:
@@ -59,9 +59,9 @@ const sessionMethods = [
     account: serverAccount,
     recipient: PAY_TO,
     currency: USDC_E_TESTNET,
-    amount: '0.001',
-    suggestedDeposit: '1',
-    unitType: 'request',
+    amount: "0.001",
+    suggestedDeposit: "1",
+    unitType: "request",
     decimals: 6,
     testnet: true,
   }),
@@ -69,7 +69,7 @@ const sessionMethods = [
 
 // mppx/hono Mppx.create() adds .charge / .session / .<name> accessors for payment()
 const mppx = Mppx.create({
-  realm: 'example.abs.xyz',
+  realm: "example.abs.xyz",
   secretKey: SECRET_KEY,
   methods: [...chargeMethods, ...sessionMethods],
 });
@@ -79,44 +79,44 @@ const mppx = Mppx.create({
 const app = new Hono();
 
 // Free health check
-app.get('/health', (c) => c.json({ ok: true }));
+app.get("/health", (c) => c.json({ ok: true }));
 
 // Paid: one-time ERC-3009 charge — $0.01 USDC.e per request
 app.get(
-  '/api/data',
+  "/api/data",
   // mppx exposes abstract/charge as a key on the hono Mppx instance
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payment((mppx as any)['abstract/charge'], {
-    amount: '0.01',
+  payment((mppx as any)["abstract/charge"], {
+    amount: "0.01",
     currency: USDC_E_TESTNET,
     decimals: 6,
     recipient: PAY_TO!,
-    description: 'Premium data — 0.01 USDC.e',
+    description: "Premium data — 0.01 USDC.e",
   }),
   (c) =>
     c.json({
-      data: 'Here is your premium content!',
+      data: "Here is your premium content!",
       timestamp: new Date().toISOString(),
-      chain: 'Abstract Testnet',
+      chain: "Abstract Testnet",
     }),
 );
 
 // Paid: session channel — $0.001 USDC.e per request via payment vouchers
 app.get(
-  '/api/stream',
+  "/api/stream",
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payment((mppx as any)['abstract/session'], {
-    amount: '0.001',
+  payment((mppx as any)["abstract/session"], {
+    amount: "0.001",
     currency: USDC_E_TESTNET,
     decimals: 6,
     recipient: PAY_TO!,
-    unitType: 'request',
-    suggestedDeposit: '1',
-    description: 'Streaming data — 0.001 USDC.e per request',
+    unitType: "request",
+    suggestedDeposit: "1",
+    description: "Streaming data — 0.001 USDC.e per request",
   }),
   (c) =>
     c.json({
-      stream: 'Streaming content via payment channel',
+      stream: "Streaming content via payment channel",
       timestamp: new Date().toISOString(),
     }),
 );

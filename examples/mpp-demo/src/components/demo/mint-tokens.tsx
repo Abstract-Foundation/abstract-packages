@@ -1,47 +1,48 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useAccount, useWaitForTransactionReceipt } from 'wagmi'
-import { parseUnits } from 'viem'
-import { useWriteContractSponsored } from '@abstract-foundation/agw-react'
-import { getGeneralPaymasterInput } from 'viem/zksync'
+import { useWriteContractSponsored } from "@abstract-foundation/agw-react";
+import { useState } from "react";
+import { parseUnits } from "viem";
+import { getGeneralPaymasterInput } from "viem/zksync";
+import { useAccount, useWaitForTransactionReceipt } from "wagmi";
 import {
-  OPEN_MINTER_TESTNET,
   OPEN_MINTER_ABI,
+  OPEN_MINTER_TESTNET,
   PAYMASTER_ADDRESS,
-} from '@/lib/constants'
+} from "@/lib/constants";
 
-const MINT_AMOUNT = parseUnits('5', 6)
+const MINT_AMOUNT = parseUnits("5", 6);
 
 export function MintTokens() {
-  const { address } = useAccount()
-  const [minted, setMinted] = useState(false)
+  const { address } = useAccount();
+  const [minted, setMinted] = useState(false);
 
   const {
     writeContractSponsored,
     data: hash,
     isPending,
     error,
-  } = useWriteContractSponsored()
+  } = useWriteContractSponsored();
 
-  const { isLoading: isConfirming, isSuccess } =
-    useWaitForTransactionReceipt({ hash })
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const handleMint = () => {
-    if (!address) return
-    setMinted(false)
+    if (!address) return;
+    setMinted(false);
     writeContractSponsored({
       address: OPEN_MINTER_TESTNET,
       abi: OPEN_MINTER_ABI,
-      functionName: 'mint',
+      functionName: "mint",
       args: [address, MINT_AMOUNT],
       paymaster: PAYMASTER_ADDRESS,
-      paymasterInput: getGeneralPaymasterInput({ innerInput: '0x' }),
-    })
-  }
+      paymasterInput: getGeneralPaymasterInput({ innerInput: "0x" }),
+    });
+  };
 
   if (isSuccess && !minted) {
-    setMinted(true)
+    setMinted(true);
   }
 
   return (
@@ -53,10 +54,10 @@ export function MintTokens() {
         type="button"
       >
         {isPending
-          ? 'Confirm in wallet...'
+          ? "Confirm in wallet..."
           : isConfirming
-            ? 'Minting...'
-            : 'Mint 5 USDC.e'}
+            ? "Minting..."
+            : "Mint 5 USDC.e"}
       </button>
       {minted && (
         <p className="text-xs text-accent animate-fade-in-up">
@@ -65,9 +66,9 @@ export function MintTokens() {
       )}
       {error && (
         <p className="text-xs text-red-400 max-w-xs text-center">
-          {error.message.split('\n')[0]}
+          {error.message.split("\n")[0]}
         </p>
       )}
     </div>
-  )
+  );
 }

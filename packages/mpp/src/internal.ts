@@ -1,7 +1,7 @@
-import { Errors } from 'mppx';
-import { bytesToHex } from 'viem';
-import { abstract, abstractTestnet } from 'viem/chains';
-import type { ChainEIP712 } from 'viem/zksync';
+import { Errors } from "mppx";
+import { bytesToHex } from "viem";
+import { abstract, abstractTestnet } from "viem/chains";
+import type { ChainEIP712 } from "viem/zksync";
 
 export const UINT128_MAX = 2n ** 128n - 1n;
 

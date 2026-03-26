@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useAccount } from 'wagmi'
-import { ConnectWallet } from '@/components/wallet/connect-wallet'
-import { MintTokens } from '@/components/demo/mint-tokens'
-import { ChargeDemo } from '@/components/demo/charge-demo'
-import { SessionDemo } from '@/components/demo/session-demo'
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import { ChargeDemo } from "@/components/demo/charge-demo";
+import { MintTokens } from "@/components/demo/mint-tokens";
+import { SessionDemo } from "@/components/demo/session-demo";
+import { ConnectWallet } from "@/components/wallet/connect-wallet";
 
-type Tab = 'charge' | 'session'
+type Tab = "charge" | "session";
 
-const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT
+const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT;
 
 export function DemoPanel() {
-  const { address } = useAccount()
-  const [activeTab, setActiveTab] = useState<Tab>('charge')
+  const { address } = useAccount();
+  const [activeTab, setActiveTab] = useState<Tab>("charge");
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-lg p-6 backdrop-blur-sm w-full h-full">
@@ -52,22 +52,22 @@ export function DemoPanel() {
               <div className="flex w-full rounded-lg overflow-hidden border border-white/10 mb-3">
                 <button
                   className={`flex-1 text-xs font-mono py-2 transition-colors ${
-                    activeTab === 'charge'
-                      ? 'bg-accent/20 text-accent'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    activeTab === "charge"
+                      ? "bg-accent/20 text-accent"
+                      : "bg-white/5 text-gray-400 hover:bg-white/10"
                   }`}
-                  onClick={() => setActiveTab('charge')}
+                  onClick={() => setActiveTab("charge")}
                   type="button"
                 >
                   Charge
                 </button>
                 <button
                   className={`flex-1 text-xs font-mono py-2 transition-colors ${
-                    activeTab === 'session'
-                      ? 'bg-accent/20 text-accent'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                  } ${!ESCROW_CONTRACT ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  onClick={() => ESCROW_CONTRACT && setActiveTab('session')}
+                    activeTab === "session"
+                      ? "bg-accent/20 text-accent"
+                      : "bg-white/5 text-gray-400 hover:bg-white/10"
+                  } ${!ESCROW_CONTRACT ? "opacity-40 cursor-not-allowed" : ""}`}
+                  onClick={() => ESCROW_CONTRACT && setActiveTab("session")}
                   disabled={!ESCROW_CONTRACT}
                   type="button"
                 >
@@ -75,12 +75,12 @@ export function DemoPanel() {
                 </button>
               </div>
 
-              {activeTab === 'charge' && <ChargeDemo />}
-              {activeTab === 'session' && <SessionDemo />}
+              {activeTab === "charge" && <ChargeDemo />}
+              {activeTab === "session" && <SessionDemo />}
             </div>
           </>
         )}
       </div>
     </div>
-  )
+  );
 }

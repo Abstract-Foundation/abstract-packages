@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { ProtocolOverview } from '@/components/overview/protocol-overview'
-import { FlowDiagram } from '@/components/flow/flow-diagram'
-import { DemoPanel } from '@/components/demo/demo-panel'
-import { HeaderExplainer } from '@/components/headers/header-explainer'
-import { USDC_E_TESTNET, CHARGE_AMOUNT, SESSION_AMOUNT } from '@/lib/constants'
+import { DemoPanel } from "@/components/demo/demo-panel";
+import { FlowDiagram } from "@/components/flow/flow-diagram";
+import { HeaderExplainer } from "@/components/headers/header-explainer";
+import { ProtocolOverview } from "@/components/overview/protocol-overview";
+import { CHARGE_AMOUNT, SESSION_AMOUNT, USDC_E_TESTNET } from "@/lib/constants";
 
-const PAY_TO = process.env.NEXT_PUBLIC_PAY_TO ?? '—'
-const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT
+const PAY_TO = process.env.NEXT_PUBLIC_PAY_TO ?? "—";
+const ESCROW_CONTRACT = process.env.NEXT_PUBLIC_ESCROW_CONTRACT;
 
 export default function Home() {
   return (
@@ -65,7 +65,7 @@ export default function Home() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 function ConfigItem({
@@ -73,18 +73,18 @@ function ConfigItem({
   value,
   mono,
 }: {
-  label: string
-  value: string
-  mono?: boolean
+  label: string;
+  value: string;
+  mono?: boolean;
 }) {
   return (
     <div>
       <span className="text-gray-500 text-[13px]">{label}</span>
       <p
-        className={`text-gray-300 text-[13px] break-all ${mono ? 'font-mono' : ''}`}
+        className={`text-gray-300 text-[13px] break-all ${mono ? "font-mono" : ""}`}
       >
         {value}
       </p>
     </div>
-  )
+  );
 }

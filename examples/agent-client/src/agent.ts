@@ -13,21 +13,24 @@
  *   tsx src/agent.ts
  */
 
-import { Mppx } from 'mppx/client';
-import { abstractCharge, abstractSession } from '@abstract-foundation/mpp/client';
-import { privateKeyToAccount } from 'viem/accounts';
+import {
+  abstractCharge,
+  abstractSession,
+} from "@abstract-foundation/mpp/client";
+import { Mppx } from "mppx/client";
+import { privateKeyToAccount } from "viem/accounts";
 
 const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY as
   | `0x${string}`
   | undefined;
-const SERVER_URL = process.env.SERVER_URL ?? 'http://localhost:3000';
+const SERVER_URL = process.env.SERVER_URL ?? "http://localhost:3000";
 
-if (!AGENT_PRIVATE_KEY) throw new Error('AGENT_PRIVATE_KEY required');
+if (!AGENT_PRIVATE_KEY) throw new Error("AGENT_PRIVATE_KEY required");
 
 // ── Account ────────────────────────────────────────────────────────────────
 
 const agentAccount = privateKeyToAccount(AGENT_PRIVATE_KEY);
-console.log('Agent account:', agentAccount.address);
+console.log("Agent account:", agentAccount.address);
 
 // ── MPP client ─────────────────────────────────────────────────────────────
 
@@ -39,7 +42,7 @@ const mppx = Mppx.create({
     // Session method: open payment channel, send vouchers per-request
     abstractSession({
       account: agentAccount,
-      deposit: '5', // pre-fund 5 USDC.e into the channel
+      deposit: "5", // pre-fund 5 USDC.e into the channel
     }),
   ],
 });
@@ -47,31 +50,31 @@ const mppx = Mppx.create({
 // ── Demo: Charge request ───────────────────────────────────────────────────
 
 async function demoCharge() {
-  console.log('\n── Charge demo ────────────────────────────────────────');
+  console.log("\n── Charge demo ────────────────────────────────────────");
   console.log(`Fetching ${SERVER_URL}/api/data (0.01 USDC.e charge)...`);
 
   // mppx.fetch() automatically handles the 402 → sign → retry flow
   const response = await mppx.fetch(`${SERVER_URL}/api/data`);
 
   if (!response.ok) {
-    console.error('Request failed:', response.status, await response.text());
+    console.error("Request failed:", response.status, await response.text());
     return;
   }
 
-  const receipt = response.headers.get('Payment-Receipt');
+  const receipt = response.headers.get("Payment-Receipt");
   const body = await response.json();
 
-  console.log('✅ Response:', JSON.stringify(body, null, 2));
+  console.log("✅ Response:", JSON.stringify(body, null, 2));
   if (receipt) {
-    console.log('🧾 Payment-Receipt:', receipt);
+    console.log("🧾 Payment-Receipt:", receipt);
   }
 }
 
 // ── Demo: Session requests ──────────────────────────────────────────────────
 
 async function demoSession() {
-  console.log('\n── Session demo ────────────────────────────────────────');
-  console.log('Opening payment channel and sending 3 requests...');
+  console.log("\n── Session demo ────────────────────────────────────────");
+  console.log("Opening payment channel and sending 3 requests...");
 
   for (let i = 1; i <= 3; i++) {
     console.log(`\nRequest ${i}: ${SERVER_URL}/api/stream (0.001 USDC.e)`);
@@ -87,14 +90,14 @@ async function demoSession() {
       continue;
     }
 
-    const receipt = response.headers.get('Payment-Receipt');
+    const receipt = response.headers.get("Payment-Receipt");
     const body = await response.json();
 
     console.log(`  ✅ Response:`, JSON.stringify(body));
     if (receipt) {
       try {
         const parsed = JSON.parse(
-          Buffer.from(receipt.replace('Payment ', ''), 'base64url').toString(),
+          Buffer.from(receipt.replace("Payment ", ""), "base64url").toString(),
         );
         console.log(
           `  🧾 Cumulative paid: ${parsed.acceptedCumulative} (${i} unit(s))`,
@@ -112,9 +115,9 @@ async function main() {
   try {
     await demoCharge();
     await demoSession();
-    console.log('\n✅ Demo complete');
+    console.log("\n✅ Demo complete");
   } catch (err) {
-    console.error('Error:', err);
+    console.error("Error:", err);
     process.exit(1);
   }
 }

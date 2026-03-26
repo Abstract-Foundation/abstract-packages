@@ -17,8 +17,12 @@
     "paths": {
       "@/*": ["./src/*"],
       "@abstract-foundation/mpp": ["../../packages/mpp/src/index.ts"],
-      "@abstract-foundation/mpp/server": ["../../packages/mpp/src/server/index.ts"],
-      "@abstract-foundation/mpp/client": ["../../packages/mpp/src/client/index.ts"]
+      "@abstract-foundation/mpp/server": [
+        "../../packages/mpp/src/server/index.ts"
+      ],
+      "@abstract-foundation/mpp/client": [
+        "../../packages/mpp/src/client/index.ts"
+      ]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

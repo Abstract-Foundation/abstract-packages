@@ -4,7 +4,7 @@
  * Handles the full channel lifecycle against AbstractStreamChannel.sol.
  */
 
-import { Errors, Method, Store } from 'mppx';
+import { Errors, Method, Store } from "mppx";
 import {
   type Account,
   type Address,
@@ -18,14 +18,14 @@ import {
   type Transport,
   type WalletClient,
   zeroAddress,
-} from 'viem';
-import { abstract, abstractTestnet } from 'viem/chains';
+} from "viem";
+import { abstract, abstractTestnet } from "viem/chains";
 import {
   type ChainEIP712,
   eip712WalletActions,
   getGeneralPaymasterInput,
-} from 'viem/zksync';
-import { abstractSessionMethods } from '../client/methods.js';
+} from "viem/zksync";
+import { abstractSessionMethods } from "../client/methods.js";
 import {
   ABSTRACT_STREAM_CHANNEL_ABI,
   DEFAULT_CURRENCY,
@@ -34,8 +34,8 @@ import {
   VOUCHER_DOMAIN_NAME,
   VOUCHER_DOMAIN_VERSION,
   VOUCHER_TYPES,
-} from '../constants.js';
-import { assertUint128, resolveChain } from '../internal.js';
+} from "../constants.js";
+import { assertUint128, resolveChain } from "../internal.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -164,7 +164,7 @@ async function verifyVoucherSig(
         verifyingContract: escrowContract,
       },
       types: VOUCHER_TYPES,
-      primaryType: 'Voucher',
+      primaryType: "Voucher",
       message: {
         channelId: voucher.channelId,
         cumulativeAmount: voucher.cumulativeAmount,
@@ -185,9 +185,9 @@ function makeSessionReceipt(params: {
   txHash?: Hex;
 }) {
   return {
-    method: 'abstract' as const,
-    intent: 'session' as const,
-    status: 'success' as const,
+    method: "abstract" as const,
+    intent: "session" as const,
+    status: "success" as const,
     timestamp: new Date().toISOString(),
     reference: params.txHash ?? params.channelId,
     channelId: params.channelId,
@@ -228,8 +228,8 @@ export function session(params: AbstractSessionServerOptions) {
     recipient,
     amount,
     suggestedDeposit,
-    minVoucherDelta = '0',
-    unitType = 'request',
+    minVoucherDelta = "0",
+    unitType = "request",
     decimals = USDC_E_DECIMALS,
     testnet = false,
     rpcUrl,
@@ -238,12 +238,11 @@ export function session(params: AbstractSessionServerOptions) {
   } = params;
 
   const defaultChain = testnet ? abstractTestnet : abstract;
-  const escrowContract = params.escrowContract ?? DEFAULT_ESCROW[defaultChain.id];
+  const escrowContract =
+    params.escrowContract ?? DEFAULT_ESCROW[defaultChain.id];
   const currency = params.currency ?? DEFAULT_CURRENCY[defaultChain.id];
   const minDelta = parseUnits(minVoucherDelta, decimals);
-  const channelStore = channelStoreFromStore(
-    params.store ?? Store.memory(),
-  );
+  const channelStore = channelStoreFromStore(params.store ?? Store.memory());
 
   function buildClients(chainId: number): {
     publicClient: PublicClient<Transport, ChainEIP712>;
@@ -267,14 +266,14 @@ export function session(params: AbstractSessionServerOptions) {
     return publicClient.readContract({
       address: escrowContract,
       abi: ABSTRACT_STREAM_CHANNEL_ABI,
-      functionName: 'getChannel',
+      functionName: "getChannel",
       args: [channelId],
     });
   }
 
   return Method.toServer(abstractSessionMethods, {
     defaults: {
-      amount: amount ?? '0',
+      amount: amount ?? "0",
       currency,
       decimals,
       recipient,
@@ -311,7 +310,7 @@ export function session(params: AbstractSessionServerOptions) {
 
       switch (action) {
         // ── OPEN ────────────────────────────────────────────────────────────
-        case 'open': {
+        case "open": {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);
           const signature = payload.signature as Hex;
@@ -320,7 +319,7 @@ export function session(params: AbstractSessionServerOptions) {
           const receipt = await publicClient.waitForTransactionReceipt({
             hash: txHash,
           });
-          if (receipt.status !== 'success') {
+          if (receipt.status !== "success") {
             throw new Errors.VerificationFailedError({
               reason: `open transaction reverted: ${txHash}`,
             });
@@ -329,24 +328,24 @@ export function session(params: AbstractSessionServerOptions) {
           const onChain = await getOnChainChannel(publicClient, channelId);
           if (onChain.deposit === 0n)
             throw new Errors.ChannelNotFoundError({
-              reason: 'channel not funded on-chain',
+              reason: "channel not funded on-chain",
             });
           if (onChain.finalized)
             throw new Errors.ChannelClosedError({
-              reason: 'channel is finalized',
+              reason: "channel is finalized",
             });
           if (onChain.closeRequestedAt !== 0n)
             throw new Errors.ChannelClosedError({
-              reason: 'channel has a pending close request',
+              reason: "channel has a pending close request",
             });
           if (!isAddressEqual(onChain.payee, recipient)) {
             throw new Errors.VerificationFailedError({
-              reason: 'on-chain payee mismatch',
+              reason: "on-chain payee mismatch",
             });
           }
           if (!isAddressEqual(onChain.token, currency)) {
             throw new Errors.VerificationFailedError({
-              reason: 'on-chain token mismatch',
+              reason: "on-chain token mismatch",
             });
           }
 
@@ -361,7 +360,7 @@ export function session(params: AbstractSessionServerOptions) {
 
           if (cumulativeAmount > onChain.deposit) {
             throw new Errors.AmountExceedsDepositError({
-              reason: 'voucher exceeds deposit',
+              reason: "voucher exceeds deposit",
             });
           }
 
@@ -379,7 +378,7 @@ export function session(params: AbstractSessionServerOptions) {
           );
           if (!valid)
             throw new Errors.InvalidSignatureError({
-              reason: 'invalid voucher signature',
+              reason: "invalid voucher signature",
             });
 
           const state: ChannelState = {
@@ -412,20 +411,20 @@ export function session(params: AbstractSessionServerOptions) {
         }
 
         // ── TOPUP ───────────────────────────────────────────────────────────
-        case 'topUp': {
+        case "topUp": {
           const channelId = payload.channelId as Hex;
           const txHash = payload.txHash as Hex;
 
           const state = await channelStore.getChannel(channelId);
           if (!state)
             throw new Errors.ChannelNotFoundError({
-              reason: 'channel not found',
+              reason: "channel not found",
             });
 
           const receipt = await publicClient.waitForTransactionReceipt({
             hash: txHash,
           });
-          if (receipt.status !== 'success') {
+          if (receipt.status !== "success") {
             throw new Errors.VerificationFailedError({
               reason: `topUp transaction reverted: ${txHash}`,
             });
@@ -434,7 +433,7 @@ export function session(params: AbstractSessionServerOptions) {
           const onChain = await getOnChainChannel(publicClient, channelId);
           if (onChain.deposit <= state.deposit) {
             throw new Errors.VerificationFailedError({
-              reason: 'channel deposit did not increase',
+              reason: "channel deposit did not increase",
             });
           }
 
@@ -457,7 +456,7 @@ export function session(params: AbstractSessionServerOptions) {
         }
 
         // ── VOUCHER ─────────────────────────────────────────────────────────
-        case 'voucher': {
+        case "voucher": {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);
           const signature = payload.signature as Hex;
@@ -465,11 +464,11 @@ export function session(params: AbstractSessionServerOptions) {
           const state = await channelStore.getChannel(channelId);
           if (!state)
             throw new Errors.ChannelNotFoundError({
-              reason: 'channel not found',
+              reason: "channel not found",
             });
           if (state.finalized)
             throw new Errors.ChannelClosedError({
-              reason: 'channel is finalized',
+              reason: "channel is finalized",
             });
 
           if (cumulativeAmount <= state.highestVoucherAmount) {
@@ -492,7 +491,7 @@ export function session(params: AbstractSessionServerOptions) {
           }
           if (cumulativeAmount > state.deposit) {
             throw new Errors.AmountExceedsDepositError({
-              reason: 'voucher exceeds deposit',
+              reason: "voucher exceeds deposit",
             });
           }
 
@@ -510,7 +509,7 @@ export function session(params: AbstractSessionServerOptions) {
           );
           if (!valid)
             throw new Errors.InvalidSignatureError({
-              reason: 'invalid voucher signature',
+              reason: "invalid voucher signature",
             });
 
           const updated = await channelStore.updateChannel(
@@ -537,7 +536,7 @@ export function session(params: AbstractSessionServerOptions) {
         }
 
         // ── CLOSE ───────────────────────────────────────────────────────────
-        case 'close': {
+        case "close": {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);
           const signature = payload.signature as Hex;
@@ -545,11 +544,11 @@ export function session(params: AbstractSessionServerOptions) {
           const state = await channelStore.getChannel(channelId);
           if (!state)
             throw new Errors.ChannelNotFoundError({
-              reason: 'channel not found',
+              reason: "channel not found",
             });
           if (state.finalized)
             throw new Errors.ChannelClosedError({
-              reason: 'channel already finalized',
+              reason: "channel already finalized",
             });
 
           assertUint128(cumulativeAmount);
@@ -565,7 +564,7 @@ export function session(params: AbstractSessionServerOptions) {
           }
           if (cumulativeAmount > state.deposit) {
             throw new Errors.AmountExceedsDepositError({
-              reason: 'close amount exceeds deposit',
+              reason: "close amount exceeds deposit",
             });
           }
 
@@ -583,7 +582,7 @@ export function session(params: AbstractSessionServerOptions) {
           );
           if (!valid)
             throw new Errors.InvalidSignatureError({
-              reason: 'invalid close voucher signature',
+              reason: "invalid close voucher signature",
             });
 
           const closeArgs = [channelId, cumulativeAmount, signature] as const;
@@ -594,12 +593,12 @@ export function session(params: AbstractSessionServerOptions) {
               account,
               address: escrowContract,
               abi: ABSTRACT_STREAM_CHANNEL_ABI,
-              functionName: 'close',
+              functionName: "close",
               args: closeArgs,
               ...{
                 paymaster: paymasterAddress,
                 paymasterInput: getGeneralPaymasterInput({
-                  innerInput: paymasterInput ?? '0x',
+                  innerInput: paymasterInput ?? "0x",
                 }),
               },
             });
@@ -608,7 +607,7 @@ export function session(params: AbstractSessionServerOptions) {
               account,
               address: escrowContract,
               abi: ABSTRACT_STREAM_CHANNEL_ABI,
-              functionName: 'close',
+              functionName: "close",
               args: closeArgs,
             });
           }
@@ -616,7 +615,7 @@ export function session(params: AbstractSessionServerOptions) {
           const closeReceipt = await publicClient.waitForTransactionReceipt({
             hash: txHash,
           });
-          if (closeReceipt.status !== 'success') {
+          if (closeReceipt.status !== "success") {
             throw new Errors.VerificationFailedError({
               reason: `close transaction reverted: ${txHash}`,
             });
@@ -653,14 +652,14 @@ export function session(params: AbstractSessionServerOptions) {
       const action = (credential.payload as Record<string, unknown>)
         .action as string;
 
-      if (action === 'close' || action === 'topUp') {
+      if (action === "close" || action === "topUp") {
         return new Response(null, { status: 204 });
       }
 
-      if (input.method === 'POST') {
-        const contentLength = input.headers.get('content-length');
-        if (contentLength !== null && contentLength !== '0') return undefined;
-        if (input.headers.has('transfer-encoding')) return undefined;
+      if (input.method === "POST") {
+        const contentLength = input.headers.get("content-length");
+        if (contentLength !== null && contentLength !== "0") return undefined;
+        if (input.headers.has("transfer-encoding")) return undefined;
         return new Response(null, { status: 204 });
       }
 

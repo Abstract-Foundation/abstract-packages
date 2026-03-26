@@ -59,6 +59,25 @@
           }
         }
       }
+    },
+    {
+      "includes": ["examples/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "warn",
+            "noArrayIndexKey": "warn",
+            "noUnknownAtRules": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "warn"
+          },
+          "a11y": {
+            "noStaticElementInteractions": "warn",
+            "noSvgWithoutTitle": "warn"
+          }
+        }
+      }
     }
   ]
 }

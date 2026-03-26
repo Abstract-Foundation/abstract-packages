@@ -9,8 +9,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@abstract-foundation/agw-client": "^1.8.6",
-    "@abstract-foundation/agw-react": "^1.11.0",
+    "@abstract-foundation/agw-client": "workspace:*",
+    "@abstract-foundation/agw-react": "workspace:*",
     "@abstract-foundation/mpp": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@privy-io/cross-app-connect": "^0.5.4",

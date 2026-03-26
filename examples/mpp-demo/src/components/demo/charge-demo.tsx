@@ -1,80 +1,80 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useAccount, useWalletClient } from 'wagmi'
-import { createChargeClient } from '@/lib/mpp-client'
-import { CHARGE_AMOUNT } from '@/lib/constants'
-import type { Account, Transport, WalletClient } from 'viem'
-import type { ChainEIP712 } from 'viem/zksync'
+import { useState } from "react";
+import type { Account, Transport, WalletClient } from "viem";
+import type { ChainEIP712 } from "viem/zksync";
+import { useAccount, useWalletClient } from "wagmi";
+import { CHARGE_AMOUNT } from "@/lib/constants";
+import { createChargeClient } from "@/lib/mpp-client";
 
 interface ChargeResponse {
-  message: string
-  timestamp: string
-  fact: string
-  intent: string
-  chain: string
+  message: string;
+  timestamp: string;
+  fact: string;
+  intent: string;
+  chain: string;
 }
 
 interface ReceiptData {
-  txHash?: string
-  raw: string
+  txHash?: string;
+  raw: string;
 }
 
 function parseReceipt(header: string | null): ReceiptData | null {
-  if (!header) return null
+  if (!header) return null;
   try {
-    const payload = header.startsWith('Payment ')
-      ? header.slice('Payment '.length)
-      : header
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-    const parsed = JSON.parse(decoded)
-    return { txHash: parsed.transaction ?? parsed.txHash, raw: header }
+    const payload = header.startsWith("Payment ")
+      ? header.slice("Payment ".length)
+      : header;
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    const parsed = JSON.parse(decoded);
+    return { txHash: parsed.transaction ?? parsed.txHash, raw: header };
   } catch {
-    return { raw: header }
+    return { raw: header };
   }
 }
 
 export function ChargeDemo() {
-  const { address } = useAccount()
-  const { data: walletClient } = useWalletClient()
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<ChargeResponse | null>(null)
-  const [receipt, setReceipt] = useState<ReceiptData | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ChargeResponse | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCharge = async () => {
-    if (!walletClient?.account) return
+    if (!walletClient?.account) return;
 
-    setLoading(true)
-    setResult(null)
-    setReceipt(null)
-    setError(null)
+    setLoading(true);
+    setResult(null);
+    setReceipt(null);
+    setError(null);
 
     try {
       const mppx = createChargeClient(
         walletClient as WalletClient<Transport, ChainEIP712, Account>,
-      )
-      const response = await mppx.fetch('/api/charge')
+      );
+      const response = await mppx.fetch("/api/charge");
 
       if (!response.ok) {
-        const text = await response.text()
+        const text = await response.text();
         throw new Error(
           `Request failed (${response.status}): ${text.slice(0, 200)}`,
-        )
+        );
       }
 
-      const data = (await response.json()) as ChargeResponse
-      setResult(data)
-      setReceipt(parseReceipt(response.headers.get('Payment-Receipt')))
+      const data = (await response.json()) as ChargeResponse;
+      setResult(data);
+      setReceipt(parseReceipt(response.headers.get("Payment-Receipt")));
     } catch (err) {
       setError(
-        err instanceof Error ? err.message.split('\n')[0] : 'Unknown error',
-      )
+        err instanceof Error ? err.message.split("\n")[0] : "Unknown error",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -101,9 +101,7 @@ export function ChargeDemo() {
 
       {result && (
         <div className="bg-white/5 border border-accent/20 rounded-lg p-4 w-full animate-fade-in-up">
-          <p className="text-xs text-accent font-mono mb-2">
-            Charge settled
-          </p>
+          <p className="text-xs text-accent font-mono mb-2">Charge settled</p>
           <div className="space-y-1.5 text-sm font-sans">
             <p className="text-white">{result.message}</p>
             <p className="text-gray-400 text-xs">{result.fact}</p>
@@ -130,5 +128,5 @@ export function ChargeDemo() {
         </div>
       )}
     </div>
-  )
+  );
 }

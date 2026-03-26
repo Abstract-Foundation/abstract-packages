@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useLoginWithAbstract } from '@abstract-foundation/agw-react'
-import { useAccount } from 'wagmi'
+import { useLoginWithAbstract } from "@abstract-foundation/agw-react";
+import { useAccount } from "wagmi";
 
 export function ConnectWallet() {
-  const { login, logout } = useLoginWithAbstract()
-  const { address, status } = useAccount()
+  const { login, logout } = useLoginWithAbstract();
+  const { address, status } = useAccount();
 
-  if (status === 'connecting' || status === 'reconnecting') {
+  if (status === "connecting" || status === "reconnecting") {
     return (
       <div className="flex items-center justify-center w-10 h-10">
         <span className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
-    )
+    );
   }
 
   if (address) {
@@ -34,7 +34,7 @@ export function ConnectWallet() {
           Disconnect
         </button>
       </div>
-    )
+    );
   }
 
   return (
@@ -45,5 +45,5 @@ export function ConnectWallet() {
     >
       Sign in with Abstract
     </button>
-  )
+  );
 }

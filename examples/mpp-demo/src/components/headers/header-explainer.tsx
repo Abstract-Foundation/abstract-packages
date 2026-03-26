@@ -1,8 +1,8 @@
 interface HeaderCardProps {
-  name: string
-  direction: string
-  description: string
-  fields: { key: string; value: string }[]
+  name: string;
+  direction: string;
+  description: string;
+  fields: { key: string; value: string }[];
 }
 
 function HeaderCard({ name, direction, description, fields }: HeaderCardProps) {
@@ -24,7 +24,7 @@ function HeaderCard({ name, direction, description, fields }: HeaderCardProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export function HeaderExplainer() {
@@ -37,13 +37,13 @@ export function HeaderExplainer() {
         <HeaderCard
           name="WWW-Authenticate"
           direction="Server → Client"
-          description='Sent with 402 response. Contains the payment challenge with method, amount, currency, recipient, and expiry.'
+          description="Sent with 402 response. Contains the payment challenge with method, amount, currency, recipient, and expiry."
           fields={[
-            { key: 'method', value: '"abstract/charge"' },
-            { key: 'realm', value: '"mpp-demo.abs.xyz"' },
-            { key: 'challenge', value: '<base64url JWT>' },
-            { key: 'amount', value: '"10000"' },
-            { key: 'currency', value: '"0xbd28..."' },
+            { key: "method", value: '"abstract/charge"' },
+            { key: "realm", value: '"mpp-demo.abs.xyz"' },
+            { key: "challenge", value: "<base64url JWT>" },
+            { key: "amount", value: '"10000"' },
+            { key: "currency", value: '"0xbd28..."' },
           ]}
         />
         <HeaderCard
@@ -51,11 +51,11 @@ export function HeaderExplainer() {
           direction="Client → Server"
           description="Sent with the retry request. Contains the signed credential (ERC-3009 authorization or session voucher)."
           fields={[
-            { key: 'scheme', value: '"Payment"' },
-            { key: 'credential', value: '<base64url>' },
-            { key: 'payload.type', value: '"authorization"' },
-            { key: 'payload.from', value: '"0x..."' },
-            { key: 'payload.signature', value: '"0x..."' },
+            { key: "scheme", value: '"Payment"' },
+            { key: "credential", value: "<base64url>" },
+            { key: "payload.type", value: '"authorization"' },
+            { key: "payload.from", value: '"0x..."' },
+            { key: "payload.signature", value: '"0x..."' },
           ]}
         />
         <HeaderCard
@@ -63,12 +63,12 @@ export function HeaderExplainer() {
           direction="Server → Client"
           description="Sent with 200 response. Confirms settlement with transaction hash (charge) or accepted cumulative amount (session)."
           fields={[
-            { key: 'method', value: '"abstract/charge"' },
-            { key: 'transaction', value: '"0x..."' },
-            { key: 'settled', value: 'true' },
+            { key: "method", value: '"abstract/charge"' },
+            { key: "transaction", value: '"0x..."' },
+            { key: "settled", value: "true" },
           ]}
         />
       </div>
     </div>
-  )
+  );
 }

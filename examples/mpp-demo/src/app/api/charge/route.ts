@@ -1,3 +1,3 @@
-import { chargeHandler } from '@/lib/mpp-server'
+import { chargeHandler } from "@/lib/mpp-server";
 
-export const GET = chargeHandler
+export const GET = chargeHandler;
