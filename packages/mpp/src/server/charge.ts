@@ -209,7 +209,6 @@ export function charge(params: AbstractChargeServerOptions) {
       const validBefore = payload.validBefore as string;
       const from = payload.from as Address;
 
-      // Verify ERC-3009 signature
       const domain = await getErc3009Domain(
         publicClient,
         currencyAddr,
@@ -236,7 +235,6 @@ export function charge(params: AbstractChargeServerOptions) {
         throw new Error('ERC-3009 signature verification failed');
       }
 
-      // Check nonce not already used
       const used = (await publicClient.readContract({
         address: currencyAddr,
         abi: ERC3009_ABI,

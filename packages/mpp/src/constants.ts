@@ -13,8 +13,6 @@ export const USDC_E_MAINNET =
 /** USDC.e decimals */
 export const USDC_E_DECIMALS = 6;
 
-// ── AbstractStreamChannel deployments ──────────────────────────────────────
-
 /** AbstractStreamChannel escrow contract on Abstract Testnet. */
 export const ABSTRACT_STREAM_CHANNEL_TESTNET =
   '0x29635C384f451a72ED2e2a312BCeb8b0bDC0923c' as const;
@@ -22,13 +20,11 @@ export const ABSTRACT_STREAM_CHANNEL_TESTNET =
 export const ABSTRACT_STREAM_CHANNEL_MAINNET =
   '0x29635C384f451a72ED2e2a312BCeb8b0bDC0923c' as const;
 
-// ── ERC-3009 typehash ──────────────────────────────────────────────────────
-
+/** Keccak-256 typehash for ERC-3009 `TransferWithAuthorization`. */
 export const TRANSFER_WITH_AUTHORIZATION_TYPEHASH =
   '0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267' as const;
 
-// ── ERC-3009 ABI fragments ─────────────────────────────────────────────────
-
+/** ABI fragments for ERC-3009 `transferWithAuthorization` (v/r/s signature variant). */
 export const ERC3009_ABI = [
   {
     name: 'transferWithAuthorization',
@@ -73,6 +69,7 @@ export const ERC3009_ABI = [
   },
 ] as const;
 
+/** ABI fragment for ERC-3009 `transferWithAuthorization` (bytes signature variant). */
 export const ERC3009_BYTES_SIGNATURE_ABI = [
   {
     name: 'transferWithAuthorization',
@@ -91,8 +88,7 @@ export const ERC3009_BYTES_SIGNATURE_ABI = [
   },
 ] as const;
 
-// ── AbstractStreamChannel ABI ──────────────────────────────────────────────
-
+/** ABI for the AbstractStreamChannel escrow contract. */
 export const ABSTRACT_STREAM_CHANNEL_ABI = [
   {
     name: 'open',
@@ -219,7 +215,6 @@ export const ABSTRACT_STREAM_CHANNEL_ABI = [
     inputs: [],
     outputs: [{ name: '', type: 'uint64' }],
   },
-  // Events
   {
     name: 'ChannelOpened',
     type: 'event',
@@ -269,11 +264,12 @@ export const ABSTRACT_STREAM_CHANNEL_ABI = [
   },
 ] as const;
 
-// ── EIP-712 voucher domain (matches AbstractStreamChannel) ─────────────────
-
+/** EIP-712 domain name for session voucher signatures. */
 export const VOUCHER_DOMAIN_NAME = 'Abstract Stream Channel';
+/** EIP-712 domain version for session voucher signatures. */
 export const VOUCHER_DOMAIN_VERSION = '1';
 
+/** EIP-712 type definition for `Voucher` typed data. */
 export const VOUCHER_TYPES = {
   Voucher: [
     { name: 'channelId', type: 'bytes32' },
@@ -281,8 +277,7 @@ export const VOUCHER_TYPES = {
   ],
 } as const;
 
-// ── EIP-712 ERC-3009 transfer types ────────────────────────────────────────
-
+/** EIP-712 type definition for `TransferWithAuthorization` typed data. */
 export const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   TransferWithAuthorization: [
     { name: 'from', type: 'address' },
@@ -294,15 +289,13 @@ export const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   ],
 } as const;
 
-// ── Default currency map by chainId ───────────────────────────────────────
-
+/** USDC.e address by Abstract chainId (testnet/mainnet). */
 export const DEFAULT_CURRENCY = {
   [abstractTestnet.id]: USDC_E_TESTNET,
   [abstract.id]: USDC_E_MAINNET,
 };
 
-// ── Default escrow contract map by chainId ───────────────────────────────
-
+/** AbstractStreamChannel address by Abstract chainId (testnet/mainnet). */
 export const DEFAULT_ESCROW = {
   [abstractTestnet.id]: ABSTRACT_STREAM_CHANNEL_TESTNET,
   [abstract.id]: ABSTRACT_STREAM_CHANNEL_MAINNET,

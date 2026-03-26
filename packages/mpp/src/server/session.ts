@@ -37,8 +37,6 @@ import {
 } from '../constants.js';
 import { assertUint128, resolveChain } from '../internal.js';
 
-// ── Types ─────────────────────────────────────────────────────────────────
-
 interface VoucherRecord {
   channelId: Hex;
   cumulativeAmount: bigint;
@@ -62,8 +60,6 @@ interface ChannelState {
   finalized: boolean;
   createdAt: string;
 }
-
-// ── ChannelStore ──────────────────────────────────────────────────────────
 
 interface ChannelStore {
   getChannel(channelId: Hex): Promise<ChannelState | null>;
@@ -112,8 +108,6 @@ function channelStoreFromStore(store: Store.Store): ChannelStore {
   };
 }
 
-// ── Options ────────────────────────────────────────────────────────────────
-
 export interface AbstractSessionServerOptions {
   /** Server account (broadcasts close/settle transactions). */
   account: Account;
@@ -144,8 +138,6 @@ export interface AbstractSessionServerOptions {
   /** Store backend for channel state. Defaults to Store.memory(). */
   store?: Store.Store;
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────
 
 async function verifyVoucherSig(
   publicClient: PublicClient,
@@ -197,8 +189,6 @@ function makeSessionReceipt(params: {
     challengeId: params.challengeId,
   };
 }
-
-// ── Main export ────────────────────────────────────────────────────────────
 
 /**
  * Creates a server-side Abstract session handler.
@@ -310,7 +300,6 @@ export function session(params: AbstractSessionServerOptions) {
       const action = payload.action as string;
 
       switch (action) {
-        // ── OPEN ────────────────────────────────────────────────────────────
         case 'open': {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);
@@ -411,7 +400,6 @@ export function session(params: AbstractSessionServerOptions) {
           });
         }
 
-        // ── TOPUP ───────────────────────────────────────────────────────────
         case 'topUp': {
           const channelId = payload.channelId as Hex;
           const txHash = payload.txHash as Hex;
@@ -456,7 +444,6 @@ export function session(params: AbstractSessionServerOptions) {
           });
         }
 
-        // ── VOUCHER ─────────────────────────────────────────────────────────
         case 'voucher': {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);
@@ -536,7 +523,6 @@ export function session(params: AbstractSessionServerOptions) {
           });
         }
 
-        // ── CLOSE ───────────────────────────────────────────────────────────
         case 'close': {
           const channelId = payload.channelId as Hex;
           const cumulativeAmount = BigInt(payload.cumulativeAmount as string);

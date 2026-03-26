@@ -5,8 +5,6 @@
 import { Method, z } from 'mppx';
 import { parseUnits } from 'viem';
 
-// ── Charge ────────────────────────────────────────────────────────────────
-
 /**
  * Abstract charge intent — one-time ERC-3009 transfer authorization.
  *
@@ -46,8 +44,6 @@ export const abstractChargeMethods = Method.from({
     ),
   },
 });
-
-// ── Session ───────────────────────────────────────────────────────────────
 
 /**
  * Abstract session intent — payment channels backed by AbstractStreamChannel.

@@ -59,7 +59,9 @@ const ERC20_ABI = [
 ] as const;
 
 export interface AbstractSessionClientOptions {
+  /** Viem account for signing vouchers and channel transactions. */
   account: Account;
+  /** Optional custom RPC URL override. */
   rpcUrl?: string;
   /**
    * Default deposit amount as human-readable string (e.g. "10" for 10 USDC.e).
@@ -68,11 +70,13 @@ export interface AbstractSessionClientOptions {
   deposit?: string;
   /** Override escrow contract (falls back to challenge.request.methodDetails.escrowContract). */
   escrowContract?: Address;
+  /** Override the wallet client factory (advanced). */
   getClient?: (
     chainId: number,
   ) =>
     | WalletClient<Transport, ChainEIP712, Account>
     | Promise<WalletClient<Transport, ChainEIP712, Account>>;
+  /** Override the public client factory (advanced). */
   getPublicClient?: (
     chainId: number,
   ) =>
@@ -196,7 +200,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
       const key = channelKey(recipient, currency, escrowContract);
       let entry = channels.get(key);
 
-      // ── Open a new channel ────────────────────────────────────────────────
       if (!entry) {
         const suggestedDepositRaw = req.suggestedDeposit as string | undefined;
         const decimals = (req.decimals as number | undefined) ?? 6;
@@ -213,7 +216,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
 
         const salt = randomBytes32();
 
-        // Ensure allowance
         const currentAllowance = await publicClient.readContract({
           address: currency,
           abi: ERC20_ABI,
@@ -232,7 +234,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
           await publicClient.waitForTransactionReceipt({ hash: approveTx });
         }
 
-        // Open channel
         const openTx = await walletClient.writeContract({
           account,
           address: escrowContract,
@@ -248,7 +249,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         });
         await publicClient.waitForTransactionReceipt({ hash: openTx });
 
-        // Compute channelId
         const channelId = (await publicClient.readContract({
           address: escrowContract,
           abi: ABSTRACT_STREAM_CHANNEL_ABI,
@@ -275,7 +275,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
           await options.onChannelOpened(channelId);
         }
 
-        // Sign opening voucher
         entry.cumulativeAmount += amount;
         const voucherSig = await signVoucherSig(
           chainId,
@@ -300,7 +299,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         });
       }
 
-      // ── Voucher for existing channel ──────────────────────────────────────
       entry.cumulativeAmount += amount;
       const sig = await signVoucherSig(
         chainId,
