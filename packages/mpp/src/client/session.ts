@@ -9,7 +9,7 @@
  *   - `close`: client sends a final voucher to close the channel
  */
 
-import { Credential, Method } from "mppx";
+import { Credential, Method } from 'mppx';
 import {
   type Account,
   type Address,
@@ -22,44 +22,46 @@ import {
   type Transport,
   type WalletClient,
   zeroAddress,
-} from "viem";
-import type { ChainEIP712 } from "viem/chains";
-import { eip712WalletActions } from "viem/zksync";
+} from 'viem';
+import type { ChainEIP712 } from 'viem/chains';
+import { eip712WalletActions } from 'viem/zksync';
 import {
   ABSTRACT_STREAM_CHANNEL_ABI,
   DEFAULT_ESCROW,
   VOUCHER_DOMAIN_NAME,
   VOUCHER_DOMAIN_VERSION,
   VOUCHER_TYPES,
-} from "../constants.js";
-import { randomBytes32, resolveChain } from "../internal.js";
-import { abstractSessionMethods } from "./methods.js";
+} from '../constants.js';
+import { randomBytes32, resolveChain } from '../internal.js';
+import { abstractSessionMethods } from './methods.js';
 
 const ERC20_ABI = [
   {
-    name: "approve",
-    type: "function",
-    stateMutability: "nonpayable",
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
     inputs: [
-      { name: "spender", type: "address" },
-      { name: "amount", type: "uint256" },
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
     ],
-    outputs: [{ name: "", type: "bool" }],
+    outputs: [{ name: '', type: 'bool' }],
   },
   {
-    name: "allowance",
-    type: "function",
-    stateMutability: "view",
+    name: 'allowance',
+    type: 'function',
+    stateMutability: 'view',
     inputs: [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
     ],
-    outputs: [{ name: "", type: "uint256" }],
+    outputs: [{ name: '', type: 'uint256' }],
   },
 ] as const;
 
 export interface AbstractSessionClientOptions {
+  /** Viem account for signing vouchers and channel transactions. */
   account: Account;
+  /** Optional custom RPC URL override. */
   rpcUrl?: string;
   /**
    * Default deposit amount as human-readable string (e.g. "10" for 10 USDC.e).
@@ -68,11 +70,13 @@ export interface AbstractSessionClientOptions {
   deposit?: string;
   /** Override escrow contract (falls back to challenge.request.methodDetails.escrowContract). */
   escrowContract?: Address;
+  /** Override the wallet client factory (advanced). */
   getClient?: (
     chainId: number,
   ) =>
     | WalletClient<Transport, ChainEIP712, Account>
     | Promise<WalletClient<Transport, ChainEIP712, Account>>;
+  /** Override the public client factory (advanced). */
   getPublicClient?: (
     chainId: number,
   ) =>
@@ -158,7 +162,7 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         verifyingContract: escrowContract,
       },
       types: VOUCHER_TYPES,
-      primaryType: "Voucher",
+      primaryType: 'Voucher',
       message: { channelId, cumulativeAmount },
     });
   }
@@ -174,8 +178,7 @@ export function abstractSession(options: AbstractSessionClientOptions) {
       const req = challenge.request as Record<string, unknown>;
       const md = (req.methodDetails ?? {}) as Record<string, unknown>;
 
-      const chainId =
-        (md.chainId as number | undefined) ?? resolveChain(2741).id;
+      const chainId = (md.chainId as number | undefined) ?? resolveChain(2741).id;
       const currency = req.currency as Address;
       const recipient = req.recipient as Address;
       const amountRaw = req.amount as string;
@@ -187,7 +190,7 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         (DEFAULT_ESCROW as Record<number, Address>)[chainId];
       if (!escrowContract) {
         throw new Error(
-          "escrowContract required: set options.escrowContract, ensure the server challenge includes methodDetails.escrowContract, or use a supported Abstract chain",
+          'escrowContract required: set options.escrowContract, ensure the server challenge includes methodDetails.escrowContract, or use a supported Abstract chain',
         );
       }
 
@@ -197,7 +200,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
       const key = channelKey(recipient, currency, escrowContract);
       let entry = channels.get(key);
 
-      // ── Open a new channel ────────────────────────────────────────────────
       if (!entry) {
         const suggestedDepositRaw = req.suggestedDeposit as string | undefined;
         const decimals = (req.decimals as number | undefined) ?? 6;
@@ -208,17 +210,16 @@ export function abstractSession(options: AbstractSessionClientOptions) {
             ? parseUnits(depositStr, decimals)
             : (() => {
                 throw new Error(
-                  "deposit required: set options.deposit or ensure server sends suggestedDeposit",
+                  'deposit required: set options.deposit or ensure server sends suggestedDeposit',
                 );
               })();
 
         const salt = randomBytes32();
 
-        // Ensure allowance
         const currentAllowance = await publicClient.readContract({
           address: currency,
           abi: ERC20_ABI,
-          functionName: "allowance",
+          functionName: 'allowance',
           args: [account.address as Address, escrowContract],
         });
 
@@ -227,18 +228,17 @@ export function abstractSession(options: AbstractSessionClientOptions) {
             account,
             address: currency,
             abi: ERC20_ABI,
-            functionName: "approve",
+            functionName: 'approve',
             args: [escrowContract, deposit],
           });
           await publicClient.waitForTransactionReceipt({ hash: approveTx });
         }
 
-        // Open channel
         const openTx = await walletClient.writeContract({
           account,
           address: escrowContract,
           abi: ABSTRACT_STREAM_CHANNEL_ABI,
-          functionName: "open",
+          functionName: 'open',
           args: [
             recipient,
             currency,
@@ -249,11 +249,10 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         });
         await publicClient.waitForTransactionReceipt({ hash: openTx });
 
-        // Compute channelId
         const channelId = (await publicClient.readContract({
           address: escrowContract,
           abi: ABSTRACT_STREAM_CHANNEL_ABI,
-          functionName: "computeChannelId",
+          functionName: 'computeChannelId',
           args: [
             account.address as Address,
             recipient,
@@ -276,7 +275,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
           await options.onChannelOpened(channelId);
         }
 
-        // Sign opening voucher
         entry.cumulativeAmount += amount;
         const voucherSig = await signVoucherSig(
           chainId,
@@ -289,10 +287,10 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         return Credential.serialize({
           challenge: challenge as Parameters<
             typeof Credential.serialize
-          >[0]["challenge"],
+          >[0]['challenge'],
           source: `did:pkh:eip155:${chainId}:${account.address}`,
           payload: {
-            action: "open" as const,
+            action: 'open' as const,
             channelId,
             cumulativeAmount: entry.cumulativeAmount.toString(),
             signature: voucherSig,
@@ -301,7 +299,6 @@ export function abstractSession(options: AbstractSessionClientOptions) {
         });
       }
 
-      // ── Voucher for existing channel ──────────────────────────────────────
       entry.cumulativeAmount += amount;
       const sig = await signVoucherSig(
         chainId,
@@ -314,10 +311,10 @@ export function abstractSession(options: AbstractSessionClientOptions) {
       return Credential.serialize({
         challenge: challenge as Parameters<
           typeof Credential.serialize
-        >[0]["challenge"],
+        >[0]['challenge'],
         source: `did:pkh:eip155:${chainId}:${account.address}`,
         payload: {
-          action: "voucher" as const,
+          action: 'voucher' as const,
           channelId: entry.channelId,
           cumulativeAmount: entry.cumulativeAmount.toString(),
           signature: sig,

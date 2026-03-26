@@ -9,7 +9,7 @@
  * fee-payer service required.
  */
 
-import { Method } from "mppx";
+import { Method } from 'mppx';
 import {
   type Account,
   type Address,
@@ -18,26 +18,26 @@ import {
   erc20Abi,
   type Hex,
   http,
-  type PublicClient,
   parseSignature,
+  type PublicClient,
   type Transport,
   type WalletClient,
-} from "viem";
-import { abstract, abstractTestnet } from "viem/chains";
+} from 'viem';
+import { abstract, abstractTestnet } from 'viem/chains';
 import {
   type ChainEIP712,
   eip712WalletActions,
   getGeneralPaymasterInput,
-} from "viem/zksync";
-import { abstractChargeMethods } from "../client/methods.js";
+} from 'viem/zksync';
+import { abstractChargeMethods } from '../client/methods.js';
 import {
   DEFAULT_CURRENCY,
   ERC3009_ABI,
   ERC3009_BYTES_SIGNATURE_ABI,
   TRANSFER_WITH_AUTHORIZATION_TYPES,
   USDC_E_DECIMALS,
-} from "../constants.js";
-import { resolveChain } from "../internal.js";
+} from '../constants.js';
+import { resolveChain } from '../internal.js';
 
 export interface AbstractChargeServerOptions {
   /** Token address (defaults to USDC.e for the resolved chain). */
@@ -90,14 +90,14 @@ async function getErc3009Domain(
   const cached = domainCache.get(currency);
   if (cached) return { ...cached, chainId, verifyingContract: currency };
 
-  let name = "USD Coin";
-  let version = "2";
+  let name = 'USD Coin';
+  let version = '2';
 
   try {
     name = (await publicClient.readContract({
       address: currency,
       abi: erc20Abi,
-      functionName: "name",
+      functionName: 'name',
     })) as string;
   } catch {
     /* fallback */
@@ -107,7 +107,7 @@ async function getErc3009Domain(
     version = (await publicClient.readContract({
       address: currency,
       abi: ERC3009_ABI,
-      functionName: "version",
+      functionName: 'version',
     })) as string;
   } catch {
     /* fallback */
@@ -168,7 +168,7 @@ export function charge(params: AbstractChargeServerOptions) {
 
   return Method.toServer(abstractChargeMethods, {
     defaults: {
-      amount: amount ?? "0",
+      amount: amount ?? '0',
       currency,
       decimals,
       recipient,
@@ -199,7 +199,7 @@ export function charge(params: AbstractChargeServerOptions) {
       const recipientAddr =
         (challengeReq.recipient as Address | undefined) ?? recipient;
 
-      if (payload.type !== "authorization") {
+      if (payload.type !== 'authorization') {
         throw new Error(`Unsupported credential type "${payload.type}"`);
       }
 
@@ -209,7 +209,6 @@ export function charge(params: AbstractChargeServerOptions) {
       const validBefore = payload.validBefore as string;
       const from = payload.from as Address;
 
-      // Verify ERC-3009 signature
       const domain = await getErc3009Domain(
         publicClient,
         currencyAddr,
@@ -220,7 +219,7 @@ export function charge(params: AbstractChargeServerOptions) {
         address: from,
         domain,
         types: TRANSFER_WITH_AUTHORIZATION_TYPES,
-        primaryType: "TransferWithAuthorization",
+        primaryType: 'TransferWithAuthorization',
         message: {
           from,
           to: recipientAddr,
@@ -233,18 +232,17 @@ export function charge(params: AbstractChargeServerOptions) {
       });
 
       if (!verified) {
-        throw new Error("ERC-3009 signature verification failed");
+        throw new Error('ERC-3009 signature verification failed');
       }
 
-      // Check nonce not already used
       const used = (await publicClient.readContract({
         address: currencyAddr,
         abi: ERC3009_ABI,
-        functionName: "authorizationState",
+        functionName: 'authorizationState',
         args: [from, nonce],
       })) as boolean;
 
-      if (used) throw new Error("ERC-3009 authorization nonce already used");
+      if (used) throw new Error('ERC-3009 authorization nonce already used');
 
       const baseArgs = [
         from,
@@ -255,33 +253,28 @@ export function charge(params: AbstractChargeServerOptions) {
         nonce,
       ] as const;
       const signerCode = await publicClient.getCode({ address: from });
-      const isContractAccount = !!signerCode && signerCode !== "0x";
+      const isContractAccount = !!signerCode && signerCode !== '0x';
 
       let txHash: Hex;
 
       if (!isContractAccount && isCompactSignature(signature)) {
         const parsed = parseSignature(signature);
-        if (!("v" in parsed)) {
-          throw new Error("Expected a 65-byte ECDSA signature");
+        if (!('v' in parsed)) {
+          throw new Error('Expected a 65-byte ECDSA signature');
         }
-        const txArgs = [
-          ...baseArgs,
-          Number(parsed.v),
-          parsed.r,
-          parsed.s,
-        ] as const;
+        const txArgs = [...baseArgs, Number(parsed.v), parsed.r, parsed.s] as const;
 
         if (paymasterAddress) {
           txHash = await walletClient.writeContract({
             account,
             address: currencyAddr,
             abi: ERC3009_ABI,
-            functionName: "transferWithAuthorization",
+            functionName: 'transferWithAuthorization',
             args: txArgs,
             ...{
               paymaster: paymasterAddress,
               paymasterInput: getGeneralPaymasterInput({
-                innerInput: paymasterInput ?? "0x",
+                innerInput: paymasterInput ?? '0x',
               }),
             },
           });
@@ -290,7 +283,7 @@ export function charge(params: AbstractChargeServerOptions) {
             account,
             address: currencyAddr,
             abi: ERC3009_ABI,
-            functionName: "transferWithAuthorization",
+            functionName: 'transferWithAuthorization',
             args: txArgs,
           });
         }
@@ -299,12 +292,12 @@ export function charge(params: AbstractChargeServerOptions) {
           account,
           address: currencyAddr,
           abi: ERC3009_BYTES_SIGNATURE_ABI,
-          functionName: "transferWithAuthorization",
+          functionName: 'transferWithAuthorization',
           args: [...baseArgs, signature],
           ...{
             paymaster: paymasterAddress,
             paymasterInput: getGeneralPaymasterInput({
-              innerInput: paymasterInput ?? "0x",
+              innerInput: paymasterInput ?? '0x',
             }),
           },
         });
@@ -313,7 +306,7 @@ export function charge(params: AbstractChargeServerOptions) {
           account,
           address: currencyAddr,
           abi: ERC3009_BYTES_SIGNATURE_ABI,
-          functionName: "transferWithAuthorization",
+          functionName: 'transferWithAuthorization',
           args: [...baseArgs, signature],
         });
       }
@@ -321,14 +314,14 @@ export function charge(params: AbstractChargeServerOptions) {
       const receipt = await publicClient.waitForTransactionReceipt({
         hash: txHash,
       });
-      if (receipt.status !== "success") {
+      if (receipt.status !== 'success') {
         throw new Error(`transferWithAuthorization reverted: ${txHash}`);
       }
 
       return {
-        method: "abstract" as const,
-        intent: "charge" as const,
-        status: "success" as const,
+        method: 'abstract' as const,
+        intent: 'charge' as const,
+        status: 'success' as const,
         timestamp: new Date().toISOString(),
         reference: txHash,
       };
