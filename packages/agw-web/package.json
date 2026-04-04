@@ -1,7 +1,7 @@
 {
   "name": "@abstract-foundation/agw-web",
   "description": "Abstract Global Wallet for the web (generic EIP-6963 provider)",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -58,6 +58,7 @@
   },
   "peerDependencies": {
     "@privy-io/cross-app-connect": "^0.5.2",
+    "typescript": ">=5.0.4",
     "viem": "^2.37.0"
   },
   "devDependencies": {
