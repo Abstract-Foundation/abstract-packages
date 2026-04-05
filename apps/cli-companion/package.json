@@ -26,8 +26,8 @@
     "react-dom": "catalog:",
     "sass": "^1.93.3",
     "string-hash": "^1.1.3",
-    "viem": "^2.39.0",
-    "wagmi": "^2.19.4",
+    "viem": "catalog:",
+    "wagmi": "catalog:",
     "zustand": "^4.5.7"
   },
   "devDependencies": {

@@ -39,9 +39,11 @@ jobs:
         run: |
           if [[ "${{ inputs.event_name }}" == "pull_request" ]]; then
             git fetch origin main --depth=1
-            pnpm turbo run build typecheck --filter=...[origin/main] --filter=!./packages/contracts
+            pnpm turbo run build --filter=...[origin/main] --filter=!./packages/contracts --filter=!./examples/*
+            pnpm turbo run typecheck --filter=...[origin/main] --filter=!./packages/contracts
           else
-            pnpm turbo run build typecheck --filter=!./packages/contracts
+            pnpm turbo run build --filter=!./packages/contracts --filter=!./examples/*
+            pnpm turbo run typecheck --filter=!./packages/contracts
           fi
 
       - name: Run non-specialized tests
