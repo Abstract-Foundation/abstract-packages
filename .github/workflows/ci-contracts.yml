@@ -1,0 +1,28 @@
+name: Contracts
+
+on:
+  workflow_call:
+
+jobs:
+  contracts:
+    name: Forge build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Solidity dependencies
+        working-directory: packages/contracts
+        run: forge soldeer install
+
+      - name: Build contracts
+        working-directory: packages/contracts
+        run: forge build
+
+      - name: Test contracts
+        working-directory: packages/contracts
+        run: forge test -v

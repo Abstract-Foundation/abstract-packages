@@ -206,7 +206,7 @@ export function transformEIP1193Provider(
 
         // Undo the automatic formatting applied by Wagmi's eth_signTransaction
         // Formatter: https://github.com/wevm/viem/blob/main/src/zksync/formatters.ts#L114
-        if (transaction.eip712Meta && transaction.eip712Meta.paymasterParams) {
+        if (transaction.eip712Meta?.paymasterParams) {
           transaction.paymaster =
             transaction.eip712Meta.paymasterParams.paymaster;
           transaction.paymasterInput = toHex(

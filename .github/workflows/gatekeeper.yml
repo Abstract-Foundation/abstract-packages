@@ -1,0 +1,156 @@
+name: CI Gatekeeper
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-gatekeeper-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      js: ${{ steps.filter.outputs.js }}
+      contracts: ${{ steps.filter.outputs.contracts }}
+      agw-client: ${{ steps.filter.outputs.agw-client }}
+      publish-surface: ${{ steps.filter.outputs.publish-surface }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            js:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig.base.json'
+              - 'biome.json'
+              - 'vitest.workspace.ts'
+              - '.npmrc'
+              - 'packages/**'
+              - 'apps/**'
+              - 'examples/**'
+              - '.github/scripts/**'
+              - '.github/workflows/ci-verify.yml'
+              - '.github/workflows/gatekeeper.yml'
+            contracts:
+              - 'packages/contracts/**'
+              - '.github/workflows/ci-contracts.yml'
+              - '.github/workflows/gatekeeper.yml'
+            agw-client:
+              - 'packages/agw-client/**'
+              - '.github/workflows/ci-agw-client.yml'
+              - '.github/workflows/gatekeeper.yml'
+            publish-surface:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - 'tsconfig.base.json'
+              - 'biome.json'
+              - 'vitest.workspace.ts'
+              - '.npmrc'
+              - '.changeset/**'
+              - 'packages/mpp/**'
+              - 'packages/agw-client/**'
+              - 'packages/agw-react/**'
+              - 'packages/agw-web/**'
+              - 'packages/web3-react-agw/**'
+              - 'packages/agw-cli/**'
+              - '.github/scripts/**'
+              - '.github/workflows/ci-release-surface.yml'
+              - '.github/workflows/release-pr.yml'
+              - '.github/workflows/publish.yml'
+              - '.github/workflows/gatekeeper.yml'
+
+  changesets:
+    name: Changeset Check
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'changeset-release/') && needs.changes.outputs.publish-surface == 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Require changeset for publishable changes
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          pnpm exec changeset status --since="origin/${{ github.base_ref }}"
+
+  verify:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.js == 'true'
+    uses: ./.github/workflows/ci-verify.yml
+    with:
+      event_name: ${{ github.event_name }}
+    secrets: inherit
+
+  contracts:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.contracts == 'true'
+    uses: ./.github/workflows/ci-contracts.yml
+    secrets: inherit
+
+  agw-client:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.agw-client == 'true'
+    uses: ./.github/workflows/ci-agw-client.yml
+    secrets: inherit
+
+  release-surface:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.publish-surface == 'true'
+    uses: ./.github/workflows/ci-release-surface.yml
+    secrets: inherit
+
+  ci-gatekeeper:
+    name: CI Gatekeeper
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - changesets
+      - verify
+      - contracts
+      - agw-client
+      - release-surface
+    steps:
+      - name: Verify job results
+        run: |
+          set -euo pipefail
+          results="${{ needs.changesets.result || 'skipped' }} ${{ needs.verify.result || 'skipped' }} ${{ needs.contracts.result || 'skipped' }} ${{ needs.agw-client.result || 'skipped' }} ${{ needs.release-surface.result || 'skipped' }}"
+          echo "Job results: $results"
+
+          if [[ "$results" =~ failure || "$results" =~ cancelled ]]; then
+            echo "One or more required jobs failed or were cancelled."
+            exit 1
+          fi

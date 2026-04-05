@@ -5,9 +5,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abstract-Foundation/agw-sdk.git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
     "directory": "packages/agw-client"
   },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/agw-client",
   "scripts": {
     "test": "vitest -c ./test/vitest.config.ts --disable-console-intercept",
     "coverage": "vitest run --coverage -c ./test/vitest.config.ts",
@@ -63,6 +67,10 @@
     "src",
     "package.json"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "peerDependencies": {
     "typescript": ">=5.0.4",
     "viem": "^2.37.0"

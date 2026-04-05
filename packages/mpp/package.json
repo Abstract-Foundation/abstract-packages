@@ -36,13 +36,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abstract-Foundation/mpp-abstract.git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
     "directory": "packages/mpp"
   },
   "bugs": {
-    "url": "https://github.com/Abstract-Foundation/mpp-abstract/issues"
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
   },
-  "homepage": "https://github.com/Abstract-Foundation/mpp-abstract/tree/main/packages/mpp",
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/mpp",
   "peerDependencies": {
     "mppx": "catalog:",
     "viem": "catalog:",

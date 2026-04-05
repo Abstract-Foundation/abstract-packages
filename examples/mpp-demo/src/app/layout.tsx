@@ -17,13 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <WalletProvider>
-        <body
-          className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
-        >
+      <body
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
+      >
+        <WalletProvider>
           {children}
-        </body>
-      </WalletProvider>
+        </WalletProvider>
+      </body>
     </html>
   );
 }

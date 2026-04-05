@@ -8,7 +8,8 @@
     "build:cjs": "tsc -p tsconfig.cjs.json && printf '{\"type\":\"commonjs\"}' > ./dist/cjs/package.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "typecheck": "tsc --noEmit",
-    "debug": "tsc-watch --sourceMap true --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types"
+    "debug": "tsc-watch --sourceMap true --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types",
+    "test:build": "publint && attw --pack --ignore-rules false-cjs"
   },
   "keywords": [
     "eth",
@@ -24,9 +25,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abstract-Foundation/agw-sdk.git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
     "directory": "packages/web3-react-agw"
   },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/web3-react-agw",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
@@ -43,17 +48,19 @@
     "src",
     "package.json"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "typescript": ">=5.0.4"
   },
   "dependencies": {
     "@abstract-foundation/agw-client": "workspace:^",
     "@privy-io/cross-app-connect": "^0.5.2",
     "@web3-react/types": "^8.2.3"
-  },
-  "peerDependencies": {
-    "typescript": ">=5.0.4"
   },
   "peerDependenciesMeta": {
     "typescript": {
@@ -68,6 +75,6 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "viem": "catalog:",
-    "wagmi": "^2.17.5"
+    "wagmi": "catalog:"
   }
 }

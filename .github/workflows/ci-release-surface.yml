@@ -1,0 +1,40 @@
+name: Release Surface
+
+on:
+  workflow_call:
+
+jobs:
+  release-surface:
+    name: ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - "@abstract-foundation/mpp"
+          - "@abstract-foundation/agw-client"
+          - "@abstract-foundation/agw-react"
+          - "@abstract-foundation/agw-web"
+          - "@abstract-foundation/web3-react-agw"
+          - "@abstract-foundation/agw-cli"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate package release surface
+        run: node .github/scripts/run-release-surface.mjs --package "${{ matrix.package }}"

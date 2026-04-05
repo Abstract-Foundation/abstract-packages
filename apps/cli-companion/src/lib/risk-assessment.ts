@@ -68,7 +68,7 @@ export function assessPolicyRisk(preview: PolicyPreview): SecurityAssessment {
   }
   if ((policyPayload.policyMeta?.warnings.length ?? 0) > 0) {
     score += 1;
-    reasons.push(...policyPayload.policyMeta!.warnings);
+    reasons.push(...(policyPayload.policyMeta?.warnings ?? []));
   }
 
   const level: SecurityAssessment["level"] =

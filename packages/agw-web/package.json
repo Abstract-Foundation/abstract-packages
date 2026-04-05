@@ -5,9 +5,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abstract-Foundation/agw-sdk.git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
     "directory": "packages/agw-web"
   },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/agw-web",
   "scripts": {
     "build": "pnpm run clean && pnpm run build:esm+types && pnpm run build:cjs",
     "build:esm+types": "tsc --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && printf '{\"type\":\"module\"}' > ./dist/esm/package.json",
@@ -53,6 +57,10 @@
     "src",
     "package.json"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "dependencies": {
     "@abstract-foundation/agw-client": "workspace:*"
   },

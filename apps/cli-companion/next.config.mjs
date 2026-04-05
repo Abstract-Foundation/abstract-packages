@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
-import { dirname, relative } from "path";
+import { dirname, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import hash from "string-hash";
-import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

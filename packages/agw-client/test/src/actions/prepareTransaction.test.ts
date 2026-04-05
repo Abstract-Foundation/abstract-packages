@@ -1,6 +1,5 @@
 import {
   createClient,
-  createNonceManager,
   createPublicClient,
   createWalletClient,
   type EIP1193RequestFn,
@@ -8,7 +7,6 @@ import {
   http,
   keccak256,
   type NonceManager,
-  nonceManager,
   parseEther,
   toBytes,
   toHex,
@@ -17,10 +15,7 @@ import { toAccount } from "viem/accounts";
 import type { ChainEIP712, ZksyncTransactionRequestEIP712 } from "viem/zksync";
 import { expect, test, vi } from "vitest";
 
-import {
-  MaxFeePerGasTooLowError,
-  prepareTransactionRequest,
-} from "../../../src/actions/prepareTransaction.js";
+import { prepareTransactionRequest } from "../../../src/actions/prepareTransaction.js";
 import {
   CONTRACT_DEPLOYER_ADDRESS,
   EOA_VALIDATOR_ADDRESS,

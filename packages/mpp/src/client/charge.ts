@@ -6,37 +6,39 @@
  * `transferWithAuthorization` call on behalf of the payer.
  */
 
-import { Credential, Method } from 'mppx';
+import { Credential, Method } from "mppx";
 import {
   type Account,
   type Address,
   createPublicClient,
   createWalletClient,
   erc20Abi,
-  type Hex,
   http,
   type PublicClient,
   type Transport,
   type WalletClient,
-} from 'viem';
-import type { ChainEIP712 } from 'viem/zksync';
-import { ERC3009_ABI, TRANSFER_WITH_AUTHORIZATION_TYPES } from '../constants.js';
-import { randomBytes32, resolveChain } from '../internal.js';
-import { abstractChargeMethods } from './methods.js';
+} from "viem";
+import type { ChainEIP712 } from "viem/zksync";
+import {
+  ERC3009_ABI,
+  TRANSFER_WITH_AUTHORIZATION_TYPES,
+} from "../constants.js";
+import { randomBytes32, resolveChain } from "../internal.js";
+import { abstractChargeMethods } from "./methods.js";
 
 async function getErc3009Domain(
   publicClient: PublicClient,
   currency: Address,
   chainId: number,
 ) {
-  let name = 'USD Coin';
-  let version = '2';
+  let name = "USD Coin";
+  let version = "2";
 
   try {
     name = (await publicClient.readContract({
       address: currency,
       abi: erc20Abi,
-      functionName: 'name',
+      functionName: "name",
     })) as string;
   } catch {
     /* fallback to USDC defaults */
@@ -46,7 +48,7 @@ async function getErc3009Domain(
     version = (await publicClient.readContract({
       address: currency,
       abi: ERC3009_ABI,
-      functionName: 'version',
+      functionName: "version",
     })) as string;
   } catch {
     /* fallback to USDC defaults */
@@ -91,9 +93,7 @@ export function abstractCharge(options: AbstractChargeClientOptions) {
     };
   }
 
-  async function resolveWalletClient(
-    chainId: number,
-  ): Promise<WalletClient> {
+  async function resolveWalletClient(chainId: number): Promise<WalletClient> {
     if (customGetClient) return customGetClient(chainId);
     return buildClient(chainId).walletClient;
   }
@@ -135,7 +135,7 @@ export function abstractCharge(options: AbstractChargeClientOptions) {
         account,
         domain,
         types: TRANSFER_WITH_AUTHORIZATION_TYPES,
-        primaryType: 'TransferWithAuthorization',
+        primaryType: "TransferWithAuthorization",
         message: {
           from: account.address as Address,
           to: recipient,
@@ -151,10 +151,10 @@ export function abstractCharge(options: AbstractChargeClientOptions) {
       return Credential.serialize({
         challenge: challenge as Parameters<
           typeof Credential.serialize
-        >[0]['challenge'],
+        >[0]["challenge"],
         source,
         payload: {
-          type: 'authorization' as const,
+          type: "authorization" as const,
           signature,
           nonce,
           validAfter: validAfter.toString(),

@@ -41,7 +41,7 @@ export function useSessionWizardState() {
     (state) => state.existingSigners,
   );
 
-  const resolutionAttempt = useSessionWizardStore(
+  const _resolutionAttempt = useSessionWizardStore(
     (state) => state.resolutionAttempt,
   );
   const markResolving = useSessionWizardStore((state) => state.markResolving);
@@ -140,7 +140,6 @@ export function useSessionWizardState() {
     signerAddress,
     validChainId,
     publicClient,
-    resolutionAttempt,
     markResolving,
     syncConnection,
     markCreationError,

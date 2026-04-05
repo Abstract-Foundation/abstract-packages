@@ -9,6 +9,7 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "contracts",
+    "@abstract-foundation/agw-core",
     "mpp-abstract-agent-example",
     "mpp-abstract-hono-example",
     "mpp-demo",

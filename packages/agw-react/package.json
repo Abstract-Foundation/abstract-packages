@@ -5,9 +5,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Abstract-Foundation/agw-sdk.git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
     "directory": "packages/agw-react"
   },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/agw-react",
   "scripts": {
     "build": "pnpm run clean && pnpm run build:esm+types && pnpm run build:cjs",
     "build:esm+types": "tsc --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && printf '{\"type\":\"module\"}' > ./dist/esm/package.json",
@@ -46,12 +50,26 @@
   },
   "typesVersions": {
     "*": {
-      "connectors": ["dist/types/exports/connectors.d.ts"],
-      "privy": ["dist/types/exports/privy.d.ts"],
-      "thirdweb": ["dist/types/exports/thirdweb.d.ts"]
+      "connectors": [
+        "dist/types/exports/connectors.d.ts"
+      ],
+      "privy": [
+        "dist/types/exports/privy.d.ts"
+      ],
+      "thirdweb": [
+        "dist/types/exports/thirdweb.d.ts"
+      ]
     }
   },
-  "files": ["dist", "src", "package.json"],
+  "files": [
+    "dist",
+    "src",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "dependencies": {
     "@abstract-foundation/agw-client": "workspace:*",
     "@privy-io/cross-app-connect": "^0.5.2"
@@ -78,7 +96,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "thirdweb": "^5.68.0",
-    "viem": "^2.37.0"
+    "viem": "catalog:",
+    "wagmi": "catalog:"
   },
   "peerDependenciesMeta": {
     "typescript": {
