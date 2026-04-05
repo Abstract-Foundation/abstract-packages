@@ -126,7 +126,7 @@ export async function POST(request: Request) {
     }
 
     const callbackState = new URL(body.callbackUrl).searchParams.get("state");
-    if (!callbackState || !callbackState.trim()) {
+    if (!callbackState?.trim()) {
       return NextResponse.json(
         { error: "callbackUrl is missing required `state` parameter." },
         { status: 400 },

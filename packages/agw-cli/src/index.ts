@@ -44,6 +44,9 @@ function registerCommands(
     }
 
     const segment = definition.path[definition.path.length - 1];
+    if (!segment) {
+      continue;
+    }
     const command = parent.command(segment).description(definition.description);
 
     if (definition.children?.length) {

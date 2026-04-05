@@ -38,7 +38,7 @@ const Button: React.FC<ButtonProps> = ({
       "b3",
       styles.container,
       props.disabled && styles.disabled,
-      styles["height-" + height],
+      styles[`height-${height}`],
       variant === "primary" && styles.primary,
       (variant === "secondary" || variant === "destructive") &&
         styles.secondary,

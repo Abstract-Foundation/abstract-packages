@@ -6,8 +6,8 @@ import {
 } from "@abstract-foundation/agw-client/sessions";
 import type { WriteContractParameters } from "@wagmi/core";
 import type { Address, Hash, Hex } from "viem";
-import { useWriteContract } from "wagmi";
 import type { UseWriteContractReturnType } from "wagmi";
+import { useWriteContract } from "wagmi";
 
 export type RevokeSessionsArgs = {
   sessions: SessionConfig | Hash | (SessionConfig | Hash)[];

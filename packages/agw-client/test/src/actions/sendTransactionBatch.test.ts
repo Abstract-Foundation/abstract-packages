@@ -4,12 +4,10 @@ import {
   createWalletClient,
   erc20Abi,
   http,
-  keccak256,
-  toBytes,
 } from "viem";
 import { toAccount } from "viem/accounts";
 import type { ChainEIP712, ZksyncTransactionRequestEIP712 } from "viem/zksync";
-import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sendTransactionBatch } from "../../../src/actions/sendTransactionBatch.js";
 import { EOA_VALIDATOR_ADDRESS } from "../../../src/constants.js";

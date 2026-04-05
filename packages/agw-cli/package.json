@@ -7,11 +7,12 @@
   "author": "Abstract Foundation",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Abstract-Foundation/agw-cli.git"
+    "url": "git+https://github.com/Abstract-Foundation/abstract-packages.git",
+    "directory": "packages/agw-cli"
   },
-  "homepage": "https://github.com/Abstract-Foundation/agw-cli#readme",
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/agw-cli",
   "bugs": {
-    "url": "https://github.com/Abstract-Foundation/agw-cli/issues"
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
   },
   "bin": {
     "agw-cli": "./dist/index.mjs"
@@ -25,16 +26,19 @@
     "node": ">=18"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsdown --config tsdown.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.mjs",
-    "prepublishOnly": "pnpm check-types && pnpm build"
+    "prepublishOnly": "pnpm typecheck && pnpm build"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "tsdown": "^0.20.3",
     "tsx": "catalog:",
     "typescript": "catalog:"

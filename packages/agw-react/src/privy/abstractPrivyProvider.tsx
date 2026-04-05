@@ -5,7 +5,6 @@ import {
   type PrivyProviderProps,
 } from "@privy-io/react-auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
 import type { Chain, Transport } from "viem";
 import { createConfig, http, WagmiProvider } from "wagmi";
 

@@ -6,6 +6,8 @@
     "test:build": "turbo run test:build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
+    "ci:lint": "biome ci .github .changeset package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json apps/cli-companion/package.json apps/cli-companion/next.config.mjs packages/*/package.json examples/*/package.json",
+    "ci:release-surface": "node .github/scripts/run-release-surface.mjs",
     "lint:check": "biome lint",
     "lint:fix": "biome lint --write",
     "format": "biome format --write",
@@ -18,7 +20,9 @@
   },
   "packageManager": "pnpm@10.30.2",
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,css,scss,md}": ["biome check --write"]
+    "**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "biome check --write"
+    ]
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.16.4",

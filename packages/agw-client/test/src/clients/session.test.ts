@@ -1,4 +1,4 @@
-import { parseAccount, toAccount } from "viem/accounts";
+import { toAccount } from "viem/accounts";
 import type { ChainEIP712 } from "viem/zksync";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

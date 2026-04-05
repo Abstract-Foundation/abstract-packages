@@ -1,17 +1,5 @@
-import {
-  createClient,
-  createPublicClient,
-  createWalletClient,
-  encodeFunctionData,
-  type Hash,
-  http,
-  parseEther,
-} from "viem";
-import {
-  generatePrivateKey,
-  privateKeyToAccount,
-  toAccount,
-} from "viem/accounts";
+import { createClient, type Hash, parseEther } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import type { ChainEIP712 } from "viem/zksync";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -32,7 +20,6 @@ vi.mock("viem/actions", () => ({
 
 import { SessionKeyValidatorAbi } from "../../../src/abis/SessionKeyValidator.js";
 import { revokeSessions } from "../../../src/actions/revokeSessions.js";
-import { sendTransaction } from "../../../src/actions/sendTransaction.js";
 import {
   getSessionHash,
   LimitType,

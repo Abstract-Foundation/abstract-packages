@@ -127,6 +127,18 @@ export const usePrivyCrossAppProvider = ({
     };
   };
 
+  const ready = useMemo(() => {
+    return (
+      privyReady &&
+      user &&
+      authenticated &&
+      user.linkedAccounts.some(
+        (account) =>
+          account.type === "cross_app" && account.providerApp.id === AGW_APP_ID,
+      )
+    );
+  }, [privyReady, user, authenticated]);
+
   const getAccounts = useCallback(
     async (promptLogin: boolean) => {
       if (!ready) {
@@ -152,9 +164,10 @@ export const usePrivyCrossAppProvider = ({
     [
       user,
       authenticated,
-      privyReady,
       loginWithCrossAppAccount,
       linkCrossAppAccount,
+      getAddressesFromUser,
+      ready,
     ],
   );
 
@@ -186,10 +199,7 @@ export const usePrivyCrossAppProvider = ({
           const transaction = params[0];
           // Undo the automatic formatting applied by Wagmi's eth_signTransaction
           // Formatter: https://github.com/wevm/viem/blob/main/src/zksync/formatters.ts#L114
-          if (
-            transaction.eip712Meta &&
-            transaction.eip712Meta.paymasterParams
-          ) {
+          if (transaction.eip712Meta?.paymasterParams) {
             transaction.paymaster =
               transaction.eip712Meta.paymasterParams.paymaster;
             transaction.paymasterInput = toHex(
@@ -223,7 +233,15 @@ export const usePrivyCrossAppProvider = ({
           throw new Error(`Unsupported request: ${method}`);
       }
     },
-    [passthrough, publicClient, getAccounts, signMessage],
+    [
+      passthrough,
+      publicClient,
+      getAccounts,
+      signMessage,
+      chain.id,
+      sendTransaction,
+      signTypedData,
+    ],
   );
 
   const provider: EIP1193Provider = useMemo(() => {
@@ -242,19 +260,7 @@ export const usePrivyCrossAppProvider = ({
       },
       request: handleRequest as EIP1193RequestFn<EIP1474Methods>,
     };
-  }, [handleRequest]);
-
-  const ready = useMemo(() => {
-    return (
-      privyReady &&
-      user &&
-      authenticated &&
-      user.linkedAccounts.some(
-        (account) =>
-          account.type === "cross_app" && account.providerApp.id === AGW_APP_ID,
-      )
-    );
-  }, [privyReady, user, authenticated]);
+  }, [handleRequest, eventListeners.get, eventListeners.set]);
 
   return {
     ready,

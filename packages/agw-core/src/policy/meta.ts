@@ -129,7 +129,7 @@ export function assertToolAllowedByPolicyMeta(
   session: AgwSessionData | null,
   toolName: string,
 ): void {
-  if (!session || !session.policyMeta) {
+  if (!session?.policyMeta) {
     return;
   }
 

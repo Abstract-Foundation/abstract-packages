@@ -74,7 +74,7 @@ export async function startCallbackServer(
     }
 
     const payload = url.searchParams.get("session");
-    if (!payload || !payload.trim()) {
+    if (!payload?.trim()) {
       textResponse(res, 400, "Missing `session` query parameter.");
       return;
     }

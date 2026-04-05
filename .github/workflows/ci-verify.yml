@@ -1,0 +1,54 @@
+name: Verify
+
+on:
+  workflow_call:
+    inputs:
+      event_name:
+        required: true
+        type: string
+
+jobs:
+  verify:
+    name: Lint, build, typecheck, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format check
+        run: pnpm ci:lint
+
+      - name: Build and typecheck
+        run: |
+          if [[ "${{ inputs.event_name }}" == "pull_request" ]]; then
+            git fetch origin main --depth=1
+            pnpm turbo run build typecheck --filter=...[origin/main] --filter=!./packages/contracts
+          else
+            pnpm turbo run build typecheck --filter=!./packages/contracts
+          fi
+
+      - name: Run non-specialized tests
+        run: |
+          if [[ "${{ inputs.event_name }}" == "pull_request" ]]; then
+            git fetch origin main --depth=1
+            pnpm turbo run test --filter=...[origin/main] --filter=!./packages/contracts --filter=!@abstract-foundation/agw-client
+          else
+            pnpm turbo run test --filter=!./packages/contracts --filter=!@abstract-foundation/agw-client
+          fi

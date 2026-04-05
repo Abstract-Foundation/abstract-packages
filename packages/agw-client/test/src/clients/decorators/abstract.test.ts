@@ -1,4 +1,3 @@
-import { parseEther } from "viem";
 import { parseAccount } from "viem/accounts";
 import { describe, expect, it, vi } from "vitest";
 import * as deployContractModule from "../../../../src/actions/deployContract.js";

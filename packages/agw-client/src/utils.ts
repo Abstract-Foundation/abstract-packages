@@ -181,37 +181,33 @@ export function transformEip712TypedData(
   return {
     chainId: Number(typedData.domain.chainId),
     account: parseAccount(
-      toHex(BigInt(typedData.message["from"] as string), {
+      toHex(BigInt(typedData.message.from as string), {
         size: 20,
       }),
     ),
-    to: toHex(BigInt(typedData.message["to"] as string), {
+    to: toHex(BigInt(typedData.message.to as string), {
       size: 20,
     }),
-    gas: BigInt(typedData.message["gasLimit"] as string),
-    gasPerPubdata: BigInt(
-      typedData.message["gasPerPubdataByteLimit"] as string,
-    ),
-    maxFeePerGas: BigInt(typedData.message["maxFeePerGas"] as string),
+    gas: BigInt(typedData.message.gasLimit as string),
+    gasPerPubdata: BigInt(typedData.message.gasPerPubdataByteLimit as string),
+    maxFeePerGas: BigInt(typedData.message.maxFeePerGas as string),
     maxPriorityFeePerGas: BigInt(
-      typedData.message["maxPriorityFeePerGas"] as string,
+      typedData.message.maxPriorityFeePerGas as string,
     ),
     paymaster:
-      (typedData.message["paymaster"] as string) != "0"
-        ? toHex(BigInt(typedData.message["paymaster"] as string), {
+      (typedData.message.paymaster as string) !== "0"
+        ? toHex(BigInt(typedData.message.paymaster as string), {
             size: 20,
           })
         : undefined,
-    nonce: typedData.message["nonce"] as number,
-    value: BigInt(typedData.message["value"] as string),
+    nonce: typedData.message.nonce as number,
+    value: BigInt(typedData.message.value as string),
     data:
-      typedData.message["data"] === "0x0"
-        ? "0x"
-        : (typedData.message["data"] as Hex),
-    factoryDeps: typedData.message["factoryDeps"] as Hex[],
+      typedData.message.data === "0x0" ? "0x" : (typedData.message.data as Hex),
+    factoryDeps: typedData.message.factoryDeps as Hex[],
     paymasterInput:
-      typedData.message["paymasterInput"] !== "0x"
-        ? (typedData.message["paymasterInput"] as Hex)
+      typedData.message.paymasterInput !== "0x"
+        ? (typedData.message.paymasterInput as Hex)
         : undefined,
   };
 }

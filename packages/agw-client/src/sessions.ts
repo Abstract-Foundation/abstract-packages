@@ -189,7 +189,7 @@ export const getPeriodIdsForTransaction = (args: {
     return args.sessionConfig.callPolicies.find(
       (policy) =>
         policy.target.toLowerCase() === target.toLowerCase() &&
-        policy.selector == args.selector,
+        policy.selector === args.selector,
     );
   };
 

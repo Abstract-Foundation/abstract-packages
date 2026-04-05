@@ -37,7 +37,7 @@ interface ProvisionAttestationPayload {
 function extractCallbackState(callbackUrl: string): string {
   const url = new URL(callbackUrl);
   const state = url.searchParams.get("state");
-  if (!state || !state.trim()) {
+  if (!state?.trim()) {
     throw new Error("callbackUrl is missing required `state` parameter.");
   }
   return state.trim();
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!body.provisionAttestation || !body.provisionAttestation.trim()) {
+    if (!body.provisionAttestation?.trim()) {
       return NextResponse.json(
         { error: "Missing required field: provisionAttestation." },
         { status: 400 },
