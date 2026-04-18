@@ -1,5 +1,13 @@
 # @abstract-foundation/web3-react-agw
 
+## 1.8.4
+
+### Patch Changes
+
+- d93d84f: Republish the public SDK packages after fixing the publish workflow to build fresh package artifacts in CI.
+- Updated dependencies [d93d84f]
+  - @abstract-foundation/agw-client@1.12.3
+
 ## 1.8.3
 
 ### Patch Changes
