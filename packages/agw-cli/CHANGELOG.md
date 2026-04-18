@@ -1,5 +1,12 @@
 # @abstract-foundation/agw-cli
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [d93d84f]
+  - @abstract-foundation/agw-client@1.12.3
+
 ## 0.1.7
 
 ### Patch Changes

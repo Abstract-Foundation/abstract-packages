@@ -1,5 +1,11 @@
 # @abstract-foundation/mpp
 
+## 0.1.6
+
+### Patch Changes
+
+- d93d84f: Republish the public SDK packages after fixing the publish workflow to build fresh package artifacts in CI.
+
 ## 0.1.5
 
 ### Patch Changes
