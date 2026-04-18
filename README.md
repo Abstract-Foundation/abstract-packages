@@ -143,7 +143,7 @@ Install, build, and verify:
 pnpm install
 pnpm build        # turbo run build across the graph
 pnpm typecheck    # turbo run typecheck
-pnpm test         # turbo run test (non-contract packages)
+pnpm test         # turbo run test across the graph (requires Foundry for contracts + agw-client anvil tests)
 pnpm lint         # biome lint
 pnpm format       # biome format --write
 ```
@@ -152,7 +152,7 @@ Work on a single package with Turbo's filter syntax:
 
 ```bash
 pnpm --filter @abstract-foundation/agw-client build
-pnpm --filter @abstract-foundation/agw-react test
+pnpm --filter @abstract-foundation/agw-react typecheck
 pnpm --filter @abstract-foundation/agw-cli dev
 ```
 

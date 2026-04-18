@@ -171,8 +171,8 @@ Group: external → internal (`@abstract-foundation/*`, `workspace:*`) → relat
 Unit tests use [Vitest](https://vitest.dev). The root [`vitest.workspace.ts`](vitest.workspace.ts) pulls each package's config in.
 
 ```bash
-pnpm test                                            # all non-contract packages
-pnpm --filter @abstract-foundation/agw-client test   # unit tests (requires Foundry for some)
+pnpm test                                            # all packages via turbo (Foundry required: contracts forge test + agw-client anvil tests)
+pnpm --filter @abstract-foundation/agw-client test   # unit tests (spin up anvil, Foundry required)
 pnpm --filter @abstract-foundation/agw-client coverage
 pnpm --filter @abstract-foundation/agw-client test:build   # publint + arethetypeswrong
 ```
