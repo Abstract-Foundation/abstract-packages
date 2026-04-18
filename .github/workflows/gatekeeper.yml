@@ -180,6 +180,9 @@ jobs:
       needs.detect-publishable.outputs.should_publish == 'true' &&
       needs.release-surface.result == 'success' &&
       needs.agw-client.result == 'success'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/publish.yml
     secrets: inherit
 
