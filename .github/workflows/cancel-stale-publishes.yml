@@ -23,6 +23,7 @@ jobs:
 
           mapfile -t RUN_IDS < <(
             gh run list \
+              --repo="$REPO" \
               --workflow=gatekeeper.yml \
               --branch=main \
               --limit=50 \
