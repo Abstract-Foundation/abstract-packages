@@ -1,59 +1,19 @@
 name: Publish
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: publish-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  detect:
-    name: Detect publishable release
-    runs-on: ubuntu-latest
-    outputs:
-      should_publish: ${{ steps.detect.outputs.should_publish }}
-      packages_json: ${{ steps.detect.outputs.packages_json }}
-      summary_markdown: ${{ steps.detect.outputs.summary_markdown }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Detect publishable packages
-        id: detect
-        run: node .github/scripts/detect-publishable.mjs
-
-  verify-release-surface:
-    name: Verify release surface
-    needs: detect
-    if: needs.detect.outputs.should_publish == 'true'
-    uses: ./.github/workflows/ci-release-surface.yml
-    secrets: inherit
-
-  verify-agw-client:
-    name: Verify AGW client
-    needs: detect
-    if: needs.detect.outputs.should_publish == 'true'
-    uses: ./.github/workflows/ci-agw-client.yml
-    secrets: inherit
-
   publish:
     name: Publish to npm
-    needs:
-      - detect
-      - verify-release-surface
-      - verify-agw-client
-    if: needs.detect.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     environment:
       name: npm
@@ -83,7 +43,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm turbo run build --filter='./packages/*' --force
+        run: pnpm turbo run build --filter='./packages/*' --filter='!./packages/contracts' --force
 
       - name: Publish packages
         uses: changesets/action@v1
