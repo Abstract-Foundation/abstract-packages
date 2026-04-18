@@ -196,12 +196,13 @@ jobs:
       - contracts
       - agw-client
       - release-surface
+      - detect-publishable
       - publish
     steps:
       - name: Verify job results
         run: |
           set -euo pipefail
-          results="${{ needs.changesets.result || 'skipped' }} ${{ needs.verify.result || 'skipped' }} ${{ needs.contracts.result || 'skipped' }} ${{ needs.agw-client.result || 'skipped' }} ${{ needs.release-surface.result || 'skipped' }} ${{ needs.publish.result || 'skipped' }}"
+          results="${{ needs.changesets.result || 'skipped' }} ${{ needs.verify.result || 'skipped' }} ${{ needs.contracts.result || 'skipped' }} ${{ needs.agw-client.result || 'skipped' }} ${{ needs.release-surface.result || 'skipped' }} ${{ needs.detect-publishable.result || 'skipped' }} ${{ needs.publish.result || 'skipped' }}"
           echo "Job results: $results"
 
           if [[ "$results" =~ failure || "$results" =~ cancelled ]]; then
