@@ -6,6 +6,7 @@ import {
 import { toPrivyWalletProvider } from "@privy-io/cross-app-connect";
 import { EIP1193, type Wallet } from "thirdweb/wallets";
 import type { Chain } from "viem";
+import { abstract } from "viem/chains";
 
 const AGW_APP_ID = "cm04asygd041fmry9zmcyn5o5";
 const AGW_WALLET_ID = "xyz.abs";
@@ -23,6 +24,11 @@ interface AbstractWalletOptions {
  * it builds a minimal EIP-1193 provider via `@privy-io/cross-app-connect` and
  * wraps it with the AGW smart-account transform from `@abstract-foundation/agw-client`.
  *
+ * The returned wallet is restricted to Abstract-supported chains: if thirdweb
+ * requests an unsupported `chainId` (for example, in apps that mix AGW with
+ * non-Abstract networks), the provider falls back to the default Abstract
+ * chain instead of throwing, so the rest of the connect flow keeps working.
+ *
  * @example
  * ```tsx
  * import { createThirdwebClient } from "thirdweb";
@@ -39,17 +45,19 @@ interface AbstractWalletOptions {
 function abstractWallet(options: AbstractWalletOptions = {}): Wallet {
   const { customPaymasterHandler } = options;
   const chains = Object.values(validChains) as [Chain, ...Chain[]];
+  const defaultChain = chains.find((c) => c.id === abstract.id) ?? chains[0];
 
   return EIP1193.fromProvider({
     walletId: AGW_WALLET_ID,
     provider: async ({ chainId } = {}) => {
-      const targetChainId = chainId ?? chains[0].id;
-      const chain = chains.find((c) => c.id === targetChainId) ?? chains[0];
+      const requestedChain =
+        chainId == null ? undefined : chains.find((c) => c.id === chainId);
+      const chain = requestedChain ?? defaultChain;
 
       const privyProvider = toPrivyWalletProvider({
         providerAppId: AGW_APP_ID,
         chains,
-        chainId: targetChainId,
+        chainId: chain.id,
       });
 
       return transformEIP1193Provider({
