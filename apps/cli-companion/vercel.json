@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "ignoreCommand": "npx turbo-ignore @abstract-foundation/agw-cli-app --fallback=main"
+  "ignoreCommand": "npx turbo-ignore @abstract-foundation/agw-cli-app --fallback=HEAD^1"
 }

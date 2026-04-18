@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "ignoreCommand": "npx turbo-ignore mpp-demo --fallback=main"
+  "ignoreCommand": "npx turbo-ignore mpp-demo --fallback=HEAD^1"
 }
