@@ -83,7 +83,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm turbo run build --filter='./packages/*' --force
+        run: pnpm turbo run build --filter='./packages/*' --filter='!./packages/contracts' --force
 
       - name: Publish packages
         run: pnpm changeset:publish
