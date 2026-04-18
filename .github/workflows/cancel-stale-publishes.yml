@@ -17,7 +17,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          CURRENT_RUN_ID: ${{ github.run_id }}
+          CURRENT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
@@ -26,22 +26,21 @@ jobs:
               --workflow=gatekeeper.yml \
               --branch=main \
               --limit=50 \
-              --json databaseId,status \
-              --jq '.[]
-                | select(.status == "in_progress" or .status == "waiting" or .status == "queued")
-                | .databaseId'
+              --json databaseId,status,headSha \
+            | jq -r \
+                --arg current_sha "$CURRENT_SHA" \
+                '.[]
+                  | select(.status == "in_progress" or .status == "waiting" or .status == "queued")
+                  | select(.headSha != $current_sha)
+                  | .databaseId'
           )
 
           if [[ ${#RUN_IDS[@]} -eq 0 ]]; then
-            echo "No active gatekeeper runs on main."
+            echo "No stale gatekeeper runs on main (all active runs are tied to $CURRENT_SHA)."
             exit 0
           fi
 
           for RUN_ID in "${RUN_IDS[@]}"; do
-            if [[ "$RUN_ID" == "$CURRENT_RUN_ID" ]]; then
-              continue
-            fi
-
             PENDING_COUNT=$(
               gh api "repos/$REPO/actions/runs/$RUN_ID/pending_deployments" \
                 --jq 'length'
