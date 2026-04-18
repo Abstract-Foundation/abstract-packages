@@ -9,7 +9,7 @@ on:
 
 concurrency:
   group: ci-gatekeeper-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   changes:
@@ -77,6 +77,27 @@ jobs:
               - '.github/workflows/publish.yml'
               - '.github/workflows/gatekeeper.yml'
 
+  detect-publishable:
+    name: Detect publishable release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.detect.outputs.should_publish }}
+      packages_json: ${{ steps.detect.outputs.packages_json }}
+      summary_markdown: ${{ steps.detect.outputs.summary_markdown }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Detect publishable packages
+        id: detect
+        run: node .github/scripts/detect-publishable.mjs
+
   changesets:
     name: Changeset Check
     if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'changeset-release/') && needs.changes.outputs.publish-surface == 'true'
@@ -122,15 +143,44 @@ jobs:
     secrets: inherit
 
   agw-client:
-    needs: changes
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.agw-client == 'true'
+    needs:
+      - changes
+      - detect-publishable
+    if: |
+      always() &&
+      needs.changes.result == 'success' &&
+      (github.event_name == 'workflow_dispatch' ||
+        needs.changes.outputs.agw-client == 'true' ||
+        needs.detect-publishable.outputs.should_publish == 'true')
     uses: ./.github/workflows/ci-agw-client.yml
     secrets: inherit
 
   release-surface:
-    needs: changes
-    if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.publish-surface == 'true'
+    needs:
+      - changes
+      - detect-publishable
+    if: |
+      always() &&
+      needs.changes.result == 'success' &&
+      (github.event_name == 'workflow_dispatch' ||
+        needs.changes.outputs.publish-surface == 'true' ||
+        needs.detect-publishable.outputs.should_publish == 'true')
     uses: ./.github/workflows/ci-release-surface.yml
+    secrets: inherit
+
+  publish:
+    name: Publish
+    needs:
+      - detect-publishable
+      - release-surface
+      - agw-client
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.detect-publishable.outputs.should_publish == 'true' &&
+      needs.release-surface.result == 'success' &&
+      needs.agw-client.result == 'success'
+    uses: ./.github/workflows/publish.yml
     secrets: inherit
 
   ci-gatekeeper:
@@ -143,11 +193,12 @@ jobs:
       - contracts
       - agw-client
       - release-surface
+      - publish
     steps:
       - name: Verify job results
         run: |
           set -euo pipefail
-          results="${{ needs.changesets.result || 'skipped' }} ${{ needs.verify.result || 'skipped' }} ${{ needs.contracts.result || 'skipped' }} ${{ needs.agw-client.result || 'skipped' }} ${{ needs.release-surface.result || 'skipped' }}"
+          results="${{ needs.changesets.result || 'skipped' }} ${{ needs.verify.result || 'skipped' }} ${{ needs.contracts.result || 'skipped' }} ${{ needs.agw-client.result || 'skipped' }} ${{ needs.release-surface.result || 'skipped' }} ${{ needs.publish.result || 'skipped' }}"
           echo "Job results: $results"
 
           if [[ "$results" =~ failure || "$results" =~ cancelled ]]; then
