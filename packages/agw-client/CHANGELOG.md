@@ -1,5 +1,11 @@
 # @abstract-foundation/agw-client
 
+## 1.12.2
+
+### Patch Changes
+
+- 0b4e965: Normalize release metadata and add CI-aligned packaging checks across the public packages.
+
 ## 1.12.1
 
 ### Patch Changes

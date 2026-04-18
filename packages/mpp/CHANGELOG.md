@@ -1,5 +1,11 @@
 # @abstract-foundation/mpp
 
+## 0.1.5
+
+### Patch Changes
+
+- 0b4e965: Normalize release metadata and add CI-aligned packaging checks across the public packages.
+
 ## 0.1.4
 
 ### Patch Changes
