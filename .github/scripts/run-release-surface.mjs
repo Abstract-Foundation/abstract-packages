@@ -7,6 +7,7 @@ const PACKAGE_COMMANDS = {
   "@abstract-foundation/mpp": [["build"]],
   "@abstract-foundation/agw-client": [["build"], ["test:build"]],
   "@abstract-foundation/agw-react": [["build"], ["test:build"]],
+  "@abstract-foundation/agw-thirdweb": [["build"], ["test:build"]],
   "@abstract-foundation/agw-web": [["build"], ["test:build"]],
   "@abstract-foundation/web3-react-agw": [["build"], ["test:build"]],
   "@abstract-foundation/agw-cli": [["build"], ["pack"]],
