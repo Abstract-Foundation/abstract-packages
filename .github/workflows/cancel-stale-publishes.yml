@@ -1,0 +1,74 @@
+name: Cancel stale pending publishes
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  actions: write
+
+jobs:
+  cancel:
+    name: Cancel stale gatekeeper runs awaiting publish approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel stale runs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          mapfile -t RUN_IDS < <(
+            gh run list \
+              --workflow=gatekeeper.yml \
+              --branch=main \
+              --limit=50 \
+              --json databaseId,status \
+              --jq '.[]
+                | select(.status == "in_progress" or .status == "waiting" or .status == "queued")
+                | .databaseId'
+          )
+
+          if [[ ${#RUN_IDS[@]} -eq 0 ]]; then
+            echo "No active gatekeeper runs on main."
+            exit 0
+          fi
+
+          for RUN_ID in "${RUN_IDS[@]}"; do
+            if [[ "$RUN_ID" == "$CURRENT_RUN_ID" ]]; then
+              continue
+            fi
+
+            PENDING_COUNT=$(
+              gh api "repos/$REPO/actions/runs/$RUN_ID/pending_deployments" \
+                --jq 'length'
+            )
+
+            if [[ "$PENDING_COUNT" -eq 0 ]]; then
+              echo "Run $RUN_ID: no pending deployments, skipping."
+              continue
+            fi
+
+            BLOCKING_JOBS=$(
+              gh api "repos/$REPO/actions/runs/$RUN_ID/jobs?per_page=100" \
+                --jq '[
+                  .jobs[]
+                  | select(.status == "in_progress" or .status == "queued")
+                  | select((.name | startswith("Publish /")) | not)
+                  | select(.name != "CI Gatekeeper")
+                ] | length'
+            )
+
+            if [[ "$BLOCKING_JOBS" -gt 0 ]]; then
+              echo "Run $RUN_ID: pending publish, but $BLOCKING_JOBS non-publish job(s) still running; leaving it alone."
+              continue
+            fi
+
+            echo "Run $RUN_ID: cancelling (pending publish with CI complete)."
+            gh api --method POST "repos/$REPO/actions/runs/$RUN_ID/cancel" || {
+              echo "Failed to cancel run $RUN_ID; continuing."
+            }
+          done
