@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Captcha,
   useLogin,
   useLoginWithEmail,
   useLoginWithOAuth,
@@ -325,6 +326,8 @@ export default function EmbeddedLoginCard() {
                   <IconPointerRight width="14" />
                 </div>
               </Button>
+
+              <Captcha />
             </div>
           ) : (
             <div className={clsx(styles.forms, showLoading && styles.disabled)}>
