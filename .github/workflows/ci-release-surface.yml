@@ -15,6 +15,7 @@ jobs:
           - "@abstract-foundation/mpp"
           - "@abstract-foundation/agw-client"
           - "@abstract-foundation/agw-react"
+          - "@abstract-foundation/agw-thirdweb"
           - "@abstract-foundation/agw-web"
           - "@abstract-foundation/web3-react-agw"
           - "@abstract-foundation/agw-cli"

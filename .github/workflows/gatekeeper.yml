@@ -68,6 +68,7 @@ jobs:
               - 'packages/mpp/**'
               - 'packages/agw-client/**'
               - 'packages/agw-react/**'
+              - 'packages/agw-thirdweb/**'
               - 'packages/agw-web/**'
               - 'packages/web3-react-agw/**'
               - 'packages/agw-cli/**'
@@ -181,7 +182,7 @@ jobs:
       needs.release-surface.result == 'success' &&
       needs.agw-client.result == 'success'
     permissions:
-      contents: read
+      contents: write
       id-token: write
     uses: ./.github/workflows/publish.yml
     secrets: inherit
