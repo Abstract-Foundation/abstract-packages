@@ -82,10 +82,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build publishable packages
-        env:
-          PACKAGES_JSON: ${{ needs.detect.outputs.packages_json }}
-        run: node .github/scripts/build-publishable.mjs
+      - name: Build packages
+        run: pnpm turbo run build --filter='./packages/*' --force
 
       - name: Publish packages
         run: pnpm changeset:publish
