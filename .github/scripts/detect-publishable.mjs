@@ -95,8 +95,7 @@ const summaryLines = [
   "| --- | --- | --- | --- |",
   ...releases.map((pkg) => {
     const publishedVersion = pkg.publishedVersion || "unpublished";
-    const publishState =
-      pkg.shouldPublish && !pendingChangesets ? "yes" : "no";
+    const publishState = pkg.shouldPublish && !pendingChangesets ? "yes" : "no";
     return `| \`${pkg.name}\` | \`${pkg.version}\` | \`${publishedVersion}\` | ${publishState} |`;
   }),
 ];
