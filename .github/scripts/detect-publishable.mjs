@@ -3,6 +3,7 @@ import { appendFileSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const PACKAGES_DIR = "packages";
+const CHANGESET_DIR = ".changeset";
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -58,6 +59,16 @@ function toMultilineOutput(key, value) {
   return `${key}<<EOF\n${value}\nEOF\n`;
 }
 
+function hasPendingChangesets() {
+  try {
+    return readdirSync(CHANGESET_DIR).some(
+      (entry) => entry.endsWith(".md") && entry.toLowerCase() !== "readme.md",
+    );
+  } catch {
+    return false;
+  }
+}
+
 const packages = getPublicPackages();
 const releases = packages.map((pkg) => {
   const publishedVersion = getPublishedVersion(pkg.name);
@@ -71,15 +82,20 @@ const releases = packages.map((pkg) => {
 });
 
 const changedPackages = releases.filter((pkg) => pkg.shouldPublish);
-const shouldPublish = changedPackages.length > 0;
+const pendingChangesets = hasPendingChangesets();
+const shouldPublish = changedPackages.length > 0 && !pendingChangesets;
 const summaryLines = [
   "## Publish detection",
+  "",
+  pendingChangesets
+    ? "Pending changesets detected on main; deferring publish until the release PR is merged."
+    : "No pending changesets on main.",
   "",
   "| Package | Local | Published | Publish |",
   "| --- | --- | --- | --- |",
   ...releases.map((pkg) => {
     const publishedVersion = pkg.publishedVersion || "unpublished";
-    const publishState = pkg.shouldPublish ? "yes" : "no";
+    const publishState = pkg.shouldPublish && !pendingChangesets ? "yes" : "no";
     return `| \`${pkg.name}\` | \`${pkg.version}\` | \`${publishedVersion}\` | ${publishState} |`;
   }),
 ];
