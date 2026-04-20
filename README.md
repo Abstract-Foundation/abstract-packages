@@ -20,7 +20,8 @@ Everything is built on [viem](https://viem.sh), ships ESM + CJS dual builds with
 | Package | Description | Version |
 | --- | --- | --- |
 | [`@abstract-foundation/agw-client`](packages/agw-client) | Core viem-based client for AGW — transactions, sponsored gas, session keys, typed signatures. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-client.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-client) |
-| [`@abstract-foundation/agw-react`](packages/agw-react) | React hooks and connectors for AGW — Wagmi, Privy, and Thirdweb integrations. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-react.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-react) |
+| [`@abstract-foundation/agw-react`](packages/agw-react) | React hooks and connectors for AGW — Wagmi and Privy integrations. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-react.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-react) |
+| [`@abstract-foundation/agw-thirdweb`](packages/agw-thirdweb) | Standalone Thirdweb Connect SDK adapter for AGW. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-thirdweb.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-thirdweb) |
 | [`@abstract-foundation/agw-web`](packages/agw-web) | Generic EIP-6963 provider for AGW. Framework-agnostic. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-web.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-web) |
 | [`@abstract-foundation/web3-react-agw`](packages/web3-react-agw) | `@web3-react/core` connector for AGW. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/web3-react-agw.svg)](https://www.npmjs.com/package/@abstract-foundation/web3-react-agw) |
 | [`@abstract-foundation/agw-cli`](packages/agw-cli) | Agent-first CLI and MCP server for AGW workflows. JSON-first, sanitizable, with Claude Code and Gemini extension scaffolds. | [![npm](https://img.shields.io/npm/v/@abstract-foundation/agw-cli.svg)](https://www.npmjs.com/package/@abstract-foundation/agw-cli) |
@@ -58,8 +59,11 @@ Everything is built on [viem](https://viem.sh), ships ESM + CJS dual builds with
 Install the SDK you need. Most applications start with one of:
 
 ```bash
-# React app using wagmi / Privy / Thirdweb
+# React app using wagmi / Privy
 npm install @abstract-foundation/agw-react
+
+# Thirdweb integration
+npm install @abstract-foundation/agw-thirdweb thirdweb
 
 # Framework-agnostic / vanilla TypeScript
 npm install @abstract-foundation/agw-client
@@ -106,6 +110,7 @@ abstract-packages/
 │   ├── agw-client/           # Published — core viem client
 │   ├── agw-core/             # Internal — shared CLI core
 │   ├── agw-react/            # Published — React bindings
+│   ├── agw-thirdweb/         # Published — Thirdweb integration
 │   ├── agw-web/              # Published — EIP-6963 provider
 │   ├── contracts/            # Internal — Foundry/ZKsync contracts
 │   ├── mpp/                  # Published — mppx payment plugin
