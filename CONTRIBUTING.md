@@ -197,6 +197,7 @@ Private packages ignored by Changesets (see [`.changeset/config.json`](.changese
 - `contracts`
 - `@abstract-foundation/agw-core`
 - `@abstract-foundation/agw-cli-app`
+- `agw-nextjs`
 - `mpp-abstract-agent-example`
 - `mpp-abstract-hono-example`
 - `mpp-demo`
