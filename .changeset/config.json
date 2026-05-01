@@ -16,7 +16,6 @@
     "mpp-abstract-agent-example",
     "mpp-abstract-hono-example",
     "mpp-demo",
-    "agw-nextjs",
-    "@abstract-foundation/agw-cli-app"
+    "agw-nextjs"
   ]
 }
