@@ -1,5 +1,5 @@
 {
-  "name": "agw-nextjs",
+  "name": "agw-thirdweb-nextjs",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@abstract-foundation/agw-client": "workspace:*",
     "@abstract-foundation/agw-example-ui": "workspace:*",
-    "@abstract-foundation/agw-react": "workspace:*",
-    "@tanstack/react-query": "^5.71.5",
+    "@abstract-foundation/agw-thirdweb": "workspace:*",
     "next": "15.5.12",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "viem": "catalog:",
-    "wagmi": "catalog:"
+    "thirdweb": "^5.93.11",
+    "viem": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

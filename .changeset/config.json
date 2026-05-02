@@ -16,6 +16,9 @@
     "mpp-abstract-agent-example",
     "mpp-abstract-hono-example",
     "mpp-demo",
-    "agw-nextjs"
+    "agw-nextjs",
+    "agw-thirdweb-nextjs",
+    "@abstract-foundation/agw-thirdweb",
+    "@abstract-foundation/agw-example-ui"
   ]
 }
