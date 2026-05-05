@@ -44,6 +44,7 @@ Everything is built on [viem](https://viem.sh), ships ESM + CJS dual builds with
 | Path | Description |
 | --- | --- |
 | [`examples/agent-client`](examples/agent-client) | Minimal `mppx` client paying an Abstract-gated API with `@abstract-foundation/mpp`. |
+| [`examples/agw-nextjs`](examples/agw-nextjs) | Next.js example app using the AGW client and React packages. |
 | [`examples/hono-server`](examples/hono-server) | Hono server that charges ERC-3009 and opens payment channel sessions via `@abstract-foundation/mpp`. |
 | [`examples/mpp-demo`](examples/mpp-demo) | Next.js demo combining AGW login with the MPP payment flow end-to-end. |
 
@@ -99,6 +100,7 @@ abstract-packages/
 │   └── cli-companion/        # Next.js session approval UI
 ├── examples/                 # Runnable reference integrations
 │   ├── agent-client/         # mppx client example
+│   ├── agw-nextjs/           # Next.js AGW example app
 │   ├── hono-server/          # Hono + mpp server example
 │   └── mpp-demo/             # Full Next.js demo
 ├── packages/                 # Published + internal packages
