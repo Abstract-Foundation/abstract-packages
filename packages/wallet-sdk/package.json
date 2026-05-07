@@ -1,0 +1,85 @@
+{
+  "name": "@abstract-foundation/wallet-sdk",
+  "description": "Abstract Wallet SDK — framework-agnostic core for embedding the Abstract Global Wallet on third-party origins via iframe (with popup fallback). Origin-validated postMessage transport, hardened iframe sandboxing, IntersectionObserver-v2-aware visibility checks, WebAuthn-aware popup fallback.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abstract-Foundation/abstract-packages.git",
+    "directory": "packages/wallet-sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/Abstract-Foundation/abstract-packages/issues"
+  },
+  "homepage": "https://github.com/Abstract-Foundation/abstract-packages/tree/main/packages/wallet-sdk",
+  "scripts": {
+    "test": "vitest run -c ./test/vitest.config.ts",
+    "build": "pnpm run clean && pnpm run build:esm+types && pnpm run build:cjs",
+    "build:esm+types": "tsc --outDir ./dist/esm --declaration --declarationMap --declarationDir ./dist/types && printf '{\"type\":\"module\"}' > ./dist/esm/package.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && printf '{\"type\":\"commonjs\"}' > ./dist/cjs/package.json",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "test:build": "publint && attw --pack --ignore-rules false-cjs"
+  },
+  "main": "./dist/cjs/exports/index.js",
+  "module": "./dist/esm/exports/index.js",
+  "types": "./dist/types/exports/index.d.ts",
+  "typings": "./dist/types/exports/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/exports/index.d.ts",
+      "import": "./dist/esm/exports/index.js",
+      "require": "./dist/cjs/exports/index.js"
+    },
+    "./core": {
+      "types": "./dist/types/exports/core.d.ts",
+      "import": "./dist/esm/exports/core.js",
+      "require": "./dist/cjs/exports/core.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "core": [
+        "dist/types/exports/core.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.4",
+    "viem": "^2.37.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "jsdom": "^25.0.1",
+    "typescript": "catalog:",
+    "viem": "catalog:",
+    "vitest": "catalog:"
+  },
+  "keywords": [
+    "abstract",
+    "abstract-global-wallet",
+    "agw",
+    "wallet",
+    "iframe",
+    "embedded-wallet",
+    "eip-1193",
+    "ethereum",
+    "web3",
+    "sdk"
+  ]
+}
