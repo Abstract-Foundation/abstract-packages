@@ -133,9 +133,11 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
       pointerEvents: "none",
     } as CSSStyleDeclaration);
 
-    // Transparent backdrop so the page is dimmed by our own UI inside.
+    // Keep the parent document visually neutral. The wallet host iframe owns
+    // its own overlay/chrome so the complete confirmation surface is rendered
+    // from the trusted wallet origin, matching Porto's model.
     const style = document.createElement("style");
-    style.textContent = `dialog[data-abs-wallet]::backdrop { background: rgba(0,0,0,0.4); }`;
+    style.textContent = `dialog[data-abs-wallet]::backdrop { background: transparent !important; }`;
 
     // Iframe with hardened attributes.
     const frame = document.createElement("iframe");
@@ -199,6 +201,38 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
         targetOrigin: hostOrigin,
       }),
       waitForReady: true,
+    });
+
+    const applyHostResize = (
+      payload: Extract<Messenger.InternalPayload, { type: "resize" }>,
+    ) => {
+      if (
+        typeof payload.width !== "number" &&
+        typeof payload.height !== "number"
+      )
+        return;
+
+      const width =
+        typeof payload.width === "number"
+          ? Math.min(Math.max(payload.width, 1), window.innerWidth)
+          : window.innerWidth;
+      const height =
+        typeof payload.height === "number"
+          ? Math.min(Math.max(payload.height, 1), window.innerHeight)
+          : window.innerHeight;
+      const drawer = width <= 460 || window.innerWidth <= 460;
+
+      Object.assign(frame.style, {
+        width: drawer ? "100%" : `${width}px`,
+        height: `${height}px`,
+        left: drawer ? "0" : "50%",
+        top: drawer ? "auto" : "50%",
+        bottom: drawer ? "0" : "auto",
+        transform: drawer ? "none" : "translate(-50%, -50%)",
+      } as CSSStyleDeclaration);
+    };
+    const offHostResize = messenger.on("__internal", (payload) => {
+      if (payload.type === "resize") applyHostResize(payload);
     });
 
     const drawerModeQuery = window.matchMedia("(max-width: 460px)");
@@ -320,6 +354,7 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
         }
         inertObserver.disconnect();
         drawerModeQuery.removeEventListener("change", onDrawerModeChange);
+        offHostResize();
         messenger.destroy();
         root.remove();
       },
