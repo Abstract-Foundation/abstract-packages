@@ -40,14 +40,29 @@ export type ReadyOptions = {
   chainIds: readonly number[];
   trustedHosts?: readonly string[] | undefined;
   /**
-   * Method policy table. Methods with `headless: true` skip the dialog and run
-   * inside the wallet without UI. Methods missing from the table default to
-   * `headless: false` (always shows confirmation surface).
+   * Method policy table advertised by the wallet host. Methods missing from
+   * the table default to requiring the dialog.
    */
   methodPolicies?:
     | readonly {
         method: string;
-        headless?: boolean | undefined;
+        modes?:
+          | {
+              headless?:
+                | true
+                | {
+                    sameOrigin?: boolean | undefined;
+                  }
+                | undefined;
+              dialog?:
+                | true
+                | {
+                    sameOrigin?: boolean | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+        requireConnection?: boolean | undefined;
       }[]
     | undefined;
 };

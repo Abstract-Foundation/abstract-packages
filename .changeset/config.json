@@ -17,6 +17,7 @@
     "mpp-abstract-hono-example",
     "mpp-demo",
     "agw-nextjs",
+    "wallet-sdk-nextjs",
     "agw-thirdweb-nextjs",
     "@abstract-foundation/agw-thirdweb",
     "@abstract-foundation/agw-example-ui"
