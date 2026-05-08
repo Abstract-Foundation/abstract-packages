@@ -115,11 +115,13 @@ export function createWallet(config: WalletConfig): Wallet {
           }),
         );
       else p.resolve(response.result);
+      if (pending.size === 0) handle.close();
     });
     handle.messenger.on("__internal", (payload) => {
       if (payload.type === "switch") void switchMode(payload.mode);
     });
     handle.messenger.on("close", () => {
+      handle.close();
       // Reject every outstanding request with a user-rejected style error.
       for (const [id, p] of pending) {
         pending.delete(id);

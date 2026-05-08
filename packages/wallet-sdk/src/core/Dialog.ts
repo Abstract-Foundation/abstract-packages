@@ -57,6 +57,7 @@ export type DialogFactory = (parameters: {
 // ---------- Internals ----------
 
 const DEFAULT_POPUP_SIZE = { width: 420, height: 720 };
+const DRAWER_BREAKPOINT = 460;
 
 function getReferrer(): { title: string; icon?: string } {
   if (typeof document === "undefined") return { title: "" };
@@ -162,16 +163,11 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
     if (!UserAgent.isFirefox()) allow.push("clipboard-write");
     frame.setAttribute("allow", allow.join("; "));
     frame.setAttribute("src", buildHostUrl(host, DIALOG_PATH));
-    // `position: fixed; left/top: 0; 100% × 100%` — the iframe escapes the
-    // <dialog> box and covers the entire viewport. Without this the dialog
-    // and iframe size each other circularly: the dialog auto-sizes to fit
-    // the iframe (`width: 100%`), the iframe sizes to fit the dialog, and
-    // the resolved size collapses to the user-agent default tiny box.
-    // Mirrors Porto's iframe positioning.
+    // Mirrors Porto's iframe positioning: the parent SDK backdrop stays
+    // transparent and the wallet host iframe owns the in-frame overlay/chrome.
     Object.assign(frame.style, {
       backgroundColor: "transparent",
       border: "0",
-      colorScheme: "light dark",
       position: "fixed",
       left: "0",
       top: "0",
@@ -203,44 +199,16 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
       waitForReady: true,
     });
 
-    const applyHostResize = (
-      payload: Extract<Messenger.InternalPayload, { type: "resize" }>,
-    ) => {
-      if (
-        typeof payload.width !== "number" &&
-        typeof payload.height !== "number"
-      )
-        return;
-
-      const width =
-        typeof payload.width === "number"
-          ? Math.min(Math.max(payload.width, 1), window.innerWidth)
-          : window.innerWidth;
-      const height =
-        typeof payload.height === "number"
-          ? Math.min(Math.max(payload.height, 1), window.innerHeight)
-          : window.innerHeight;
-      const drawer = width <= 460 || window.innerWidth <= 460;
-
-      Object.assign(frame.style, {
-        width: drawer ? "100%" : `${width}px`,
-        height: `${height}px`,
-        left: drawer ? "0" : "50%",
-        top: drawer ? "auto" : "50%",
-        bottom: drawer ? "0" : "auto",
-        transform: drawer ? "none" : "translate(-50%, -50%)",
-      } as CSSStyleDeclaration);
-    };
-    const offHostResize = messenger.on("__internal", (payload) => {
-      if (payload.type === "resize") applyHostResize(payload);
-    });
-
-    const drawerModeQuery = window.matchMedia("(max-width: 460px)");
+    const drawerModeQuery = window.matchMedia(
+      `(max-width: ${DRAWER_BREAKPOINT}px)`,
+    );
     const sendResize = () => {
       messenger.send("__internal", {
         type: "resize",
         // Match Porto's contract: 460 = drawer mode, 461 = floating mode.
-        width: drawerModeQuery.matches ? 460 : 461,
+        width: drawerModeQuery.matches
+          ? DRAWER_BREAKPOINT
+          : DRAWER_BREAKPOINT + 1,
       });
     };
     const onDrawerModeChange = () => {
@@ -354,7 +322,6 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
         }
         inertObserver.disconnect();
         drawerModeQuery.removeEventListener("change", onDrawerModeChange);
-        offHostResize();
         messenger.destroy();
         root.remove();
       },
