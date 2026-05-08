@@ -1,0 +1,28 @@
+{
+  "name": "wallet-sdk-nextjs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Minimal Next.js demo of @abstract-foundation/wallet-sdk. Mounts the iframe-embeddable Abstract wallet-host, walks through wallet_connect → personal_sign → eth_sendTransaction.",
+  "scripts": {
+    "dev": "next dev -p 3004",
+    "build": "next build",
+    "start": "next start -p 3004",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@abstract-foundation/agw-example-ui": "workspace:*",
+    "@abstract-foundation/wallet-sdk": "workspace:*",
+    "next": "15.5.12",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "^4",
+    "typescript": "catalog:"
+  }
+}

@@ -37,6 +37,8 @@ export type WalletConfig = {
   chainId?: number | undefined;
   /** Dialog mode preference. `auto` picks iframe with popup fallback. */
   dialog?: WalletMode | undefined;
+  /** Skip the HTTPS protocol gate. Only intended for local dev/testing. */
+  skipProtocolCheck?: boolean | undefined;
   /** Theme hint forwarded to the wallet host on init. */
   theme?: "light" | "dark" | undefined;
 };
@@ -64,13 +66,19 @@ export type Wallet = {
 // ---------- Implementation ----------
 
 export function createWallet(config: WalletConfig): Wallet {
-  const { host, chainId, dialog: mode = "auto", theme } = config;
+  const {
+    host,
+    chainId,
+    dialog: mode = "auto",
+    skipProtocolCheck = false,
+    theme,
+  } = config;
 
   let active: Dialog.DialogHandle | null = null;
   let activeMode: Dialog.DialogMode | null = null;
   let destroyed = false;
 
-  const iframeFactory = Dialog.iframe();
+  const iframeFactory = Dialog.iframe({ skipProtocolCheck });
   const popupFactory = Dialog.popup();
 
   // Outstanding requests waiting for a response from the wallet. Keyed by the
@@ -141,6 +149,39 @@ export function createWallet(config: WalletConfig): Wallet {
     return "iframe";
   }
 
+  function requiresConfirmation(
+    request: Messenger.RpcRequest,
+    options: {
+      methodPolicies?: Messenger.ReadyOptions["methodPolicies"] | undefined;
+      targetOrigin?: string | undefined;
+    } = {},
+  ) {
+    const { methodPolicies, targetOrigin } = options;
+    const policy = methodPolicies?.find((x) => x.method === request.method);
+    if (!policy) return true;
+    if (policy.modes?.headless) {
+      if (
+        typeof policy.modes.headless === "object" &&
+        policy.modes.headless.sameOrigin &&
+        targetOrigin !== window.location.origin
+      ) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function isAlwaysHeadless(
+    request: Messenger.RpcRequest,
+    methodPolicies: Messenger.ReadyOptions["methodPolicies"],
+  ) {
+    return (
+      methodPolicies?.find((policy) => policy.method === request.method)?.modes
+        ?.headless === true
+    );
+  }
+
   async function dispatch(args: Eip1193RequestArgs): Promise<unknown> {
     if (destroyed) throw new Error("Wallet has been destroyed");
 
@@ -159,20 +200,32 @@ export function createWallet(config: WalletConfig): Wallet {
 
     const initialMode = pickInitialMode();
     const handle = ensureActive(initialMode);
-    handle.open();
 
     // After the wallet announces ready, validate that iframe mode is actually
     // safe. If not, transparently downgrade to popup before sending.
+    let targetHandle = handle;
     if (initialMode === "iframe") {
+      const ready = await handle.messenger.waitForReady();
       const sec = await handle.secure();
-      if (!sec.protocol || !sec.frame) {
+      const alwaysHeadless = isAlwaysHeadless(rpc, ready.methodPolicies);
+      if (!alwaysHeadless && (!sec.protocol || !sec.frame)) {
         await switchMode("popup");
+        targetHandle = active ?? handle;
+      } else if (
+        requiresConfirmation(rpc, {
+          methodPolicies: ready.methodPolicies,
+          targetOrigin: new URL(host).origin,
+        })
+      ) {
+        targetHandle.open();
       }
+    } else {
+      targetHandle.open();
     }
 
     return new Promise((resolve, reject) => {
       pending.set(id, { request: rpc, resolve, reject });
-      (active ?? handle).messenger.send("rpc-request", rpc);
+      targetHandle.messenger.send("rpc-request", rpc);
     });
   }
 

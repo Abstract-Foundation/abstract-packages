@@ -73,6 +73,30 @@ function originOf(url: string): string {
   return new URL(url).origin;
 }
 
+/**
+ * The wallet-host serves the iframe entry at `/dialog` and the popup
+ * fallback at `/popup`. Consumers pass the host (e.g.
+ * `https://wallet.abs.xyz`); the SDK appends the route automatically so
+ * users can't accidentally point the iframe at the host's info page.
+ */
+const DIALOG_PATH = "/dialog";
+const POPUP_PATH = "/popup";
+
+function buildHostUrl(host: string, path: string): string {
+  const url = new URL(host);
+  // Preserve any existing path segments the consumer added (e.g. for
+  // multi-tenant deploys), but ensure we always land on `/dialog` or
+  // `/popup`. If the host already includes the path, treat it as a
+  // pre-built URL and pass through.
+  const stripped = url.pathname.replace(/\/$/, "");
+  if (stripped === path || stripped.endsWith(path)) {
+    // already pointed at the right route
+    return url.toString();
+  }
+  url.pathname = `${stripped}${path}`;
+  return url.toString();
+}
+
 // ---------- Iframe factory ----------
 
 export type IframeOptions = {
@@ -106,6 +130,7 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
       position: "fixed",
       maxWidth: "100vw",
       maxHeight: "100vh",
+      pointerEvents: "none",
     } as CSSStyleDeclaration);
 
     // Transparent backdrop so the page is dimmed by our own UI inside.
@@ -134,11 +159,20 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
     ];
     if (!UserAgent.isFirefox()) allow.push("clipboard-write");
     frame.setAttribute("allow", allow.join("; "));
-    frame.setAttribute("src", host);
+    frame.setAttribute("src", buildHostUrl(host, DIALOG_PATH));
+    // `position: fixed; left/top: 0; 100% × 100%` — the iframe escapes the
+    // <dialog> box and covers the entire viewport. Without this the dialog
+    // and iframe size each other circularly: the dialog auto-sizes to fit
+    // the iframe (`width: 100%`), the iframe sizes to fit the dialog, and
+    // the resolved size collapses to the user-agent default tiny box.
+    // Mirrors Porto's iframe positioning.
     Object.assign(frame.style, {
       backgroundColor: "transparent",
       border: "0",
       colorScheme: "light dark",
+      position: "fixed",
+      left: "0",
+      top: "0",
       width: "100%",
       height: "100%",
     } as CSSStyleDeclaration);
@@ -167,29 +201,116 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
       waitForReady: true,
     });
 
+    const drawerModeQuery = window.matchMedia("(max-width: 460px)");
+    const sendResize = () => {
+      messenger.send("__internal", {
+        type: "resize",
+        // Match Porto's contract: 460 = drawer mode, 461 = floating mode.
+        width: drawerModeQuery.matches ? 460 : 461,
+      });
+    };
+    const onDrawerModeChange = () => {
+      sendResize();
+    };
+    drawerModeQuery.addEventListener("change", onDrawerModeChange);
+
+    const sendInit = () => {
+      messenger.send("__internal", {
+        type: "init",
+        mode: "iframe",
+        referrer: getReferrer(),
+        theme,
+      });
+    };
+    void messenger.waitForReady().then(
+      () => {
+        sendInit();
+        sendResize();
+      },
+      () => {
+        /* destroyed */
+      },
+    );
+
     let isOpen = false;
+    let isActive = false;
+    let bodyStyle: Partial<CSSStyleDeclaration> | null = null;
+    let opener: HTMLElement | null = null;
+
+    const onRootClick = () => {
+      handle.close();
+    };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handle.close();
+    };
+    const activatePage = () => {
+      if (!isActive) return;
+      isActive = false;
+
+      root.removeEventListener("click", onRootClick);
+      document.removeEventListener("keydown", onEscape);
+      root.style.pointerEvents = "none";
+      opener?.focus();
+      opener = null;
+
+      Object.assign(document.body.style, bodyStyle ?? {});
+      document.body.style.overflow = bodyStyle?.overflow ?? "";
+      bodyStyle = null;
+    };
+    const activateDialog = () => {
+      if (isActive) return;
+      isActive = true;
+
+      root.addEventListener("click", onRootClick);
+      document.addEventListener("keydown", onEscape);
+      frame.focus();
+      root.style.pointerEvents = "auto";
+
+      bodyStyle = Object.assign({}, document.body.style);
+      document.body.style.overflow = "hidden";
+    };
+    const showDialog = () => {
+      if (isOpen) return;
+      isOpen = true;
+
+      if (document.activeElement instanceof HTMLElement) {
+        opener = document.activeElement;
+      }
+      root.removeAttribute("hidden");
+      root.removeAttribute("aria-closed");
+      if (typeof root.showModal === "function") root.showModal();
+      else root.setAttribute("open", "");
+    };
+    const hideDialog = () => {
+      if (!isOpen) return;
+      isOpen = false;
+
+      if (typeof root.close === "function") root.close();
+      else root.removeAttribute("open");
+      root.setAttribute("hidden", "true");
+      root.setAttribute("aria-closed", "true");
+
+      for (const sibling of root.parentNode
+        ? Array.from(root.parentNode.children)
+        : []) {
+        if (sibling === root) continue;
+        if (!sibling.hasAttribute("inert")) continue;
+        sibling.removeAttribute("inert");
+      }
+    };
 
     const handle: DialogHandle = {
       mode: "iframe",
       messenger,
       open() {
-        if (isOpen) return;
-        isOpen = true;
-        root.removeAttribute("hidden");
-        if (typeof root.showModal === "function") root.showModal();
-        else root.setAttribute("open", "");
-        messenger.send("__internal", {
-          type: "init",
-          mode: "iframe",
-          referrer: getReferrer(),
-          theme,
-        });
+        showDialog();
+        activateDialog();
+        sendInit();
       },
       close() {
-        if (!isOpen) return;
-        isOpen = false;
-        if (typeof root.close === "function") root.close();
-        root.setAttribute("hidden", "true");
+        hideDialog();
+        activatePage();
+        sendInit();
       },
       destroy() {
         try {
@@ -198,6 +319,7 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
           /* ignore */
         }
         inertObserver.disconnect();
+        drawerModeQuery.removeEventListener("change", onDrawerModeChange);
         messenger.destroy();
         root.remove();
       },
@@ -278,7 +400,11 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         // IMPORTANT: window.open must run synchronously inside a user-gesture
         // handler or it will be popup-blocked. Callers funnel through here
         // from a click handler.
-        win = window.open(host, "abstract-wallet", features);
+        win = window.open(
+          buildHostUrl(host, POPUP_PATH),
+          "abstract-wallet",
+          features,
+        );
         if (!win) throw new Error("Popup blocked by browser");
 
         bridge = Messenger.bridge({
