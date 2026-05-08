@@ -366,6 +366,30 @@ export function popup(options: PopupOptions = {}): DialogFactory {
     let win: Window | null = null;
     let bridge: Messenger.Bridge | null = null;
     let pollClosed: ReturnType<typeof setInterval> | null = null;
+    let destroyed = false;
+
+    // Subscriptions registered before the bridge exists. Each captures its
+    // topic/listener types in a closure so we can replay them once `open()`
+    // adopts a bridge, without losing per-topic typing.
+    type PendingSub = {
+      attach: (b: Messenger.Bridge) => () => void;
+      off?: (() => void) | undefined;
+    };
+    const pendingSubs: PendingSub[] = [];
+
+    // Sends queued before the bridge exists. Each captures its topic/payload
+    // types in a closure for the same reason. The synchronous return value
+    // uses a freshly-minted envelope id; the wallet correlates by the inner
+    // RPC id, so the envelope id mismatch does not affect request/response
+    // routing.
+    type QueuedSend = (b: Messenger.Bridge) => void;
+    const queuedSends: QueuedSend[] = [];
+
+    type ReadyResolver = {
+      resolve: (options: Messenger.ReadyOptions) => void;
+      reject: (reason?: unknown) => void;
+    };
+    const pendingReady: ReadyResolver[] = [];
 
     function teardownPoll() {
       if (pollClosed) {
@@ -374,18 +398,86 @@ export function popup(options: PopupOptions = {}): DialogFactory {
       }
     }
 
+    const messenger: Messenger.Bridge = {
+      on<T extends Messenger.Topic>(
+        topic: T,
+        listener: Messenger.Listener<T>,
+        id?: string | undefined,
+      ) {
+        if (bridge) return bridge.on(topic, listener, id);
+        const sub: PendingSub = {
+          attach: (b) => b.on(topic, listener, id),
+        };
+        pendingSubs.push(sub);
+        return () => {
+          sub.off?.();
+          const i = pendingSubs.indexOf(sub);
+          if (i >= 0) pendingSubs.splice(i, 1);
+        };
+      },
+      send<T extends Messenger.Topic>(
+        topic: T,
+        payload: Messenger.Payload<T>,
+        target?: string | undefined,
+      ) {
+        if (bridge) return bridge.send(topic, payload, target);
+        queuedSends.push((b) => {
+          b.send(topic, payload, target);
+        });
+        return { id: Messenger.uuid(), topic, payload };
+      },
+      destroy() {
+        destroyed = true;
+        teardownPoll();
+        try {
+          win?.close();
+        } catch {
+          /* COOP severs the WindowProxy — popup closes itself anyway */
+        }
+        win = null;
+        bridge?.destroy();
+        bridge = null;
+        for (const sub of pendingSubs) sub.off?.();
+        pendingSubs.length = 0;
+        queuedSends.length = 0;
+        const err = new Error("Messenger destroyed");
+        for (const r of pendingReady) r.reject(err);
+        pendingReady.length = 0;
+      },
+      ready() {
+        // dApp side: the wallet host is the one that announces ready, not us.
+      },
+      waitForReady() {
+        if (bridge) return bridge.waitForReady();
+        return new Promise<Messenger.ReadyOptions>((resolve, reject) => {
+          pendingReady.push({ resolve, reject });
+        });
+      },
+    };
+
+    function adoptBridge(b: Messenger.Bridge) {
+      bridge = b;
+      for (const sub of pendingSubs) sub.off = sub.attach(b);
+      for (const flush of queuedSends) flush(b);
+      queuedSends.length = 0;
+      if (pendingReady.length > 0) {
+        const resolvers = pendingReady.splice(0);
+        b.waitForReady().then(
+          (opts) => {
+            for (const r of resolvers) r.resolve(opts);
+          },
+          (err) => {
+            for (const r of resolvers) r.reject(err);
+          },
+        );
+      }
+    }
+
     const handle: DialogHandle = {
       mode: "popup",
-      // Lazily-bound — the bridge isn't constructable until `open()` runs.
-      // Consumers should always call `open()` before reading `messenger`.
-      get messenger(): Messenger.Bridge {
-        if (!bridge)
-          throw new Error(
-            "Popup messenger not initialised — call open() before sending",
-          );
-        return bridge;
-      },
+      messenger,
       open() {
+        if (destroyed) return;
         if (win && !win.closed) {
           win.focus();
           return;
@@ -409,13 +501,15 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         );
         if (!win) throw new Error("Popup blocked by browser");
 
-        bridge = Messenger.bridge({
-          from: Messenger.fromWindow(window, { targetOrigin: hostOrigin }),
-          to: Messenger.fromWindow(win, { targetOrigin: hostOrigin }),
-          waitForReady: true,
-        });
+        adoptBridge(
+          Messenger.bridge({
+            from: Messenger.fromWindow(window, { targetOrigin: hostOrigin }),
+            to: Messenger.fromWindow(win, { targetOrigin: hostOrigin }),
+            waitForReady: true,
+          }),
+        );
 
-        bridge.send("__internal", {
+        messenger.send("__internal", {
           type: "init",
           mode: "popup",
           referrer: getReferrer(),
@@ -441,9 +535,7 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         win = null;
       },
       destroy() {
-        this.close();
-        bridge?.destroy();
-        bridge = null;
+        messenger.destroy();
       },
       async secure() {
         // Popups don't suffer from clickjacking — the wallet runs in its own
