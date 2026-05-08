@@ -3,19 +3,28 @@
  * routes every JSON-RPC request to the wallet host via the messenger, opening
  * the appropriate dialog when the request requires user confirmation.
  *
- * Mode selection (mirrors Porto):
+ * Mode selection:
  *   1. Start with `iframe` unless the caller forced popup mode.
- *   2. After the iframe's `ready` arrives, run `secure()`. If protocol/frame
- *      checks fail, switch to popup before sending pending requests.
- *   3. Method-policy aware — read-only methods marked `headless` skip the
- *      dialog UI entirely.
- *   4. WebAuthn-required methods on Safari are forced to popup mode (Safari
- *      blocks WebAuthn credential creation in iframes).
+ *   2. After the iframe's `ready` arrives, run `secure()`. If the parent is
+ *      on HTTP, or if IntersectionObserver v2 is unavailable AND the parent
+ *      origin isn't on the wallet host's trusted-host allowlist, transparently
+ *      switch to popup before sending pending requests.
+ *   3. The wallet host can request a runtime switch at any time by emitting
+ *      `__internal { type: 'switch', mode: 'popup' }` over the messenger —
+ *      used for cases the dApp side can't predict (e.g. WebAuthn credential
+ *      creation on Safari, which Safari blocks in cross-origin iframes).
+ *
+ * Note on WebAuthn: this SDK does NOT pre-emptively force Safari users into
+ * popup mode for `wallet_connect` / `eth_requestAccounts`. AGW does not use
+ * WebAuthn for wallet signing or account creation, and Privy passkey
+ * enrollment happens in the main portal app, never inside the iframed wallet.
+ * Returning users with passkeys log in via `navigator.credentials.get()`,
+ * which works in iframes when the `publickey-credentials-get` permission is
+ * granted (set by `Dialog.iframe()` automatically).
  */
 
 import * as Dialog from "./Dialog.js";
 import type * as Messenger from "./Messenger.js";
-import * as UserAgent from "./UserAgent.js";
 
 // ---------- Public types ----------
 
@@ -51,14 +60,6 @@ export type Wallet = {
   /** Free underlying resources. */
   destroy(): void;
 };
-
-// Methods that always require WebAuthn credential creation when run for the
-// first time on Safari. We force-popup these because Safari blocks
-// `navigator.credentials.create` in iframes.
-const SAFARI_WEBAUTHN_METHODS = new Set([
-  "wallet_connect",
-  "eth_requestAccounts",
-]);
 
 // ---------- Implementation ----------
 
@@ -135,14 +136,8 @@ export function createWallet(config: WalletConfig): Wallet {
     previous?.destroy();
   }
 
-  async function pickInitialMode(
-    requestMethod: string,
-  ): Promise<Dialog.DialogMode> {
-    if (mode === "iframe") return "iframe";
+  function pickInitialMode(): Dialog.DialogMode {
     if (mode === "popup") return "popup";
-    // auto: prefer iframe, but force popup for Safari + WebAuthn methods.
-    if (UserAgent.isSafari() && SAFARI_WEBAUTHN_METHODS.has(requestMethod))
-      return "popup";
     return "iframe";
   }
 
@@ -162,7 +157,7 @@ export function createWallet(config: WalletConfig): Wallet {
       params,
     };
 
-    const initialMode = await pickInitialMode(args.method);
+    const initialMode = pickInitialMode();
     const handle = ensureActive(initialMode);
     handle.open();
 

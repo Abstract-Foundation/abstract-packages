@@ -6,9 +6,9 @@ origins via iframe (with popup fallback).
 Ports the security-relevant pieces of [Porto](https://github.com/ithacaxyz/porto)
 to the Abstract stack: origin-validated `postMessage` transport, hardened
 iframe sandboxing, IntersectionObserver-v2-aware visibility checks (the
-clickjacking primitive lives in the wallet host), WebAuthn-aware popup
-fallback for Safari, and an EIP-1193 provider that proxies through to the
-wallet origin.
+clickjacking primitive lives in the wallet host), runtime-driven popup
+fallback over the messenger, and an EIP-1193 provider that proxies through
+to the wallet origin.
 
 > Status: **early**. The dApp-side core is in place; Web Components
 > (`/elements`) and React wrappers (`/react`) ship in follow-up releases.
@@ -42,13 +42,26 @@ const accounts = await wallet.provider.request({
 `'auto'` (default) starts in iframe mode and transparently falls back to a
 popup when:
 
-- Parent origin is HTTP (HTTPS is required for WebAuthn).
+- Parent origin is HTTP (HTTPS is required for the iframe transport).
 - IntersectionObserver v2 (`isVisible`) is unsupported AND the parent host
   is not on the wallet host's trusted-host allowlist.
-- The request invokes WebAuthn credential creation on Safari, which Safari
-  blocks inside iframes (`wallet_connect`, `eth_requestAccounts`).
 - The wallet host explicitly requests a switch via the messenger
-  (`__internal { type: 'switch', mode: 'popup' }`).
+  (`__internal { type: 'switch', mode: 'popup' }`). The host uses this
+  hook for cases the parent SDK can't predict — for example, WebAuthn
+  credential creation on Safari (which Safari blocks in cross-origin
+  iframes) if a flow ever required it.
+
+### A note on WebAuthn / passkeys
+
+AGW does not use WebAuthn for wallet signing or account creation. Privy
+passkey enrollment happens in the main Abstract portal app under account
+management — never inside the iframed wallet — so the SDK does not
+pre-emptively force Safari users into popup mode for `wallet_connect` or
+`eth_requestAccounts`.
+
+Returning users with passkeys log in via `navigator.credentials.get()`,
+which works in cross-origin iframes when the `publickey-credentials-get`
+permission is granted (set automatically by `Dialog.iframe()`).
 
 ## Iframe hardening
 
