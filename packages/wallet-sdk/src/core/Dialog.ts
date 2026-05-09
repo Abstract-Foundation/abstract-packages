@@ -9,9 +9,11 @@
  *
  * Iframe attributes are pinned to the same set Porto ships:
  *   sandbox="allow-forms allow-scripts allow-same-origin allow-popups
- *            allow-popups-to-escape-sandbox"
+ *            allow-popups-to-escape-sandbox
+ *            allow-storage-access-by-user-activation"
  *   allow="payment; publickey-credentials-get <origin>;
- *          publickey-credentials-create <origin>; clipboard-write"
+ *          publickey-credentials-create <origin>; storage-access <origin>;
+ *          clipboard-write"
  *
  * The clickjacking defence (IntersectionObserver v2 isVisible check) lives
  * INSIDE the iframe (in apps/web/wallet-host) — not here. From the parent
@@ -176,12 +178,14 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
         "allow-same-origin",
         "allow-popups",
         "allow-popups-to-escape-sandbox",
+        "allow-storage-access-by-user-activation",
       ].join(" "),
     );
     const allow = [
       "payment",
       `publickey-credentials-get ${hostOrigin}`,
       `publickey-credentials-create ${hostOrigin}`,
+      `storage-access ${hostOrigin}`,
     ];
     if (!UserAgent.isFirefox()) allow.push("clipboard-write");
     frame.setAttribute("allow", allow.join("; "));
