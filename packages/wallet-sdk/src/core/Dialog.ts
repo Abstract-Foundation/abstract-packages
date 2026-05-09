@@ -434,11 +434,10 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         // IMPORTANT: window.open must run synchronously inside a user-gesture
         // handler or it will be popup-blocked. Callers funnel through here
         // from a click handler.
-        win = window.open(
-          buildHostUrl(host, POPUP_PATH),
-          "abstract-wallet",
-          features,
-        );
+        const popupUrl = new URL(buildHostUrl(host, POPUP_PATH));
+        popupUrl.searchParams.set("origin", window.location.origin);
+
+        win = window.open(popupUrl.toString(), "abstract-wallet", features);
         if (!win) throw new Error("Popup blocked by browser");
 
         messenger = Messenger.bridge({

@@ -2,7 +2,7 @@
   "name": "wallet-sdk-nextjs",
   "version": "0.0.0",
   "private": true,
-  "description": "Minimal Next.js demo of @abstract-foundation/wallet-sdk. Mounts the iframe-embeddable Abstract wallet-host, walks through wallet_connect → personal_sign → eth_sendTransaction.",
+  "description": "Minimal Next.js demo of @abstract-foundation/wallet-sdk. Uses popup-backed auth and iframe-backed wallet confirmations, walking through wallet_connect → personal_sign → eth_sendTransaction.",
   "scripts": {
     "dev": "next dev -p 3004",
     "build": "next build",

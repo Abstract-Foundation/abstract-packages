@@ -31,7 +31,7 @@ type LogEntry = {
  *
  * 1. Mount the SDK pointing at the wallet-host (defaults to
  *    http://localhost:3003 — override via `NEXT_PUBLIC_WALLET_HOST_URL`).
- * 2. Click "Connect" → SDK opens the iframe → user authenticates inside →
+ * 2. Click "Connect" → SDK opens the popup → user authenticates inside →
  *    SDK returns the AGW smart-account address.
  * 3. Click "Sign Message" → SDK opens the iframe with a signature review
  *    surface → user approves → SDK returns the EIP-191 signature.
@@ -40,7 +40,7 @@ type LogEntry = {
  *    sponsors gas via paymaster).
  *
  * Every action's request + result is appended to the log panel so the
- * iframe round-trip is visible.
+ * wallet round-trip is visible.
  */
 export function Demo() {
   const host = useMemo(() => {
@@ -72,7 +72,7 @@ export function Demo() {
   async function runConnect() {
     if (!wallet) return;
     setBusy(true);
-    append({ kind: "info", label: "wallet_connect → wallet-host iframe" });
+    append({ kind: "info", label: "wallet_connect → wallet-host popup" });
     try {
       const result = (await wallet.provider.request({
         method: "wallet_connect",

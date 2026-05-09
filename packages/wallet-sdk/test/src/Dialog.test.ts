@@ -68,6 +68,9 @@ describe("popup factory", () => {
 
     try {
       handle.open();
+      expect(openSpy.mock.calls[0]?.[0]).toBe(
+        "https://wallet.test/popup?origin=http%3A%2F%2Flocalhost%3A3000",
+      );
       (popupWindow as Window & { closed: boolean }).closed = true;
       vi.advanceTimersByTime(250);
 
