@@ -1,9 +1,8 @@
 /**
  * Browser detection used to gate iframe-vs-popup decisions.
  *
- * - Safari blocks WebAuthn credential creation inside iframes, so any request
- *   that may invoke `navigator.credentials.create` (e.g. wallet_connect when
- *   the user has no passkey yet) must route through the popup on Safari.
+ * - Mobile browsers generally need a full page rather than a small popup
+ *   window for auth flows.
  * - Firefox lacks IntersectionObserver v2 (`isVisible`), so it always falls
  *   back to the trusted-hosts allowlist for clickjacking protection.
  * - Chromium/Edge/WebView support IO v2 — happy path.

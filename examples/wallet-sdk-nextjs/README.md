@@ -2,12 +2,14 @@
 
 Minimal Next.js demo of [`@abstract-foundation/wallet-sdk`](../../packages/wallet-sdk).
 
-The SDK opens an iframe pointing at the Abstract wallet-host (the
-`apps/web/wallet-host` app in the [mono-ts](https://github.com/Abstract-Foundation/mono-ts) repo) and proxies EIP-1193
-requests to it. This demo walks through the canonical flow:
+The SDK opens a top-level popup for wallet auth, then uses an iframe pointing
+at the Abstract wallet-host (the `apps/web/wallet-host` app in the
+[mono-ts](https://github.com/Abstract-Foundation/mono-ts) repo) for embedded
+wallet confirmations where supported. It proxies EIP-1193 requests to the
+wallet host. This demo walks through the canonical flow:
 
-1. **Connect** → `wallet_connect` opens the iframe; user authenticates
-   inside the wallet origin; SDK returns the AGW smart-account address.
+1. **Connect** → `wallet_connect` opens the popup; user authenticates
+   inside a top-level wallet origin; SDK returns the AGW smart-account address.
 2. **Sign Message** → `personal_sign` opens the iframe with the
    `@abstract/wallet-ui` signature-review surface; user approves; SDK
    returns the signature.
@@ -15,7 +17,7 @@ requests to it. This demo walks through the canonical flow:
    transaction-review surface; user approves; SDK returns the tx hash.
    AGW sponsors gas via paymaster.
 
-Every action's request + result is appended to a log panel so the iframe
+Every action's request + result is appended to a log panel so the wallet
 round-trip is visible.
 
 ## Run

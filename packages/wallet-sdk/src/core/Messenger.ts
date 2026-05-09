@@ -40,6 +40,12 @@ export type ReadyOptions = {
   chainIds: readonly number[];
   trustedHosts?: readonly string[] | undefined;
   /**
+   * Whether the wallet host currently has an authenticated user session.
+   * When omitted, the dApp SDK treats auth state as unknown and uses the
+   * popup path for auth methods so OAuth providers are never embedded.
+   */
+  authenticated?: boolean | undefined;
+  /**
    * Method policy table advertised by the wallet host. Methods missing from
    * the table default to requiring the dialog.
    */
@@ -92,6 +98,9 @@ export type InternalPayload =
   | {
       type: "set-theme";
       theme: "light" | "dark";
+    }
+  | {
+      type: "authenticated";
     };
 
 // Discriminated schema describing every (topic, payload) pair the messenger

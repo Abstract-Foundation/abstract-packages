@@ -1,6 +1,6 @@
 {
   "name": "@abstract-foundation/wallet-sdk",
-  "description": "Abstract Wallet SDK — framework-agnostic core for embedding the Abstract Global Wallet on third-party origins via iframe (with popup fallback). Origin-validated postMessage transport, hardened iframe sandboxing, IntersectionObserver-v2-aware visibility checks, WebAuthn-aware popup fallback.",
+  "description": "Abstract Wallet SDK — framework-agnostic core for connecting to the Abstract Global Wallet on third-party origins via popup-backed auth and iframe-backed confirmations. Origin-validated postMessage transport, hardened iframe sandboxing, IntersectionObserver-v2-aware visibility checks.",
   "version": "0.1.0",
   "license": "MIT",
   "repository": {
