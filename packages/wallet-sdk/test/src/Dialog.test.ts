@@ -50,4 +50,102 @@ describe("popup factory", () => {
     await expect(handle.waitForReady()).rejects.toThrow(/Popup not opened/);
     handle.destroy();
   });
+
+  it("notifies the local close handler when the user closes the popup", () => {
+    vi.useFakeTimers();
+    const popupWindow = {
+      closed: false,
+      close: vi.fn(),
+      focus: vi.fn(),
+      postMessage: vi.fn(),
+    } as unknown as Window;
+    const openSpy = vi.spyOn(window, "open").mockReturnValue(popupWindow);
+    const handlers = noopHandlers();
+    const handle = Dialog.popup()({
+      host: "https://wallet.test",
+      handlers,
+    });
+
+    try {
+      handle.open();
+      (popupWindow as Window & { closed: boolean }).closed = true;
+      vi.advanceTimersByTime(250);
+
+      expect(handlers.onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      handle.destroy();
+      openSpy.mockRestore();
+      vi.useRealTimers();
+    }
+  });
+
+  it("destroys the current bridge before reopening a new popup", () => {
+    const removeSpy = vi.spyOn(window, "removeEventListener");
+    const popupWindow = {
+      closed: false,
+      close: vi.fn(),
+      focus: vi.fn(),
+      postMessage: vi.fn(),
+    } as unknown as Window;
+    const openSpy = vi.spyOn(window, "open").mockReturnValue(popupWindow);
+    const handle = Dialog.popup()({
+      host: "https://wallet.test",
+      handlers: noopHandlers(),
+    });
+
+    try {
+      handle.open();
+      handle.close();
+      const cleanupCountBeforeReopen = removeSpy.mock.calls.filter(
+        ([type]) => type === "message",
+      ).length;
+
+      handle.open();
+
+      expect(cleanupCountBeforeReopen).toBeGreaterThan(0);
+    } finally {
+      handle.destroy();
+      openSpy.mockRestore();
+      removeSpy.mockRestore();
+    }
+  });
+
+  it("cleans up a closed popup bridge before the poller observes it", () => {
+    const removeSpy = vi.spyOn(window, "removeEventListener");
+    const firstPopup = {
+      closed: false,
+      close: vi.fn(),
+      focus: vi.fn(),
+      postMessage: vi.fn(),
+    } as unknown as Window;
+    const secondPopup = {
+      closed: false,
+      close: vi.fn(),
+      focus: vi.fn(),
+      postMessage: vi.fn(),
+    } as unknown as Window;
+    const openSpy = vi
+      .spyOn(window, "open")
+      .mockReturnValueOnce(firstPopup)
+      .mockReturnValueOnce(secondPopup);
+    const handle = Dialog.popup()({
+      host: "https://wallet.test",
+      handlers: noopHandlers(),
+    });
+
+    try {
+      handle.open();
+      (firstPopup as Window & { closed: boolean }).closed = true;
+      handle.open();
+
+      const listenerCleanupCount = removeSpy.mock.calls.filter(
+        ([type]) => type === "message",
+      ).length;
+      expect(listenerCleanupCount).toBeGreaterThan(0);
+    } finally {
+      handle.destroy();
+      openSpy.mockRestore();
+      removeSpy.mockRestore();
+    }
+  });
 });

@@ -419,6 +419,10 @@ export function popup(options: PopupOptions = {}): DialogFactory {
           return;
         }
 
+        teardownPoll();
+        messenger?.destroy();
+        messenger = null;
+
         const features =
           resolvedType === "popup"
             ? `width=${size.width},height=${size.height},left=${
@@ -456,12 +460,12 @@ export function popup(options: PopupOptions = {}): DialogFactory {
           theme,
         });
 
-        // If the user closes the popup without acting, surface a `close`
-        // event so outstanding requests get rejected as user-rejections.
+        // If the user closes the popup without acting, surface the close
+        // locally so outstanding requests get rejected as user-rejections.
         pollClosed = setInterval(() => {
           if (win?.closed) {
             teardownPoll();
-            messenger?.send("close", undefined);
+            handlers.onClose();
           }
         }, 250);
       },
@@ -473,11 +477,11 @@ export function popup(options: PopupOptions = {}): DialogFactory {
           /* COOP severs the WindowProxy — popup closes itself anyway */
         }
         win = null;
+        messenger?.destroy();
+        messenger = null;
       },
       destroy() {
         this.close();
-        messenger?.destroy();
-        messenger = null;
       },
       async secure() {
         // Popups don't suffer from clickjacking — the wallet runs in its own
