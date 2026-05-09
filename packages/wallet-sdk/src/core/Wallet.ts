@@ -4,20 +4,19 @@
  * the appropriate dialog when the request requires user confirmation.
  *
  * Mode selection:
- *   1. Start auth/account-creation requests in popup mode when the wallet
- *      session is missing or unknown because social OAuth providers
- *      (including Google) reject embedded iframe user agents.
- *   2. If the prewarmed iframe reports an authenticated session, auth methods
- *      can stay in iframe mode.
- *   3. Otherwise start with `iframe` unless the caller forced popup mode.
- *   4. After the iframe's `ready` arrives, run `secure()`. If the parent is
+ *   1. Default to `iframe` for every request unless the caller explicitly
+ *      forced popup mode. The wallet host renders inline auth surfaces
+ *      (email OTP, passkey, SMS) inside the iframe and only requests popup
+ *      escalation when the user picks an external OAuth provider via
+ *      `__internal { type: 'switch', mode: 'popup' }`.
+ *   2. After the iframe's `ready` arrives, run `secure()`. If the parent is
  *      on HTTP, or if IntersectionObserver v2 is unavailable AND the parent
  *      origin isn't on the wallet host's trusted-host allowlist, transparently
  *      switch to popup before sending pending requests.
- *   5. The wallet host can request a runtime switch at any time by emitting
+ *   3. The wallet host can request a runtime switch at any time by emitting
  *      `__internal { type: 'switch', mode: 'popup' }` over the messenger —
- *      used for cases the dApp side can't predict (e.g. WebAuthn credential
- *      creation on Safari, which Safari blocks in cross-origin iframes).
+ *      used for cases the dApp side can't predict (external OAuth providers
+ *      that reject embedded user agents, Safari-only WebAuthn enrollment).
  */
 
 import * as Dialog from "./Dialog.js";
@@ -61,12 +60,6 @@ export type Wallet = {
 };
 
 // ---------- Implementation ----------
-
-const TOP_LEVEL_AUTH_METHODS = new Set([
-  "wallet_connect",
-  "eth_requestAccounts",
-  "wallet_requestPermissions",
-]);
 
 export function createWallet(config: WalletConfig): Wallet {
   const {
@@ -169,15 +162,8 @@ export function createWallet(config: WalletConfig): Wallet {
     previous?.destroy();
   }
 
-  function requiresTopLevelAuth(request: Messenger.RpcRequest): boolean {
-    return TOP_LEVEL_AUTH_METHODS.has(request.method);
-  }
-
-  function pickInitialMode(request: Messenger.RpcRequest): Dialog.DialogMode {
+  function pickInitialMode(): Dialog.DialogMode {
     if (mode === "popup") return "popup";
-    if (requiresTopLevelAuth(request) && latestReady?.authenticated !== true) {
-      return "popup";
-    }
     return "iframe";
   }
 
@@ -230,7 +216,7 @@ export function createWallet(config: WalletConfig): Wallet {
       params,
     };
 
-    const initialMode = pickInitialMode(rpc);
+    const initialMode = pickInitialMode();
     const handle = ensureActive(initialMode);
 
     // After the wallet announces ready, validate that iframe mode is actually
