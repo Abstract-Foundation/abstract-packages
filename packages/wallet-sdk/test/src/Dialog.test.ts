@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as Dialog from "../../src/core/Dialog.js";
 
 function noopHandlers(): Dialog.DialogHandlers {
@@ -150,5 +150,50 @@ describe("popup factory", () => {
       openSpy.mockRestore();
       removeSpy.mockRestore();
     }
+  });
+});
+
+describe("iframe factory", () => {
+  const realMatchMedia = window.matchMedia;
+
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockReturnValue({
+        addEventListener: vi.fn(),
+        matches: false,
+        removeEventListener: vi.fn(),
+      }),
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: realMatchMedia,
+    });
+    document.querySelectorAll("dialog[data-abs-wallet]").forEach((node) => {
+      node.remove();
+    });
+  });
+
+  it("allows the wallet host iframe to request storage access", () => {
+    const handle = Dialog.iframe()({
+      host: "https://wallet.test",
+      handlers: noopHandlers(),
+    });
+
+    const frame = document.querySelector(
+      'iframe[data-testid="abstract-wallet"]',
+    );
+
+    expect(frame?.getAttribute("sandbox")?.split(" ")).toContain(
+      "allow-storage-access-by-user-activation",
+    );
+    expect(frame?.getAttribute("allow")).toContain(
+      "storage-access https://wallet.test",
+    );
+
+    handle.destroy();
   });
 });
