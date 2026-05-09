@@ -35,40 +35,43 @@ describe("createWallet", () => {
     });
   });
 
-  it("opens wallet_connect in a top-level popup in auto mode", async () => {
+  it("opens wallet_connect in the iframe in auto mode (host handles inline auth)", () => {
     const openSpy = vi.spyOn(window, "open").mockReturnValue(mockPopupWindow());
     const wallet = createWallet({
       host: "https://wallet.test",
       chainId: 1,
     });
 
-    const request = wallet.provider
+    void wallet.provider
       .request({
         method: "wallet_connect",
         params: [{ chainId: 1 }],
       })
-      .catch((error: unknown) => error);
+      .catch(() => {
+        // Pending; we destroy below.
+      });
 
-    expect(openSpy).toHaveBeenCalledTimes(1);
-    expect(openSpy.mock.calls[0]?.[0]).toBe(
-      "https://wallet.test/popup?origin=http%3A%2F%2Flocalhost%3A3000",
-    );
+    // No popup is opened pre-emptively; the iframe surface renders the
+    // inline LoginView and only escalates to popup when the user picks an
+    // OAuth provider that demands a top-level context.
+    expect(openSpy).not.toHaveBeenCalled();
 
     wallet.destroy();
-    await expect(request).resolves.toBeInstanceOf(Error);
   });
 
-  it("opens eth_requestAccounts in a top-level popup even when iframe mode was requested", async () => {
+  it("respects an explicit popup mode override for eth_requestAccounts", () => {
     const openSpy = vi.spyOn(window, "open").mockReturnValue(mockPopupWindow());
     const wallet = createWallet({
       host: "https://wallet.test",
       chainId: 1,
-      dialog: "iframe",
+      dialog: "popup",
     });
 
-    const request = wallet.provider
+    void wallet.provider
       .request({ method: "eth_requestAccounts" })
-      .catch((error: unknown) => error);
+      .catch(() => {
+        // Pending; we destroy below.
+      });
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     expect(openSpy.mock.calls[0]?.[0]).toBe(
@@ -76,6 +79,5 @@ describe("createWallet", () => {
     );
 
     wallet.destroy();
-    await expect(request).resolves.toBeInstanceOf(Error);
   });
 });
