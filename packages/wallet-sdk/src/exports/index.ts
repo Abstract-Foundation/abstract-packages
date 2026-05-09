@@ -1,6 +1,7 @@
 export type {
   DialogFactory,
   DialogHandle,
+  DialogHandlers,
   DialogMode,
   IframeOptions,
   PopupOptions,

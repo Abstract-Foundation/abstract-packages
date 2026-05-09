@@ -91,19 +91,13 @@ export function createWallet(config: WalletConfig): Wallet {
   const pending = new Map<number | string, Pending>();
   let nextRequestId = 1;
 
-  function ensureActive(targetMode: Dialog.DialogMode): Dialog.DialogHandle {
-    if (active && activeMode === targetMode) return active;
-    // Tear down previous mode (if any) before swapping.
-    active?.destroy();
-    const factory = targetMode === "iframe" ? iframeFactory : popupFactory;
-    active = factory({ host, theme });
-    activeMode = targetMode;
-    bindMessengerListeners(active);
-    return active;
-  }
-
-  function bindMessengerListeners(handle: Dialog.DialogHandle) {
-    handle.messenger.on("rpc-response", (response) => {
+  // Inbound callbacks the dialog factories wire into their messenger
+  // internally. We rebuild this struct per-handle so the closures always
+  // close over the correct `active` reference (after a mode swap, stale
+  // events from the previous transport are ignored because that handle's
+  // messenger is destroyed by `previous?.destroy()` in `switchMode`).
+  const handlers: Dialog.DialogHandlers = {
+    onResponse(response) {
       const p = pending.get(response.id);
       if (!p) return;
       pending.delete(response.id);
@@ -115,13 +109,13 @@ export function createWallet(config: WalletConfig): Wallet {
           }),
         );
       else p.resolve(response.result);
-      if (pending.size === 0) handle.close();
-    });
-    handle.messenger.on("__internal", (payload) => {
+      if (pending.size === 0) active?.close();
+    },
+    onInternal(payload) {
       if (payload.type === "switch") void switchMode(payload.mode);
-    });
-    handle.messenger.on("close", () => {
-      handle.close();
+    },
+    onClose() {
+      active?.close();
       // Reject every outstanding request with a user-rejected style error.
       for (const [id, p] of pending) {
         pending.delete(id);
@@ -131,7 +125,17 @@ export function createWallet(config: WalletConfig): Wallet {
           }),
         );
       }
-    });
+    },
+  };
+
+  function ensureActive(targetMode: Dialog.DialogMode): Dialog.DialogHandle {
+    if (active && activeMode === targetMode) return active;
+    // Tear down previous mode (if any) before swapping.
+    active?.destroy();
+    const factory = targetMode === "iframe" ? iframeFactory : popupFactory;
+    active = factory({ host, theme, handlers });
+    activeMode = targetMode;
+    return active;
   }
 
   async function switchMode(target: Dialog.DialogMode) {
@@ -141,7 +145,7 @@ export function createWallet(config: WalletConfig): Wallet {
     next.open();
     // Re-deliver pending requests against the new transport.
     for (const p of pending.values()) {
-      next.messenger.send("rpc-request", p.request);
+      next.syncRequest(p.request);
     }
     previous?.destroy();
   }
@@ -207,7 +211,7 @@ export function createWallet(config: WalletConfig): Wallet {
     // safe. If not, transparently downgrade to popup before sending.
     let targetHandle = handle;
     if (initialMode === "iframe") {
-      const ready = await handle.messenger.waitForReady();
+      const ready = await handle.waitForReady();
       const sec = await handle.secure();
       const alwaysHeadless = isAlwaysHeadless(rpc, ready.methodPolicies);
       if (!alwaysHeadless && (!sec.protocol || !sec.frame)) {
@@ -227,7 +231,7 @@ export function createWallet(config: WalletConfig): Wallet {
 
     return new Promise((resolve, reject) => {
       pending.set(id, { request: rpc, resolve, reject });
-      targetHandle.messenger.send("rpc-request", rpc);
+      targetHandle.syncRequest(rpc);
     });
   }
 

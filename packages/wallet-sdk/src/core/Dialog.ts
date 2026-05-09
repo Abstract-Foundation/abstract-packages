@@ -37,14 +37,35 @@ export type SecurityState = {
   host: boolean;
 };
 
+/**
+ * Inbound callbacks the consumer (e.g. `Wallet.ts`) passes when constructing a
+ * dialog. The factory wires these into the messenger internally — consumers
+ * never touch the underlying transport directly. Mirrors Porto's design,
+ * which uses a shared store + handler functions instead of exposing the
+ * messenger surface (see `porto/src/core/Dialog.ts`).
+ */
+export type DialogHandlers = {
+  /** Fired when the wallet host returns an RPC response. */
+  onResponse(
+    response: Messenger.RpcResponse & { _request: Messenger.RpcRequest },
+  ): void;
+  /** Fired for internal control payloads (e.g. mode switch requests). */
+  onInternal(payload: Messenger.InternalPayload): void;
+  /** Fired when the wallet host (or popup-close watcher) signals close. */
+  onClose(): void;
+};
+
 export type DialogHandle = {
   readonly mode: DialogMode;
-  readonly messenger: Messenger.Bridge;
   open(): void;
   close(): void;
   destroy(): void;
   /** Run the security checklist. Resolves once the messenger is ready. */
   secure(): Promise<SecurityState>;
+  /** Forward an RPC request to the wallet host. */
+  syncRequest(request: Messenger.RpcRequest): void;
+  /** Resolve once the wallet host announces ready (with its capabilities). */
+  waitForReady(): Promise<Messenger.ReadyOptions>;
 };
 
 export type DialogFactory = (parameters: {
@@ -52,6 +73,8 @@ export type DialogFactory = (parameters: {
   host: string;
   /** Theme hint forwarded in the init payload. */
   theme?: "light" | "dark" | undefined;
+  /** Inbound callbacks. Wired into the messenger by the factory. */
+  handlers: DialogHandlers;
 }) => DialogHandle;
 
 // ---------- Internals ----------
@@ -112,7 +135,7 @@ export type IframeOptions = {
 export function iframe(options: IframeOptions = {}): DialogFactory {
   const { skipProtocolCheck = false } = options;
 
-  return ({ host, theme }) => {
+  return ({ host, theme, handlers }) => {
     if (typeof window === "undefined") return noopHandle();
 
     const hostOrigin = originOf(host);
@@ -198,6 +221,11 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
       }),
       waitForReady: true,
     });
+
+    // Inbound wiring is internal — the consumer never touches the messenger.
+    messenger.on("rpc-response", handlers.onResponse);
+    messenger.on("__internal", handlers.onInternal);
+    messenger.on("close", handlers.onClose);
 
     const drawerModeQuery = window.matchMedia(
       `(max-width: ${DRAWER_BREAKPOINT}px)`,
@@ -303,7 +331,6 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
 
     const handle: DialogHandle = {
       mode: "iframe",
-      messenger,
       open() {
         showDialog();
         activateDialog();
@@ -337,6 +364,12 @@ export function iframe(options: IframeOptions = {}): DialogFactory {
         const frameOk = IO.supported() || trustedHost;
         return { protocol, frame: frameOk, host: trustedHost };
       },
+      syncRequest(request) {
+        messenger.send("rpc-request", request);
+      },
+      waitForReady() {
+        return messenger.waitForReady();
+      },
     };
 
     return handle;
@@ -354,7 +387,7 @@ export type PopupOptions = {
 export function popup(options: PopupOptions = {}): DialogFactory {
   const { type = "auto", size = DEFAULT_POPUP_SIZE } = options;
 
-  return ({ host, theme }) => {
+  return ({ host, theme, handlers }) => {
     if (typeof window === "undefined") return noopHandle();
 
     const hostOrigin = originOf(host);
@@ -364,32 +397,12 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         : "popup";
 
     let win: Window | null = null;
-    let bridge: Messenger.Bridge | null = null;
+    // The messenger is constructed inside `open()` because `Messenger.fromWindow`
+    // requires the popup's Window reference, which only exists after
+    // `window.open()`. Mirrors Porto's design — consumers never touch this
+    // directly; they go through `syncRequest` / `waitForReady` instead.
+    let messenger: Messenger.Bridge | null = null;
     let pollClosed: ReturnType<typeof setInterval> | null = null;
-    let destroyed = false;
-
-    // Subscriptions registered before the bridge exists. Each captures its
-    // topic/listener types in a closure so we can replay them once `open()`
-    // adopts a bridge, without losing per-topic typing.
-    type PendingSub = {
-      attach: (b: Messenger.Bridge) => () => void;
-      off?: (() => void) | undefined;
-    };
-    const pendingSubs: PendingSub[] = [];
-
-    // Sends queued before the bridge exists. Each captures its topic/payload
-    // types in a closure for the same reason. The synchronous return value
-    // uses a freshly-minted envelope id; the wallet correlates by the inner
-    // RPC id, so the envelope id mismatch does not affect request/response
-    // routing.
-    type QueuedSend = (b: Messenger.Bridge) => void;
-    const queuedSends: QueuedSend[] = [];
-
-    type ReadyResolver = {
-      resolve: (options: Messenger.ReadyOptions) => void;
-      reject: (reason?: unknown) => void;
-    };
-    const pendingReady: ReadyResolver[] = [];
 
     function teardownPoll() {
       if (pollClosed) {
@@ -398,86 +411,9 @@ export function popup(options: PopupOptions = {}): DialogFactory {
       }
     }
 
-    const messenger: Messenger.Bridge = {
-      on<T extends Messenger.Topic>(
-        topic: T,
-        listener: Messenger.Listener<T>,
-        id?: string | undefined,
-      ) {
-        if (bridge) return bridge.on(topic, listener, id);
-        const sub: PendingSub = {
-          attach: (b) => b.on(topic, listener, id),
-        };
-        pendingSubs.push(sub);
-        return () => {
-          sub.off?.();
-          const i = pendingSubs.indexOf(sub);
-          if (i >= 0) pendingSubs.splice(i, 1);
-        };
-      },
-      send<T extends Messenger.Topic>(
-        topic: T,
-        payload: Messenger.Payload<T>,
-        target?: string | undefined,
-      ) {
-        if (bridge) return bridge.send(topic, payload, target);
-        queuedSends.push((b) => {
-          b.send(topic, payload, target);
-        });
-        return { id: Messenger.uuid(), topic, payload };
-      },
-      destroy() {
-        destroyed = true;
-        teardownPoll();
-        try {
-          win?.close();
-        } catch {
-          /* COOP severs the WindowProxy — popup closes itself anyway */
-        }
-        win = null;
-        bridge?.destroy();
-        bridge = null;
-        for (const sub of pendingSubs) sub.off?.();
-        pendingSubs.length = 0;
-        queuedSends.length = 0;
-        const err = new Error("Messenger destroyed");
-        for (const r of pendingReady) r.reject(err);
-        pendingReady.length = 0;
-      },
-      ready() {
-        // dApp side: the wallet host is the one that announces ready, not us.
-      },
-      waitForReady() {
-        if (bridge) return bridge.waitForReady();
-        return new Promise<Messenger.ReadyOptions>((resolve, reject) => {
-          pendingReady.push({ resolve, reject });
-        });
-      },
-    };
-
-    function adoptBridge(b: Messenger.Bridge) {
-      bridge = b;
-      for (const sub of pendingSubs) sub.off = sub.attach(b);
-      for (const flush of queuedSends) flush(b);
-      queuedSends.length = 0;
-      if (pendingReady.length > 0) {
-        const resolvers = pendingReady.splice(0);
-        b.waitForReady().then(
-          (opts) => {
-            for (const r of resolvers) r.resolve(opts);
-          },
-          (err) => {
-            for (const r of resolvers) r.reject(err);
-          },
-        );
-      }
-    }
-
     const handle: DialogHandle = {
       mode: "popup",
-      messenger,
       open() {
-        if (destroyed) return;
         if (win && !win.closed) {
           win.focus();
           return;
@@ -501,13 +437,17 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         );
         if (!win) throw new Error("Popup blocked by browser");
 
-        adoptBridge(
-          Messenger.bridge({
-            from: Messenger.fromWindow(window, { targetOrigin: hostOrigin }),
-            to: Messenger.fromWindow(win, { targetOrigin: hostOrigin }),
-            waitForReady: true,
-          }),
-        );
+        messenger = Messenger.bridge({
+          from: Messenger.fromWindow(window, { targetOrigin: hostOrigin }),
+          to: Messenger.fromWindow(win, { targetOrigin: hostOrigin }),
+          waitForReady: true,
+        });
+
+        // Wire inbound listeners now that the bridge exists. They live for
+        // the lifetime of this handle (until `destroy()`).
+        messenger.on("rpc-response", handlers.onResponse);
+        messenger.on("__internal", handlers.onInternal);
+        messenger.on("close", handlers.onClose);
 
         messenger.send("__internal", {
           type: "init",
@@ -516,12 +456,12 @@ export function popup(options: PopupOptions = {}): DialogFactory {
           theme,
         });
 
-        // If the user closes the popup without acting, treat that as a
-        // rejection — the consumer's outstanding requests should reject.
+        // If the user closes the popup without acting, surface a `close`
+        // event so outstanding requests get rejected as user-rejections.
         pollClosed = setInterval(() => {
           if (win?.closed) {
             teardownPoll();
-            bridge?.send("close", undefined);
+            messenger?.send("close", undefined);
           }
         }, 250);
       },
@@ -535,12 +475,27 @@ export function popup(options: PopupOptions = {}): DialogFactory {
         win = null;
       },
       destroy() {
-        messenger.destroy();
+        this.close();
+        messenger?.destroy();
+        messenger = null;
       },
       async secure() {
         // Popups don't suffer from clickjacking — the wallet runs in its own
         // top-level window, fully visible to the user. So all gates pass.
         return { protocol: true, frame: true, host: true };
+      },
+      syncRequest(request) {
+        // Optional-chained — mirrors Porto's `messenger?.send(...)`. If a
+        // caller forgets to `open()` first, the send is silently dropped
+        // rather than throwing; the request stays in the consumer's pending
+        // map and will be retried on the next mode switch.
+        messenger?.send("rpc-request", request);
+      },
+      async waitForReady() {
+        if (!messenger) {
+          throw new Error("Popup not opened — call open() first");
+        }
+        return messenger.waitForReady();
       },
     };
 
@@ -551,29 +506,8 @@ export function popup(options: PopupOptions = {}): DialogFactory {
 // ---------- Noop (SSR / non-browser) ----------
 
 function noopHandle(): DialogHandle {
-  const noopMessenger: Messenger.Bridge = {
-    on: () => () => {
-      /* no-op: SSR / non-browser environments have no message bus */
-    },
-    send: <T extends Messenger.Topic>(
-      topic: T,
-      payload: Messenger.Payload<T>,
-    ) => ({ id: "", topic, payload }),
-    destroy: () => {
-      /* no-op: nothing to tear down */
-    },
-    ready: () => {
-      /* no-op: ready handshake never fires in SSR */
-    },
-    waitForReady: () =>
-      new Promise<Messenger.ReadyOptions>(() => {
-        /* never resolves in SSR — caller is expected to abort on its own */
-      }),
-  };
-
   return {
     mode: "iframe",
-    messenger: noopMessenger,
     open() {
       /* no-op: cannot mount a dialog without a window */
     },
@@ -585,6 +519,13 @@ function noopHandle(): DialogHandle {
     },
     async secure() {
       return { protocol: false, frame: false, host: false };
+    },
+    syncRequest() {
+      /* no-op: no transport in SSR */
+    },
+    waitForReady() {
+      // Never resolves in SSR — caller is expected to abort on its own.
+      return new Promise<Messenger.ReadyOptions>(() => {});
     },
   };
 }
