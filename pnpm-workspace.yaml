@@ -3,7 +3,7 @@ packages:
   - "examples/*"
   - "tools/*"
 
-minimumReleaseAge: 1440
+minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
   - "@abstract-foundation/*"
 
