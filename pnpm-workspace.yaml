@@ -3,6 +3,10 @@ packages:
   - "examples/*"
   - "tools/*"
 
+minimumReleaseAge: 2880
+minimumReleaseAgeExclude:
+  - "@abstract-foundation/*"
+
 catalog:
   "@modelcontextprotocol/sdk": "^1.26.0"
   "@types/node": "^22.18.1"
