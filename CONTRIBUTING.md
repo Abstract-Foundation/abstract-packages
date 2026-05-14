@@ -187,6 +187,7 @@ Every user-facing change in a **publishable** package requires a changeset. The 
 
 - `@abstract-foundation/agw-client`
 - `@abstract-foundation/agw-react`
+- `@abstract-foundation/agw-thirdweb`
 - `@abstract-foundation/agw-web`
 - `@abstract-foundation/web3-react-agw`
 - `@abstract-foundation/agw-cli`
